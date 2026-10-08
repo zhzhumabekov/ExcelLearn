@@ -81,7 +81,7 @@ T1 Django-каркас ─► T2 User-модель ─────────�
 
 ### Phase 4 — Озвучка (`narration`)
 - [x] T19 `TTSProvider`, `silent`, builder с кэшем, `narration_build`
-- [ ] T20 Провайдер Yandex SpeechKit
+- [x] T20 Провайдер Yandex SpeechKit (живой прогон — после получения ключа)
 - [ ] T21 `NarrationTrack` в плеере + тексты `say` для уроков 0–1
 
 ### Checkpoint E — уроки озвучены, синхронизация по шагам работает

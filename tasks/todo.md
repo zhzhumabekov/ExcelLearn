@@ -195,7 +195,7 @@
   - Files: `narration/providers/{base,silent}.py`, `narration/builder.py`, `management/commands/narration_build.py`, `tests/narration/test_builder.py`
   - Deps: T6
 
-- [ ] **T20. Провайдер Yandex SpeechKit** · S
+- [x] **T20. Провайдер Yandex SpeechKit** · S *(живой прогон — когда будет ключ)*
   - Acceptance: `httpx`-клиент, ключ и голос из `.env`, ретраи на 429/5xx, понятная ошибка без ключа
   - Verify: pytest с замоканным HTTP; ручной прогон на одном шаге при наличии ключа
   - Files: `narration/providers/yandex.py`, `tests/narration/test_yandex.py`
