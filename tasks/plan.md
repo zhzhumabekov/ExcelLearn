@@ -99,7 +99,7 @@ T1 Django-каркас ─► T2 User-модель ─────────�
 
 ### Phase 7 — Прод (VPS)
 - [x] T27 Docker Compose: web, db, Caddy (HTTPS), прод-настройки
-- [ ] T28 Бэкапы, озвучка при деплое, инструкция по деплою
+- [x] T28 Бэкапы, озвучка при деплое, инструкция по деплою
 
 ### Checkpoint G — все Success Criteria из SPEC выполнены
 

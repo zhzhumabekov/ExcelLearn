@@ -261,12 +261,12 @@
   - Files: `Dockerfile`, `docker-compose.yml`, `deploy/nginx.conf`, `config/settings.py`
   - Deps: T26
 
-- [ ] **T28. Бэкапы, озвучка при деплое, инструкция** · S
+- [x] **T28. Бэкапы, озвучка при деплое, инструкция** · S
   - Acceptance: ежедневный `pg_dump` с хранением 14 дней на том же VPS (РК); при деплое — `migrate`, `collectstatic`, `narration_build`; `docs/deploy.md` — пошаговый деплой и восстановление из бэкапа
   - Verify: восстановление бэкапа на чистой БД локально
   - Files: `deploy/backup.sh`, `deploy/entrypoint.sh`, `docs/deploy.md`
   - Deps: T27
 
 ### ✅ Checkpoint G
-- [ ] Все Success Criteria из SPEC.md выполнены
+- [x] Все Success Criteria из SPEC.md выполнены локально (живой голос Yandex и развёртывание на VPS — после ключа и сервера)
 - [ ] Текст согласия заполнен реквизитами и согласован с юристом

@@ -35,6 +35,28 @@ services:
       - media:/app/media
       - cache:/app/var/cache
 
+  # Ежедневный бэкап базы в ./backups на этом же сервере (данные остаются в РК), хранение 14 дней.
+  # 22:00 UTC = 03:00 по Алматы (UTC+5). Вручную: docker compose ... exec backup sh /backup.sh
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      PGHOST: db
+      PGUSER: excellearn
+      PGDATABASE: excellearn
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      BACKUP_KEEP_DAYS: "14"
+    volumes:
+      - ./deploy/backup.sh:/backup.sh:ro
+      - ./backups:/backups
+    entrypoint:
+      - sh
+      - -c
+      - echo '0 22 * * * sh /backup.sh >> /proc/1/fd/1 2>&1' | crontab - && exec crond -f -l 8
+    depends_on:
+      db:
+        condition: service_healthy
+
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
