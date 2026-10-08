@@ -1,0 +1,24 @@
+# Материалы книги (авторское право) — не публикуем
+/Practice Files/
+/Solution Files/
+/Templates/
+
+# Секреты и окружение
+.env
+.venv/
+
+# Сгенерированное
+media/
+static/player/
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+db.sqlite3
+
+# IDE / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
