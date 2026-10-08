@@ -1,13 +1,7 @@
-import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-
-import { parse } from "yaml";
 import { describe, expect, it } from "vitest";
 
-import type { Lesson } from "../generated/lesson";
 import { autosumRange, createState, type LessonState } from "../lesson/state";
 import { Stage } from "../render/stage";
-import { ExcelError } from "../sheet/evaluator";
 import { SheetModel } from "../sheet/sheet-model";
 import { fakeClock, finish } from "../test/fake-clock";
 import { type ActionSpec, createAction } from "./index";
@@ -181,23 +175,4 @@ describe("animate ≡ apply", () => {
   });
 });
 
-// ---------- Сквозная проверка: настоящие уроки из content/lessons ----------
-
-const LESSONS_DIR = join(__dirname, "../../../content/lessons");
-const lessons = readdirSync(LESSONS_DIR)
-  .filter((f) => f.endsWith(".yaml"))
-  .map((f) => [f, parse(readFileSync(join(LESSONS_DIR, f), "utf8")) as Lesson] as const);
-
-describe("уроки из YAML проигрываются целиком", () => {
-  it.each(lessons)("%s: все шаги применяются, значения совпадают с expect", (_file, lesson) => {
-    const state = createState(new SheetModel(lesson.sheet));
-    for (const step of lesson.steps) for (const spec of step.actions) createAction(spec).apply(state);
-
-    for (const [addr, expected] of Object.entries(lesson.expect ?? {})) {
-      const value = state.sheet.value(addr);
-      expect(value, addr).not.toBeInstanceOf(ExcelError);
-      if (typeof expected === "number") expect(value, addr).toBeCloseTo(expected, 2);
-      else expect(value, addr).toBe(expected);
-    }
-  });
-});
+// Сквозная проверка настоящих уроков — в lesson/verify.test.ts (та же логика, что у pnpm lessons:verify)

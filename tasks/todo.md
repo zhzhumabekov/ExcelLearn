@@ -150,7 +150,7 @@
   - Files: `player/src/timeline/timeline.ts`, `player/src/render/panel.ts`, `player/src/index.ts`, `timeline.test.ts`
   - Deps: T13
 
-- [ ] **T15. `lessons:verify`** · S
+- [x] **T15. `lessons:verify`** · S
   - Acceptance: Node-скрипт загружает все YAML, прогоняет `apply()` всех шагов и сверяет с `expect` (допуск 0.005); выводит расхождения по урокам и ячейкам; ненулевой код выхода при ошибке
   - Verify: `pnpm --dir player lessons:verify` зелёный; намеренно испорченный `expect` в фикстуре даёт ошибку
   - Files: `player/scripts/verify.ts`, `player/package.json`, `verify.test.ts`

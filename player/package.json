@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
-    "gen:types": "node scripts/gen-types.mjs"
+    "gen:types": "node scripts/gen-types.mjs",
+    "lessons:verify": "esbuild scripts/verify.ts --bundle --platform=node --format=esm --packages=external --outfile=.cache/verify.mjs --log-level=warning && node .cache/verify.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
