@@ -31,3 +31,6 @@ static/css/site.css
 
 # Файловый кэш Django (счётчики попыток входа)
 var/
+
+# Секреты продакшена
+.env.production

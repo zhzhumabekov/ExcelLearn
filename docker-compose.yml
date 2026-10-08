@@ -1,0 +1,59 @@
+# Продакшен на VPS: docker compose up -d --build  (настройки — в .env.production, пример: deploy/.env.production.example)
+# Локальная проверка: тот же файл с SITE_DOMAIN=localhost → https://localhost
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: excellearn
+      POSTGRES_USER: excellearn
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?задайте POSTGRES_PASSWORD в .env.production}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U excellearn -d excellearn"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build: .
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      PRODUCTION: "true"
+      DEBUG: "false"
+      DATABASE_URL: postgres://excellearn:${POSTGRES_PASSWORD}@db:5432/excellearn
+      ALLOWED_HOSTS: ${SITE_DOMAIN:-localhost}
+      CSRF_TRUSTED_ORIGINS: https://${SITE_DOMAIN:-localhost}
+      CACHE_DIR: /app/var/cache
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - media:/app/media
+      - cache:/app/var/cache
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - media:/srv/media:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+
+volumes:
+  pgdata:
+  media:
+  cache:
+  caddy_data:
+  caddy_config:

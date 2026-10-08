@@ -13,6 +13,10 @@ environ.Env.read_env(BASE_DIR / ".env")
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
+# Боевой режим (VPS за Caddy): HTTPS, защищённые cookie, HSTS. Отдельный флаг, а не «not DEBUG»:
+# тесты тоже работают с DEBUG=False, но по http.
+PRODUCTION = env.bool("PRODUCTION", default=False)
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -42,6 +46,10 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
 ]
+if PRODUCTION:
+    # Статика (CSS, плеер) из собранной STATIC_ROOT — со сжатием и вечным кэшем. При разработке её
+    # отдаёт runserver, а STATIC_ROOT нет (WhiteNoise предупреждал бы на каждый запрос)
+    MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
 
 ROOT_URLCONF = "config.urls"
 
@@ -123,3 +131,34 @@ else:
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="ExcelLearn <no-reply@localhost>")
 # Кому писать, если сброс по почте недоступен (страница «Обратитесь к администратору»)
 SUPPORT_EMAIL = env("SUPPORT_EMAIL", default="")
+
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    # В проде — файлы с хэшем в имени (кэш навсегда) и сжатые копии; при разработке — как есть
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        if PRODUCTION
+        else "django.contrib.staticfiles.storage.StaticFilesStorage"
+    },
+}
+
+if PRODUCTION:
+    # Caddy принимает HTTPS и передаёт запрос по http с X-Forwarded-Proto
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS", default=31_536_000)
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    # preload в списке браузеров — решение необратимое на месяцы; не включаем автоматически
+    SILENCED_SYSTEM_CHECKS = ["security.W021"]
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "root": {"handlers": ["console"], "level": "WARNING"},
+    "loggers": {
+        "django": {"handlers": ["console"], "level": env("DJANGO_LOG_LEVEL", default="INFO"), "propagate": False}
+    },
+}

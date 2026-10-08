@@ -1,0 +1,26 @@
+# В образ — только код и контент курса
+.git
+.venv
+.env
+.env.*
+!deploy/.env.production.example
+**/node_modules
+**/__pycache__
+.pytest_cache
+.ruff_cache
+db.sqlite3
+media
+var
+staticfiles
+static/player
+static/css/site.css
+player/.cache
+# Материалы книги (авторское право) и рабочие файлы
+Practice Files
+Solution Files
+Templates
+prototypes
+tests
+e2e
+tasks
+docs/legal/*.docx

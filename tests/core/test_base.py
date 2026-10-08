@@ -23,7 +23,7 @@ def test_base_loads_local_assets_without_cdn(home, asset):
     assert "cdn." not in home and "unpkg" not in home
 
 
-@pytest.mark.parametrize("asset", ["js/theme.js", "vendor/htmx.min.js", "vendor/alpine.min.js", "css/input.css"])
+@pytest.mark.parametrize("asset", ["js/theme.js", "vendor/htmx.min.js", "vendor/alpine.min.js", "../assets/site.css"])
 def test_committed_assets_exist(asset):
     assert (Path(settings.BASE_DIR) / "static" / asset).exists()
 

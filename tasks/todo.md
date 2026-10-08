@@ -255,7 +255,7 @@
 
 ## Phase 7 — Прод
 
-- [ ] **T27. Docker Compose для VPS** · M
+- [x] **T27. Docker Compose для VPS** · M *(Caddy вместо Nginx + certbot)*
   - Acceptance: `Dockerfile` (multi-stage: сборка плеера и CSS → Python-образ), `docker-compose.yml` (web/Gunicorn, db/Postgres 16, nginx, certbot), прод-настройки (`DEBUG=False`, HSTS, secure cookies, `CSRF_TRUSTED_ORIGINS`), WhiteNoise, тома для БД и `media/`
   - Verify: `docker compose up -d` локально → сайт на https (самоподписанный сертификат), `manage.py check --deploy` без предупреждений
   - Files: `Dockerfile`, `docker-compose.yml`, `deploy/nginx.conf`, `config/settings.py`

@@ -3,6 +3,9 @@
 
 {% block title %}{{ lesson.title }} — ExcelLearn{% endblock %}
 
+{# Окно Excel и панель шагов рядом — нужна ширина больше обычной #}
+{% block main_width %}max-w-[1600px]{% endblock %}
+
 {% block head %}<link rel="stylesheet" href="{% static 'player/player.css' %}">{% endblock %}
 
 {% block content %}
