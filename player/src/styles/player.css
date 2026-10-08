@@ -278,7 +278,7 @@
   position: relative;
   padding: 16px;
   background: #f7f8f7;
-  border-radius: 12px 12px 0 0;
+  border-radius: 12px 0 0 12px;
   overflow: hidden;
 }
 
@@ -501,14 +501,38 @@
   font-weight: 600;
 }
 
-/* ---------- Раскладка: окно, под ним субтитры и управление — одной ширины ---------- */
+/* ---------- Раскладка: окно слева, широкая панель справа той же высоты ---------- */
 .xl-player .xl-layout {
-  width: max-content;
-  max-width: 100%;
-  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(380px, 460px);
+  justify-content: center;
+  align-items: stretch;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   background: #fff;
+}
+
+.xl-player .xl-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-left: 1px solid #e3e9e5;
+}
+
+/* Узкий экран: панель уходит под окно (как субтитры) */
+@media (max-width: 1250px) {
+  .xl-player .xl-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .xl-player .xl-panel {
+    border-left: 0;
+    border-top: 1px solid #e3e9e5;
+  }
+
+  .xl-player .xl-stage {
+    border-radius: 12px 12px 0 0;
+  }
 }
 
 .xl-player .xl-stage {
@@ -559,18 +583,18 @@
 
 /* ---------- Субтитры ---------- */
 .xl-player .xl-caption {
-  padding: 14px 20px 12px;
-  border-top: 1px solid #e3e9e5;
-  border-left: 4px solid var(--xl-green);
-  /* Высота под три строки: при смене шага окно не прыгает */
-  min-height: 112px;
+  flex: 1;
+  padding: 22px 24px 18px;
+  /* Высота хватает на длинное пояснение: при смене шага раскладка не прыгает */
+  min-height: 220px;
+  overflow-y: auto;
 }
 
 .xl-player .xl-caption-head {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin-bottom: 4px;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
 }
 
 .xl-player .xl-meta {
@@ -583,15 +607,15 @@
 }
 
 .xl-player .xl-step-title {
-  font-size: 16px;
+  font-size: 21px;
   font-weight: 700;
+  line-height: 1.3;
 }
 
 .xl-player .xl-step-text {
   margin: 0;
-  line-height: 1.55;
-  font-size: 16px;
-  max-width: 900px;
+  line-height: 1.65;
+  font-size: 17px;
 }
 
 .xl-player .xl-panel code {
@@ -617,12 +641,16 @@
 /* ---------- Панель управления ---------- */
 .xl-player .xl-controls {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  padding: 10px 16px;
+  padding: 12px 16px 14px;
   border-top: 1px solid #e3e9e5;
   background: #fafbfa;
-  border-radius: 0 0 12px 12px;
+}
+
+.xl-player .xl-panel > :last-child {
+  border-radius: 0 0 12px 0;
 }
 
 .xl-player .xl-ctl {
@@ -650,10 +678,11 @@
 
 /* Шкала: отрезок на каждый шаг, клик — перемотка */
 .xl-player .xl-progress {
-  flex: 1;
-  min-width: 120px;
+  order: -1;
+  flex: 1 0 100%;
   display: flex;
   gap: 3px;
+  padding: 4px 0;
 }
 
 .xl-player .xl-seg {
@@ -680,6 +709,7 @@
 
 .xl-player .xl-speed {
   display: flex;
+  margin-left: auto;
   border: 1px solid #cfd8d2;
   border-radius: 9px;
   overflow: hidden;
@@ -715,8 +745,6 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  columns: 2 260px;
-  column-gap: 16px;
 }
 
 .xl-player .xl-steps li {
