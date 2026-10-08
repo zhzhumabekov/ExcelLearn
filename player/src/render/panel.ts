@@ -43,6 +43,9 @@ export class PanelView {
   private readonly counter = el("span", "xl-meta");
   private readonly title = el("span", "xl-step-title");
   private readonly text = el("p", "xl-step-text");
+  private readonly next = el("div", "xl-next");
+  private readonly nextRing = el("span", "xl-ring");
+  private readonly nextLabel = el("span");
   private readonly playButton: HTMLButtonElement;
   private readonly segments: HTMLButtonElement[];
   private readonly speedButtons: HTMLButtonElement[];
@@ -61,7 +64,9 @@ export class PanelView {
     const caption = el("div", "xl-caption");
     const head = el("div", "xl-caption-head");
     head.append(this.counter, this.title);
-    caption.append(head, this.text);
+    this.next.hidden = true;
+    this.next.append(this.nextRing, this.nextLabel);
+    caption.append(head, this.text, this.next);
 
     // Управление
     this.playButton = button("xl-ctl xl-primary", "", () => handlers.onPlayPause());
@@ -126,6 +131,20 @@ export class PanelView {
             : ["▶", "Смотреть"];
     this.playButton.textContent = icon;
     this.playButton.title = label;
+  }
+
+  /** Пауза перед следующим шагом: кольцо заполняется, подпись — какой шаг дальше. null — скрыть. */
+  showWaitNext(progress: number | null, nextStep: number): void {
+    const step = this.lesson.steps[nextStep];
+    if (progress === null || !step) {
+      this.next.hidden = true;
+      return;
+    }
+    if (this.next.hidden) {
+      this.nextLabel.replaceChildren("Дальше: ", stepHtml(step.title, this.locale));
+      this.next.hidden = false;
+    }
+    this.nextRing.style.setProperty("--p", progress.toFixed(3));
   }
 
   setSpeed(speed: number): void {

@@ -11,10 +11,13 @@ export interface TimelineEvents {
   /** Начался шаг (при воспроизведении или после перемотки). */
   onStepChange?: (step: number) => void;
   onStatusChange?: (status: TimelineStatus) => void;
+  /** Пауза перед следующим шагом: progress 0…1, null — пауза закончилась или прервана. */
+  onWaitNext?: (progress: number | null, nextStep: number) => void;
   onComplete?: () => void;
 }
 
-const BETWEEN_STEPS_MS = 700;
+/** Пауза между шагами — дочитать пояснение; идёт по часам урока (замирает на паузе, ускоряется). */
+export const BETWEEN_STEPS_MS = 2500;
 
 /**
  * Воспроизведение урока по шагам. Перемотка к шагу N: лист в исходное состояние, apply() всех
@@ -69,7 +72,13 @@ export class Timeline {
           await action.animate({ state: this.state, stage: this.stage, clock: this.stage.clock });
           if (run !== this.run) return;
         }
-        if (i < this.steps.length - 1) await this.stage.clock.wait(BETWEEN_STEPS_MS);
+        if (i < this.steps.length - 1) {
+          try {
+            await this.stage.clock.tween(BETWEEN_STEPS_MS, (t) => this.events.onWaitNext?.(t, i + 1));
+          } finally {
+            this.events.onWaitNext?.(null, i + 1);
+          }
+        }
         if (run !== this.run) return;
       }
       if (run !== this.run) return;

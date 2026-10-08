@@ -112,6 +112,17 @@ describe("воспроизведение", () => {
     expect(onComplete).toHaveBeenCalledOnce();
   });
 
+  it("между шагами — пауза с прогрессом 0…1, затем null", async () => {
+    const waits: (number | null)[] = [];
+    const { timeline, advance } = setup(sumLesson, { onWaitNext: (p: number | null, next: number) => next === 1 && waits.push(p) });
+
+    await finish(timeline.play(), advance);
+
+    expect(waits[0]).toBe(0);
+    expect(waits.at(-2)).toBe(1);
+    expect(waits.at(-1)).toBeNull();
+  });
+
   it("после конца play начинает урок заново", async () => {
     const { timeline, advance } = setup(sumLesson);
     await finish(timeline.play(), advance);

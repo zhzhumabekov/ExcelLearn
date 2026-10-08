@@ -124,3 +124,19 @@ describe("mount", () => {
     expect(el.querySelector(".xl-player")).toBeNull();
   });
 });
+
+describe("пауза между шагами", () => {
+  it("показывает кольцо и следующий шаг, null — скрывает", () => {
+    const panel = new PanelView(lesson, "ru", { onPlayPause() {}, onRestart() {}, onSpeed() {}, onSeek() {} }, 1);
+    const next = panel.el.querySelector<HTMLElement>(".xl-next");
+    expect(next?.hidden).toBe(true);
+
+    panel.showWaitNext(0.4, 1);
+    expect(next?.hidden).toBe(false);
+    expect(next?.textContent).toBe("Дальше: Второй");
+    expect(next?.querySelector<HTMLElement>(".xl-ring")?.style.getPropertyValue("--p")).toBe("0.400");
+
+    panel.showWaitNext(null, 1);
+    expect(next?.hidden).toBe(true);
+  });
+});

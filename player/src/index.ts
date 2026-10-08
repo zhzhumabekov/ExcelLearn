@@ -101,6 +101,7 @@ export function mount(el: HTMLElement, options: MountOptions): PlayerHandle {
       // Стартовый экран — только до первого запуска: в конце урока он закрыл бы итоговую таблицу
       if (status === "playing") start.hidden = true;
     },
+    onWaitNext: (progress, nextStep) => panel.showWaitNext(progress, nextStep),
     onComplete: () => options.onComplete?.(),
   });
   const firstStep = options.startStep ?? 0;
