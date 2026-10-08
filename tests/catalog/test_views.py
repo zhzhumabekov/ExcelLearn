@@ -18,7 +18,7 @@ def test_home_links_to_first_lesson_and_course(client):
 
     assert reverse("catalog:lesson", args=["sum-and-autofill"]) in html
     assert reverse("catalog:course") in html
-    assert "2 главы · 2 урока" in html
+    assert "2 главы · 7 уроков" in html
 
 
 def test_course_lists_chapters_and_lessons_in_book_order(client):
@@ -40,12 +40,15 @@ def test_lesson_page_embeds_player_with_lesson_data(client):
 
 
 def test_lesson_neighbors_across_chapters(client):
-    first = client.get(reverse("catalog:lesson", args=["sum-and-autofill"])).content.decode()
-    second = client.get(reverse("catalog:lesson", args=["wages-weekly-salary"])).content.decode()
+    def page(lesson_id):
+        return client.get(reverse("catalog:lesson", args=[lesson_id])).content.decode()
+
+    first, second, last = page("sum-and-autofill"), page("wages-weekly-salary"), page("coffee-price-cost")
 
     assert 'rel="prev"' not in first
-    assert 'rel="next"' in first and reverse("catalog:lesson", args=["wages-weekly-salary"]) in first
-    assert 'rel="prev"' in second and 'rel="next"' not in second
+    assert 'rel="next"' in first and reverse("catalog:lesson", args=["wages-weekly-salary"]) in first  # 0.1 → 1.1
+    assert 'rel="prev"' in second and reverse("catalog:lesson", args=["bakery-supplier-payments"]) in second
+    assert 'rel="prev"' in last and 'rel="next"' not in last
 
 
 def test_unknown_lesson_is_404(client):

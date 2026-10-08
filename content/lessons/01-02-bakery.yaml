@@ -1,0 +1,212 @@
+# Глава 1, рис. 1.2–1.3. Данные — lesson_import из Bakery1temp.xlsx; expect — из Bakery1FINAL.xlsx.
+# В книге «выбрать E30:G30» — опечатка: итоги в строке 29 (см. content/sources/ch01.md).
+id: bakery-supplier-payments
+chapter: ch01
+order: 2
+title: Сколько пекарня должна поставщикам
+source: Рис. 1.2–1.3, Bakery1temp.xlsx
+
+sheet:
+  file: Bakery1temp.xlsx
+  name: suppliers
+  columns: {A: 30, B: 30, C: 30, D: 113, E: 90, F: 96, G: 90, H: 96, I: 64}
+  rows: 30
+  cells:
+    D3: {v: Prices, style: label}
+    E4: {v: Sugar, style: head}
+    F4: {v: Butter, style: head}
+    G4: {v: Flour, style: head}
+    D5: Supplier 1
+    E5: {v: 0.32, fmt: usd}
+    F5: {v: 1.57, fmt: usd}
+    G5: {v: 0.11, fmt: usd}
+    D6: Supplier 2
+    E6: {v: 0.35, fmt: usd}
+    F6: {v: 1.54, fmt: usd}
+    G6: {v: 0.1, fmt: usd}
+    D7: Supplier 3
+    E7: {v: 0.25, fmt: usd}
+    F7: {v: 1.54, fmt: usd}
+    G7: {v: 0.21, fmt: usd}
+    D8: Supplier 4
+    E8: {v: 0.29, fmt: usd}
+    F8: {v: 1.24, fmt: usd}
+    G8: {v: 0.1, fmt: usd}
+    D9: Supplier 5
+    E9: {v: 0.35, fmt: usd}
+    F9: {v: 1.3, fmt: usd}
+    G9: {v: 0.18, fmt: usd}
+    D10: Supplier 6
+    E10: {v: 0.27, fmt: usd}
+    F10: {v: 1.42, fmt: usd}
+    G10: {v: 0.15, fmt: usd}
+    D12: {v: Quantity, style: label}
+    E13: {v: Sugar, style: head}
+    F13: {v: Butter, style: head}
+    G13: {v: Flour, style: head}
+    D14: Supplier 1
+    E14: 364
+    F14: 391
+    G14: 220
+    D15: Supplier 2
+    E15: 387
+    F15: 245
+    G15: 314
+    D16: Supplier 3
+    E16: 290
+    F16: 211
+    G16: 200
+    D17: Supplier 4
+    E17: 340
+    F17: 265
+    G17: 330
+    D18: Supplier 5
+    E18: 261
+    F18: 345
+    G18: 246
+    D19: Supplier 6
+    E19: 365
+    F19: 232
+    G19: 390
+    D21: {v: Cost, style: label}
+    E22: {v: Sugar, style: head}
+    F22: {v: Butter, style: head}
+    G22: {v: Flour, style: head}
+    H22: {v: Total, style: head}
+    D23: Supplier 1
+    E23: {fmt: usd}
+    F23: {fmt: usd}
+    G23: {fmt: usd}
+    H23: {fmt: usd}
+    D24: Supplier 2
+    E24: {fmt: usd}
+    F24: {fmt: usd}
+    G24: {fmt: usd}
+    H24: {fmt: usd}
+    D25: Supplier 3
+    E25: {fmt: usd}
+    F25: {fmt: usd}
+    G25: {fmt: usd}
+    H25: {fmt: usd}
+    D26: Supplier 4
+    E26: {fmt: usd}
+    F26: {fmt: usd}
+    G26: {fmt: usd}
+    H26: {fmt: usd}
+    D27: Supplier 5
+    E27: {fmt: usd}
+    F27: {fmt: usd}
+    G27: {fmt: usd}
+    H27: {fmt: usd}
+    D28: Supplier 6
+    E28: {fmt: usd}
+    F28: {fmt: usd}
+    G28: {fmt: usd}
+    H28: {fmt: usd}
+    D29: {v: Total, style: label}
+    E29: {fmt: usd}
+    F29: {fmt: usd}
+    G29: {fmt: usd}
+
+expect:
+  E23: 116.48
+  F23: 613.87
+  G23: 24.2
+  E28: 98.55
+  G28: 58.5
+  H23: 754.55
+  H24: 544.15
+  H28: 486.49
+  E29: 612.93
+  F29: 2422.65
+  G29: 233.38
+
+steps:
+  - title: Задача
+    text: >-
+      Пекарня покупает сахар, масло и муку у шести поставщиков, и у каждого своя <b>цена за фунт</b>
+      (строки 5–10). Количество закупок — в строках 14–19. Нужно узнать, <b>сколько заплатить</b>
+      каждому поставщику за каждый продукт, и общие суммы.
+    say: >-
+      Пекарня покупает сахар, масло и муку у шести поставщиков, и цены у всех разные. Посчитаем, сколько
+      заплатить каждому поставщику за каждый продукт, и общие суммы.
+    actions:
+      - wait: 3000
+
+  - title: Формула =E5*E14
+    text: >-
+      Supplier 1 за сахар: цена <code>E5</code> × количество <code>E14</code>. Выделите <code>E23</code>,
+      введите <code>=</code>, щёлкните <code>E5</code>, введите <code>*</code>, щёлкните <code>E14</code>
+      и нажмите <kbd>Enter</kbd>.
+    say: >-
+      Первый поставщик, сахар: цена из ячейки Е пять умножить на количество из Е четырнадцать.
+      Нажимаем Enter — получаем 116 долларов 48 центов.
+    actions:
+      - click: E23
+      - type: "="
+      - clickRef: E5
+      - type: "*"
+      - clickRef: E14
+      - keys: [Enter]
+
+  - title: Копирование на всю таблицу
+    text: >-
+      Формула одна для всех поставщиков и продуктов. Скопируйте <code>E23</code> (<kbd>Ctrl</kbd>+<kbd>C</kbd>),
+      выделите <code>E23:G28</code> и нажмите <kbd>Enter</kbd> — Excel вставит её во все 18 ячеек.
+    say: >-
+      Формула подходит всем. Копируем Е двадцать три, выделяем всю таблицу до Жэ двадцать восемь
+      и нажимаем Enter — формула попадает во все восемнадцать ячеек.
+    actions:
+      - click: E23
+      - keys: [Ctrl, C]
+      - dragSelect: E23:G28
+      - keys: [Enter]
+
+  - title: Ссылки сдвинулись сами
+    text: >-
+      В <code>G28</code> записано <code>=G10*G19</code>: цена и количество муки у Supplier 6. При копировании
+      обе ссылки сдвинулись на столько же строк и столбцов, сколько сама формула.
+    say: >-
+      Посмотрим на последнюю ячейку: здесь цена и количество муки у шестого поставщика. Обе ссылки
+      сдвинулись вместе с формулой.
+    actions:
+      - showRefs: G28
+
+  - title: "Итого по поставщику: {fn:SUM}"
+    text: >-
+      В <code>H23</code> складываем три продукта: <code>{f:=SUM(E23:G23)}</code>. Потом протягиваем
+      формулу маркером заполнения до <code>H28</code>.
+    say: >-
+      В ячейке Аш двадцать три складываем три продукта функцией {fn:SUM}. Затем протягиваем формулу
+      вниз до Аш двадцать восемь.
+    actions:
+      - click: H23
+      - type: "=SUM("
+      - dragRef: E23:G23
+      - type: ")"
+      - keys: [Enter]
+      - click: H23
+      - fill: H23:H28
+
+  - title: "Быстрее: кнопка Σ Автосумма"
+    text: >-
+      Итоги по продуктам — ещё быстрее. Выделите <code>E29:G29</code> и нажмите <b>Σ Автосумма</b> на вкладке
+      «Главная»: Excel сам впишет в каждую ячейку сумму столбца над ней. Можно выделить сразу и
+      <code>H23:H28</code>, и (удерживая <kbd>Ctrl</kbd>) <code>E29:G29</code> — автосумма заполнит оба
+      диапазона. Но проверяйте: диапазон она угадывает не всегда верно.
+    say: >-
+      Итоги по продуктам посчитаем быстрее. Выделяем ячейки итогов и нажимаем кнопку «Автосумма» на ленте.
+      Excel сам подставляет сумму каждого столбца. Только проверяйте, какой диапазон он выбрал.
+    actions:
+      - dragSelect: E29:G29
+      - clickRibbon: autosum
+
+  - title: Готово!
+    text: >-
+      Вы скопировали одну формулу на целую таблицу, сложили строки функцией <code>{fn:SUM}</code> и столбцы —
+      кнопкой <b>Σ Автосумма</b>. Больше всего пекарня платит за масло: <b>$2422,65</b>.
+    say: >-
+      Готово! Одна формула скопирована на всю таблицу, суммы посчитаны функцией и кнопкой «Автосумма».
+      Больше всего пекарня тратит на масло.
+    actions:
+      - click: F29

@@ -1,0 +1,214 @@
+# Глава 1, рис. 1.4. Данные — lesson_import из Bakery2temp.xlsx; expect — из Bakery2final.xlsx.
+id: bakery-absolute-refs
+chapter: ch01
+order: 3
+title: "Абсолютные ссылки: знак $ и клавиша F4"
+source: Рис. 1.4, Bakery2temp.xlsx
+
+sheet:
+  file: Bakery2temp.xlsx
+  name: Cost 2
+  columns: {A: 30, B: 30, C: 30, D: 113, E: 90, F: 96, G: 90, H: 96, I: 64}
+  rows: 30
+  cells:
+    E11: {v: Price, style: label}
+    E12: {v: 0.4, fmt: usd}
+    F12: {v: 1.2, fmt: usd}
+    G12: {v: 0.12, fmt: usd}
+    D13: {v: Quantity, style: label}
+    E13: {v: Sugar, style: head}
+    F13: {v: Butter, style: head}
+    G13: {v: Flour, style: head}
+    D14: Supplier 1
+    E14: 364
+    F14: 391
+    G14: 220
+    D15: Supplier 2
+    E15: 387
+    F15: 245
+    G15: 314
+    D16: Supplier 3
+    E16: 290
+    F16: 211
+    G16: 200
+    D17: Supplier 4
+    E17: 340
+    F17: 265
+    G17: 330
+    D18: Supplier 5
+    E18: 261
+    F18: 345
+    G18: 246
+    D19: Supplier 6
+    E19: 365
+    F19: 232
+    G19: 390
+    D21: {v: Cost, style: label}
+    E22: {v: Sugar, style: head}
+    F22: {v: Butter, style: head}
+    G22: {v: Flour, style: head}
+    H22: {v: Total, style: head}
+    D23: Supplier 1
+    E23: {fmt: usd}
+    F23: {fmt: usd}
+    G23: {fmt: usd}
+    H23: {fmt: usd}
+    D24: Supplier 2
+    E24: {fmt: usd}
+    F24: {fmt: usd}
+    G24: {fmt: usd}
+    H24: {fmt: usd}
+    D25: Supplier 3
+    E25: {fmt: usd}
+    F25: {fmt: usd}
+    G25: {fmt: usd}
+    H25: {fmt: usd}
+    D26: Supplier 4
+    E26: {fmt: usd}
+    F26: {fmt: usd}
+    G26: {fmt: usd}
+    H26: {fmt: usd}
+    D27: Supplier 5
+    E27: {fmt: usd}
+    F27: {fmt: usd}
+    G27: {fmt: usd}
+    H27: {fmt: usd}
+    D28: Supplier 6
+    E28: {fmt: usd}
+    F28: {fmt: usd}
+    G28: {fmt: usd}
+    H28: {fmt: usd}
+    D29: {v: Total, style: label}
+    E29: {fmt: usd}
+    F29: {fmt: usd}
+    G29: {fmt: usd}
+
+expect:
+  E23: 145.6
+  F23: 469.2
+  G23: 26.4
+  E24: 154.8
+  F26: 318
+  G28: 46.8
+  H23: 641.2
+  H28: 471.2
+  E29: 802.8
+  F29: 2026.8
+  G29: 204
+
+steps:
+  - title: Задача
+    text: >-
+      Теперь все поставщики берут <b>одинаковую цену</b> за продукт — она одна, в строке 12. Посчитаем
+      выплаты, как в прошлом уроке, и посмотрим, что пойдёт не так.
+    say: >-
+      Теперь цена у всех поставщиков одинаковая, и записана она один раз, в двенадцатой строке.
+      Посчитаем выплаты так же, как раньше, и посмотрим, что пойдёт не так.
+    actions:
+      - wait: 3000
+
+  - title: Формула как раньше
+    text: >-
+      В <code>E23</code> вводим <code>=E12*E14</code>: цена сахара × количество у Supplier 1. Для первой
+      строки результат верный — <b>$145,60</b>.
+    say: >-
+      В Е двадцать три вводим цену из Е двенадцать, умноженную на количество из Е четырнадцать.
+      Для первого поставщика всё верно.
+    actions:
+      - click: E23
+      - type: "="
+      - clickRef: E12
+      - type: "*"
+      - clickRef: E14
+      - keys: [Enter]
+
+  - title: Копируем — и ошибка
+    text: >-
+      Копируем <code>E23</code> на <code>E23:G28</code>. В строке 24 появилась ошибка <code>#ЗНАЧ!</code> (<code>#VALUE!</code> в английском Excel),
+      а ниже — неверные суммы.
+    say: >-
+      Копируем формулу на всю таблицу — и видим ошибку во второй строке, а ниже — неправильные числа.
+    actions:
+      - click: E23
+      - keys: [Ctrl, C]
+      - dragSelect: E23:G28
+      - keys: [Enter]
+
+  - title: Почему так вышло
+    text: >-
+      В <code>E24</code> записано <code>=E13*E15</code>: при копировании вниз ссылка на цену тоже «уехала»
+      на строку и указывает на текст <i>Sugar</i>. А нам нужно, чтобы <b>строка 12 не менялась</b>.
+    say: >-
+      Смотрим, что в ячейке ниже: ссылка на цену сдвинулась на строку вниз и указывает на слово «Sugar».
+      А цена всегда в двенадцатой строке — эту строку нужно закрепить.
+    actions:
+      - showRefs: E24
+
+  - title: Отменяем вставку
+    text: >-
+      <kbd>Ctrl</kbd>+<kbd>Z</kbd> — отменяем вставку и исправим формулу в <code>E23</code>.
+    say: Отменяем вставку сочетанием Control Z.
+    actions:
+      - keys: [Ctrl, Z]
+
+  - title: Закрепляем строку клавишей F4
+    text: >-
+      Снова вводим формулу в <code>E23</code>. Щёлкнув <code>E12</code>, нажимайте <kbd>F4</kbd>: ссылка
+      меняется по кругу <code>$E$12</code> → <code>E$12</code> → <code>$E12</code> → <code>E12</code>. Нам нужна
+      <code>E$12</code>: знак <code>$</code> перед 12 запрещает строке меняться при копировании.
+      Это <b>абсолютная адресация</b> строки.
+    say: >-
+      Вводим формулу заново. Щёлкнув Е двенадцать, нажимаем F4: появляются знаки доллара. Нажимаем ещё
+      раз — доллар остаётся только перед номером строки. Теперь строка двенадцать не будет меняться
+      при копировании.
+    actions:
+      - click: E23
+      - type: "="
+      - clickRef: E12
+      - keys: [F4]
+      - keys: [F4]
+      - type: "*"
+      - clickRef: E14
+      - keys: [Enter]
+
+  - title: Копируем снова
+    text: >-
+      Копируем <code>E23</code> на <code>E23:G28</code>. Ошибок нет: в <code>F26</code> — <code>=F$12*F17</code>.
+      Столбец сдвинулся (своя цена у каждого продукта), а строка цены осталась 12.
+    say: >-
+      Копируем ещё раз — ошибок нет. Столбец в ссылке на цену сдвигается, а строка двенадцать остаётся
+      на месте.
+    actions:
+      - click: E23
+      - keys: [Ctrl, C]
+      - dragSelect: E23:G28
+      - keys: [Enter]
+      - showRefs: F26
+
+  - title: Итоги
+    text: >-
+      Итого по поставщику — <code>{f:=SUM(E23:G23)}</code> с протягиванием вниз, по продуктам —
+      кнопка <b>Σ Автосумма</b> для <code>E29:G29</code>.
+    say: >-
+      Осталось посчитать итоги: по поставщику — функцией {fn:SUM} с протягиванием вниз, по продуктам —
+      кнопкой «Автосумма».
+    actions:
+      - click: H23
+      - type: "=SUM("
+      - dragRef: E23:G23
+      - type: ")"
+      - keys: [Enter]
+      - click: H23
+      - fill: H23:H28
+      - dragSelect: E29:G29
+      - clickRibbon: autosum
+
+  - title: Готово!
+    text: >-
+      Знак <code>$</code> закрепляет часть ссылки при копировании: <code>$E$12</code> — ячейку целиком,
+      <code>E$12</code> — строку, <code>$E12</code> — столбец. Быстро поставить его — клавиша <kbd>F4</kbd>.
+    say: >-
+      Готово! Знак доллара закрепляет часть ссылки при копировании, а ставить его быстрее всего
+      клавишей F4.
+    actions:
+      - click: F29
