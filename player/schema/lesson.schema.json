@@ -1,0 +1,438 @@
+{
+  "$defs": {
+    "CellSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "v": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "f": {
+          "anyOf": [
+            {
+              "pattern": "^=",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Формула, уже записанная в ячейке шаблона"
+        },
+        "fmt": {
+          "default": "general",
+          "enum": [
+            "general",
+            "number",
+            "usd",
+            "percent"
+          ],
+          "type": "string"
+        },
+        "style": {
+          "anyOf": [
+            {
+              "enum": [
+                "head",
+                "label",
+                "total"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "CellSpec",
+      "type": "object"
+    },
+    "Click": {
+      "additionalProperties": false,
+      "properties": {
+        "click": {
+          "pattern": "^[A-Z]{1,3}[1-9][0-9]*$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "click"
+      ],
+      "title": "Click",
+      "type": "object"
+    },
+    "ClickRef": {
+      "additionalProperties": false,
+      "properties": {
+        "clickRef": {
+          "pattern": "^[A-Z]{1,3}[1-9][0-9]*$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "clickRef"
+      ],
+      "title": "ClickRef",
+      "type": "object"
+    },
+    "DragRef": {
+      "additionalProperties": false,
+      "properties": {
+        "dragRef": {
+          "pattern": "^[A-Z]{1,3}[1-9][0-9]*(:[A-Z]{1,3}[1-9][0-9]*)?$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dragRef"
+      ],
+      "title": "DragRef",
+      "type": "object"
+    },
+    "DragSelect": {
+      "additionalProperties": false,
+      "properties": {
+        "dragSelect": {
+          "pattern": "^[A-Z]{1,3}[1-9][0-9]*(:[A-Z]{1,3}[1-9][0-9]*)?$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dragSelect"
+      ],
+      "title": "DragSelect",
+      "type": "object"
+    },
+    "Fill": {
+      "additionalProperties": false,
+      "properties": {
+        "fill": {
+          "pattern": "^[A-Z]{1,3}[1-9][0-9]*(:[A-Z]{1,3}[1-9][0-9]*)?$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fill"
+      ],
+      "title": "Fill",
+      "type": "object"
+    },
+    "Keys": {
+      "additionalProperties": false,
+      "properties": {
+        "keys": {
+          "items": {
+            "enum": [
+              "Enter",
+              "Escape",
+              "Tab",
+              "Delete",
+              "F2",
+              "F4",
+              "Ctrl",
+              "Alt",
+              "Shift",
+              "C",
+              "V",
+              "X",
+              "Z",
+              "="
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "keys"
+      ],
+      "title": "Keys",
+      "type": "object"
+    },
+    "Select": {
+      "additionalProperties": false,
+      "properties": {
+        "select": {
+          "pattern": "^[A-Z]{1,3}[1-9][0-9]*(:[A-Z]{1,3}[1-9][0-9]*)?$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "select"
+      ],
+      "title": "Select",
+      "type": "object"
+    },
+    "Sheet": {
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Имя файла в окне Excel, например Wagestemp.xlsx"
+        },
+        "name": {
+          "default": "Лист1",
+          "type": "string"
+        },
+        "columns": {
+          "description": "Ширина колонок в пикселях",
+          "patternProperties": {
+            "^[A-Z]{1,3}$": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "rows": {
+          "anyOf": [
+            {
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Сколько строк показывать"
+        },
+        "cells": {
+          "patternProperties": {
+            "^[A-Z]{1,3}[1-9][0-9]*$": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "$ref": "#/$defs/CellSpec"
+                }
+              ]
+            }
+          },
+          "type": "object"
+        }
+      },
+      "title": "Sheet",
+      "type": "object"
+    },
+    "ShowRefs": {
+      "additionalProperties": false,
+      "properties": {
+        "showRefs": {
+          "pattern": "^[A-Z]{1,3}[1-9][0-9]*$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "showRefs"
+      ],
+      "title": "ShowRefs",
+      "type": "object"
+    },
+    "Step": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "text": {
+          "description": "Пояснение на экране; разрешены <b>, <code>, <kbd>",
+          "minLength": 1,
+          "type": "string"
+        },
+        "say": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Текст для диктора; {fn:SUM} подставляется по языку"
+        },
+        "actions": {
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/Click"
+              },
+              {
+                "$ref": "#/$defs/Select"
+              },
+              {
+                "$ref": "#/$defs/Type"
+              },
+              {
+                "$ref": "#/$defs/ClickRef"
+              },
+              {
+                "$ref": "#/$defs/DragRef"
+              },
+              {
+                "$ref": "#/$defs/DragSelect"
+              },
+              {
+                "$ref": "#/$defs/Fill"
+              },
+              {
+                "$ref": "#/$defs/Keys"
+              },
+              {
+                "$ref": "#/$defs/ShowRefs"
+              },
+              {
+                "$ref": "#/$defs/Wait"
+              }
+            ]
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "title",
+        "text",
+        "actions"
+      ],
+      "title": "Step",
+      "type": "object"
+    },
+    "Type": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Type",
+      "type": "object"
+    },
+    "Wait": {
+      "additionalProperties": false,
+      "properties": {
+        "wait": {
+          "description": "Пауза в миллисекундах",
+          "maximum": 10000,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "wait"
+      ],
+      "title": "Wait",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "description": "Стабильный id: хранится в БД прогресса, не переименовывать",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "type": "string"
+    },
+    "chapter": {
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "type": "string"
+    },
+    "order": {
+      "description": "Порядок внутри главы",
+      "minimum": 1,
+      "type": "integer"
+    },
+    "title": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "source": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Откуда сценарий, например «Рис. 1.1»"
+    },
+    "sheet": {
+      "$ref": "#/$defs/Sheet"
+    },
+    "expect": {
+      "description": "Значения из исходника для сверки",
+      "patternProperties": {
+        "^[A-Z]{1,3}[1-9][0-9]*$": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/Step"
+      },
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "chapter",
+    "order",
+    "title",
+    "sheet",
+    "steps"
+  ],
+  "title": "Lesson",
+  "type": "object"
+}

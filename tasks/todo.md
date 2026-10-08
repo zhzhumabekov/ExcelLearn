@@ -51,7 +51,7 @@
   - Files: `lessons/schema.py`, `loader.py`, `registry.py`, `content/course.yaml`, `tests/lessons/test_schema.py`
   - Deps: T1
 
-- [ ] **T5. `lessons_check`, `lessons_schema`, TS-типы** · M
+- [x] **T5. `lessons_check`, `lessons_schema`, TS-типы** · M
   - Acceptance:
     - `manage.py lessons_check`: все уроки, ненулевой код выхода при ошибках, предупреждение о шагах без `say`
     - `manage.py lessons_schema` → `player/schema/lesson.schema.json`; `pnpm gen:types` → `player/src/generated/lesson.ts`

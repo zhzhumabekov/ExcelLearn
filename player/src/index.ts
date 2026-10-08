@@ -1,5 +1,9 @@
 import "./styles/player.css";
 
+import type { Lesson } from "./generated/lesson";
+
+export type { Lesson };
+
 export type FunctionLocale = "ru" | "en";
 
 export interface PlayerSettings {
@@ -10,8 +14,7 @@ export interface PlayerSettings {
 }
 
 export interface MountOptions {
-  // Тип урока появится в T5 — генерируется из Pydantic-схемы.
-  lesson: unknown;
+  lesson: Lesson;
   settings?: Partial<PlayerSettings>;
   startStep?: number;
   onStepChange?: (step: number) => void;
