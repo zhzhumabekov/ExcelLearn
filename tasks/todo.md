@@ -103,7 +103,7 @@
   - Files: `player/src/locale/functions.ts`, `format.ts`, `*.test.ts`
   - Deps: T8
 
-- [ ] **T10. Статический рендер окна Excel** · M
+- [x] **T10. Статический рендер окна Excel** · M
   - Acceptance: заголовок, лента, поле «Имя», строка формул, сетка с заголовками, ярлык листа; отрисовка из `SheetModel` (`usd`, `head`, ширины колонок); стили изолированы (префикс `.xl-player`)
   - Verify: `/dev/player/?lesson=wages-weekly-salary` визуально совпадает с исходным состоянием прототипа 2
   - Files: `player/src/render/window.ts`, `grid.ts`, `player/src/styles/player.css`, `grid.test.ts`

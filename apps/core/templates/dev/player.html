@@ -6,10 +6,32 @@
 {% block content %}
   <link rel="stylesheet" href="{% static 'player/player.css' %}">
   <h1>Песочница плеера</h1>
-  <p>Собрать плеер: <code>pnpm --dir player dev</code></p>
-  <div id="player"></div>
-  <script src="{% static 'player/player.js' %}"></script>
-  <script>
-    ExcelLearnPlayer.mount(document.getElementById("player"), { lesson: {} });
-  </script>
+  <p>
+    Собрать плеер: <code>pnpm --dir player dev</code>.
+    Язык функций:
+    <a href="?lesson={{ lesson.id }}&amp;locale=ru">RU</a> ·
+    <a href="?lesson={{ lesson.id }}&amp;locale=en">EN</a>
+  </p>
+  <ul>
+    {% for item in lessons %}
+      <li>
+        {% if item.id == lesson.id %}<b>{{ item.title }}</b>{% else %}<a href="?lesson={{ item.id }}&amp;locale={{ locale }}">{{ item.title }}</a>{% endif %}
+        <code>{{ item.id }}</code>
+      </li>
+    {% endfor %}
+  </ul>
+
+  {% if lesson %}
+    <div id="player"></div>
+    {{ lesson_data|json_script:"lesson-data" }}
+    <script src="{% static 'player/player.js' %}"></script>
+    <script>
+      ExcelLearnPlayer.mount(document.getElementById("player"), {
+        lesson: JSON.parse(document.getElementById("lesson-data").textContent),
+        settings: { functionLocale: "{{ locale }}" },
+      });
+    </script>
+  {% else %}
+    <p>Уроков пока нет: добавьте YAML в <code>content/lessons/</code>.</p>
+  {% endif %}
 {% endblock %}

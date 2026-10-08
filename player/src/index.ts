@@ -1,10 +1,11 @@
 import "./styles/player.css";
 
 import type { Lesson } from "./generated/lesson";
+import type { FunctionLocale } from "./locale/format";
+import { WindowView } from "./render/window";
+import { SheetModel } from "./sheet/sheet-model";
 
-export type { Lesson };
-
-export type FunctionLocale = "ru" | "en";
+export type { FunctionLocale, Lesson };
 
 export interface PlayerSettings {
   speed: number;
@@ -38,7 +39,11 @@ export function mount(el: HTMLElement, options: MountOptions): PlayerHandle {
   const root = document.createElement("div");
   root.className = "xl-player";
   root.dataset.locale = settings.functionLocale;
-  root.textContent = "Плеер ExcelLearn: каркас готов, движок появится в задачах T8–T14.";
+
+  const sheet = new SheetModel(options.lesson.sheet);
+  const view = new WindowView(sheet, settings.functionLocale);
+  view.showActive("A1");
+  root.append(view.el);
   el.replaceChildren(root);
 
   return {
