@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ lesson.title }} — ExcelLearn{% endblock %}
+
+{% block head %}<link rel="stylesheet" href="{% static 'player/player.css' %}">{% endblock %}
+
+{% block content %}
+  <nav class="text-sm text-stone-500 dark:text-stone-400" aria-label="Хлебные крошки">
+    <a href="{% url 'catalog:course' %}" class="hover:text-brand-700 dark:hover:text-brand-100">Оглавление</a>
+    <span class="mx-1">/</span>
+    <a href="{% url 'catalog:course' %}#{{ chapter.id }}" class="hover:text-brand-700 dark:hover:text-brand-100">
+      {% if chapter.number %}Глава {{ chapter.number }}. {% endif %}{{ chapter.title }}
+    </a>
+  </nav>
+  <h1 class="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">{{ lesson.title }}</h1>
+  {% if lesson.source %}<p class="mt-1 text-sm text-stone-500 dark:text-stone-400">{{ lesson.source }}</p>{% endif %}
+
+  <div id="player" class="mt-6"></div>
+
+  <nav class="mt-8 flex flex-wrap justify-between gap-3" aria-label="Соседние уроки" id="lesson-nav">
+    {% if prev_lesson %}
+      <a href="{% url 'catalog:lesson' prev_lesson.id %}" rel="prev"
+         class="rounded-xl border border-stone-300 px-5 py-3 hover:border-brand-600 dark:border-stone-700">
+        <span class="block text-xs text-stone-500">← Предыдущий</span>{{ prev_lesson.title }}
+      </a>
+    {% else %}<span></span>{% endif %}
+    {% if next_lesson %}
+      <a href="{% url 'catalog:lesson' next_lesson.id %}" rel="next" id="next-lesson"
+         class="rounded-xl border border-stone-300 px-5 py-3 text-right hover:border-brand-600 dark:border-stone-700">
+        <span class="block text-xs text-stone-500">Следующий →</span>{{ next_lesson.title }}
+      </a>
+    {% endif %}
+  </nav>
+
+  {{ lesson_data|json_script:"lesson-data" }}
+  <script src="{% static 'player/player.js' %}"></script>
+  <script>
+    (() => {
+      const next = document.getElementById("next-lesson");
+      ExcelLearnPlayer.mount(document.getElementById("player"), {
+        lesson: JSON.parse(document.getElementById("lesson-data").textContent),
+        // Урок досмотрен — подсвечиваем переход к следующему
+        onComplete: () => next?.classList.add("border-brand-600", "bg-brand-50", "ring-2", "ring-brand-600/30", "dark:bg-stone-800"),
+      });
+    })();
+  </script>
+{% endblock %}

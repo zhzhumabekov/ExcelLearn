@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load ru %}
+
+{% block title %}Оглавление — {{ course.title }}{% endblock %}
+
+{% block content %}
+  <h1 class="text-3xl font-bold tracking-tight">{{ course.title }}</h1>
+  {% if course.source %}<p class="mt-2 text-stone-500 dark:text-stone-400">{{ course.source }}</p>{% endif %}
+
+  <ol class="mt-8 space-y-6">
+    {% for entry in chapters %}
+      <li class="rounded-2xl border border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900" id="{{ entry.chapter.id }}">
+        <h2 class="flex items-baseline gap-3 border-b border-stone-100 px-5 py-4 text-lg font-semibold dark:border-stone-800">
+          <span class="text-sm font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-100">
+            {% if entry.chapter.number %}Глава {{ entry.chapter.number }}{% else %}Вступление{% endif %}
+          </span>
+          {{ entry.chapter.title }}
+        </h2>
+        {% if entry.lessons %}
+          <ol class="divide-y divide-stone-100 dark:divide-stone-800">
+            {% for lesson in entry.lessons %}
+              <li>
+                <a href="{% url 'catalog:lesson' lesson.id %}"
+                   class="flex items-center gap-4 px-5 py-3 hover:bg-brand-50 dark:hover:bg-stone-800">
+                  <span class="w-10 flex-none text-sm tabular-nums text-stone-500">{{ entry.chapter.number }}.{{ lesson.order }}</span>
+                  <span class="flex-1 font-medium">{{ lesson.title }}</span>
+                  <span class="text-sm text-stone-500 dark:text-stone-400">{{ lesson.steps|length|ru_plural:"шаг,шага,шагов" }}</span>
+                </a>
+              </li>
+            {% endfor %}
+          </ol>
+        {% else %}
+          <p class="px-5 py-4 text-sm text-stone-500 dark:text-stone-400">Уроки готовятся.</p>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ol>
+{% endblock %}

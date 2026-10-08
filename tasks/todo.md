@@ -176,14 +176,14 @@
   - Files: `apps/core/templates/base.html`, `static/css/input.css`, `tailwind.config.js`, `package.json` скрипт `css`
   - Deps: T1
 
-- [ ] **T18. Главная, оглавление, страница урока** · M
+- [x] **T18. Главная, оглавление, страница урока** · M
   - Acceptance: `/` — главная; `/course/` — главы и уроки по порядку; `/lessons/<id>/` — плеер с данными через `json_script`, кнопки пред./след.; 404 для неизвестного урока
   - Verify: pytest — статусы, порядок, соседи, 404; e2e переходит с главной в урок и дальше
   - Files: `apps/catalog/views.py`, `urls.py`, `apps/catalog/templates/catalog/{home,course,lesson}.html`, `tests/catalog/test_views.py`
   - Deps: T16, T17
 
 ### ✅ Checkpoint D
-- [ ] Сайт без аккаунтов работает от главной до конца урока 1-01
+- [x] Сайт без аккаунтов работает от главной до конца урока 1-01
 
 ---
 
