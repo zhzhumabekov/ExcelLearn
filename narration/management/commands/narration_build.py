@@ -11,7 +11,7 @@ class Command(BaseCommand):
     help = "Озвучка уроков: аудио для шагов с say (RU и EN названия функций), только новые и изменённые."
 
     def add_arguments(self, parser):
-        parser.add_argument("--provider", help="silent | yandex (по умолчанию TTS_PROVIDER из .env)")
+        parser.add_argument("--provider", help="silent | windows | yandex (по умолчанию TTS_PROVIDER из .env)")
         parser.add_argument("--lesson", action="append", help="Только этот урок (можно несколько раз)")
 
     def handle(self, *args, provider: str | None, lesson: list[str] | None, **options):

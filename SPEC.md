@@ -43,7 +43,7 @@
 | Формат урока | YAML → Pydantic 2 → JSON Schema → TS-типы (`json-schema-to-typescript`) | Одна схема-источник для Python и TS |
 | БД | PostgreSQL 16 (прод), SQLite (локальная разработка) | Старт без Docker, прод на надёжной БД |
 | Зависимости | `uv` (Python), `pnpm` + Node 24 LTS (плеер) | |
-| Озвучка | Синтез речи через интерфейс `TTSProvider`; основной провайдер — Yandex SpeechKit (лучшее качество русской речи), для разработки и тестов — `silent` (тишина расчётной длительности, без сети) | Провайдер меняется одной настройкой |
+| Озвучка | Синтез речи через интерфейс `TTSProvider`; основной провайдер — Yandex SpeechKit (лучшее качество русской речи), для разработки и тестов — `silent` (тишина расчётной длительности, без сети), для предпросмотра на Windows — `windows` (встроенный голос «Microsoft Irina», бесплатно, качество ниже) | Провайдер меняется одной настройкой |
 | Почта | Django SMTP backend, настройки из окружения; без `EMAIL_HOST` — console backend | SMTP подключается позже без правок кода |
 | Тесты | pytest + pytest-django, Vitest (+ jsdom), Playwright (Python) | |
 | Прод | Gunicorn + WhiteNoise за Nginx, Docker Compose | |
