@@ -35,16 +35,7 @@
 
   {{ lesson_data|json_script:"lesson-data" }}
   {{ narration|json_script:"narration-data" }}
+  {{ page_config|json_script:"lesson-page" }}
   <script src="{% static 'player/player.js' %}"></script>
-  <script>
-    (() => {
-      const next = document.getElementById("next-lesson");
-      ExcelLearnPlayer.mount(document.getElementById("player"), {
-        lesson: JSON.parse(document.getElementById("lesson-data").textContent),
-        narration: JSON.parse(document.getElementById("narration-data").textContent),
-        // Урок досмотрен — подсвечиваем переход к следующему
-        onComplete: () => next?.classList.add("border-brand-600", "bg-brand-50", "ring-2", "ring-brand-600/30", "dark:bg-stone-800"),
-      });
-    })();
-  </script>
+  <script src="{% static 'js/lesson-page.js' %}"></script>
 {% endblock %}

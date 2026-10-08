@@ -1,5 +1,7 @@
 from django.http import Http404
+from django.middleware.csrf import get_token
 from django.shortcuts import render
+from django.urls import reverse
 
 from lessons.registry import get_registry
 from narration.builder import narration_urls
@@ -38,6 +40,11 @@ def lesson(request, lesson_id: str):
             "lesson": current,
             "lesson_data": current.model_dump(mode="json"),
             "narration": narration_urls(current.id),
+            "page_config": {
+                "progressUrl": reverse("progress:save", args=[current.id]) if request.user.is_authenticated else None,
+                "csrfToken": get_token(request),
+                "startStep": 0,
+            },
             "chapter": chapter,
             "prev_lesson": prev_lesson,
             "next_lesson": next_lesson,

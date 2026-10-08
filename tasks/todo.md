@@ -230,7 +230,7 @@
 
 ## Phase 6 — Прогресс и настройки
 
-- [ ] **T24. Модель и API прогресса** · M
+- [x] **T24. Модель и API прогресса** · M
   - Acceptance: `LessonProgress`; `POST /api/progress/<lesson_id>/` (`step`, `completed`) — только для авторизованных, CSRF, `last_step` не уменьшается при завершённом уроке; плеер отправляет события через `fetch`
   - Verify: pytest — права доступа, неизвестный урок → 404, идемпотентность; e2e — после просмотра запись в БД
   - Files: `apps/progress/models.py`, `views.py`, `urls.py`, `player/src/integrations/progress.ts`, `tests/progress/test_api.py`
