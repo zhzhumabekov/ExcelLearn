@@ -68,7 +68,7 @@
   - Files: `content/course.yaml`, `content/lessons/00-01-sum.yaml`, `content/lessons/01-01-wages.yaml`
   - Deps: T5
 
-- [ ] **T7. `lesson_import` из файлов книги** · S · *новая зависимость `openpyxl` (dev)*
+- [x] **T7. `lesson_import` из файлов книги** · S · *новая зависимость `openpyxl` (dev)*
   - Acceptance:
     - `manage.py lesson_import "Templates/Chapter 1 Templates/wagestemp.xlsx" --final "Practice Files/Chapter 1 Practice Files/wagesfinal.xlsx" --range B3:F15` печатает YAML-заготовку: `sheet.cells` (значения, денежный формат, ширины колонок) и `expect` из кэшированных значений решения
   - Verify: pytest на маленьком сгенерированном xlsx; ручной прогон на `wagestemp.xlsx` совпадает с T6
@@ -76,7 +76,7 @@
   - Deps: T4
 
 ### ✅ Checkpoint B
-- [ ] `lessons_check` зелёный, типы сгенерированы, импорт даёт те же данные, что ручной YAML
+- [x] `lessons_check` зелёный, типы сгенерированы, импорт даёт те же данные, что ручной YAML
 
 ---
 

@@ -53,7 +53,7 @@ T1 Django-каркас ─► T2 User-модель ─────────�
 - [x] T4 Pydantic-схема, загрузчик, реестр, `course.yaml`
 - [x] T5 `lessons_check`, `lessons_schema`, генерация TS-типов
 - [x] T6 Уроки 0-01 (СУММ) и 1-01 (ведомость) в YAML
-- [ ] T7 `lesson_import` из файлов книги
+- [x] T7 `lesson_import` из файлов книги
 
 ### Checkpoint B — уроки валидны, типы сгенерированы
 
