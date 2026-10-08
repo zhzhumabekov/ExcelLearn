@@ -60,7 +60,7 @@
   - Files: `lessons/management/commands/lessons_check.py`, `lessons_schema.py`, `player/package.json`, `tests/lessons/test_commands.py`
   - Deps: T4, T3
 
-- [ ] **T6. Уроки 0-01 и 1-01 в YAML** · S
+- [x] **T6. Уроки 0-01 и 1-01 в YAML** · S
   - Acceptance:
     - `content/lessons/00-01-sum.yaml` и `01-01-wages.yaml` повторяют сценарии прототипов шаг в шаг; `expect` заполнен (`E4: 490`, `C12: 320`, `E14: 449.63` …)
     - `course.yaml`: глава 0 «Введение», глава 1 по книге

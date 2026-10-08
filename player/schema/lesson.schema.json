@@ -265,11 +265,12 @@
       "additionalProperties": false,
       "properties": {
         "title": {
+          "description": "Заголовок шага; плейсхолдеры как в text",
           "minLength": 1,
           "type": "string"
         },
         "text": {
-          "description": "Пояснение на экране; разрешены <b>, <code>, <kbd>",
+          "description": "Пояснение на экране; разрешены <b>, <code>, <kbd>, плейсхолдеры {fn:SUM} и {f:=SUM(A1:A3)}",
           "minLength": 1,
           "type": "string"
         },

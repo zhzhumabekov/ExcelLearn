@@ -69,9 +69,12 @@ export interface CellSpec {
   style?: ("head" | "label" | "total") | null;
 }
 export interface Step {
+  /**
+   * Заголовок шага; плейсхолдеры как в text
+   */
   title: string;
   /**
-   * Пояснение на экране; разрешены <b>, <code>, <kbd>
+   * Пояснение на экране; разрешены <b>, <code>, <kbd>, плейсхолдеры {fn:SUM} и {f:=SUM(A1:A3)}
    */
   text: string;
   /**

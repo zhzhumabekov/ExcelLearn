@@ -1,0 +1,177 @@
+# Прототип: prototypes/lesson-02-wages.html. Разбор главы: content/sources/ch01.md
+id: wages-weekly-salary
+chapter: ch01
+order: 1
+title: Расчёт недельной платёжной ведомости
+source: Рис. 1.1, Wagestemp.xlsx
+
+sheet:
+  file: Wagestemp.xlsx
+  name: Wages
+  columns: { A: 30, B: 140, C: 80, D: 120, E: 130, F: 140, G: 50 }
+  rows: 16
+  cells:
+    B3: { v: Employee, style: head }
+    C3: { v: Hours, style: head }
+    D3: { v: Wage Per Hour, style: head }
+    E3: { v: Weekly Salary, style: head }
+    B4: Luka Abrus
+    C4: 49
+    D4: { v: 10, fmt: usd }
+    B5: Terry Adams
+    C5: 36
+    D5: { v: 13, fmt: usd }
+    B6: David Ahs
+    C6: 43
+    D6: { v: 14, fmt: usd }
+    B7: Kim Akers
+    C7: 35
+    D7: { v: 10, fmt: usd }
+    B8: Ties Arts
+    C8: 38
+    D8: { v: 9, fmt: usd }
+    B9: Kamil Amerih
+    C9: 38
+    D9: { v: 14, fmt: usd }
+    B10: Amy Alberts
+    C10: 42
+    D10: { v: 11, fmt: usd }
+    B11: Matt Berg
+    C11: 39
+    D11: { v: 9, fmt: usd }
+    # Пустые ячейки с форматом: сюда попадут результаты формул
+    E4: { fmt: usd }
+    E5: { fmt: usd }
+    E6: { fmt: usd }
+    E7: { fmt: usd }
+    E8: { fmt: usd }
+    E9: { fmt: usd }
+    E10: { fmt: usd }
+    E11: { fmt: usd }
+    B12: { v: Totals, style: label }
+    D14: { v: Average Salary, style: label }
+    E14: { fmt: usd }
+
+# Значения с рис. 1.1. FORMULATEXT сверяется в английском режиме.
+expect:
+  E4: 490
+  E5: 468
+  E6: 602
+  E7: 350
+  E8: 342
+  E9: 532
+  E10: 462
+  E11: 351
+  F4: "=C4*D4"
+  F11: "=C11*D11"
+  C12: 320
+  C13: "=SUM(C4:C11)"
+  E14: 449.63
+  E15: "=AVERAGE(E4:E11)"
+
+steps:
+  - title: Задача
+    text: >-
+      В файле <b>Wagestemp.xlsx</b> указаны отработанные часы и почасовая ставка сотрудников.
+      Нужно посчитать <b>недельную зарплату</b> каждого, <b>сумму часов</b> и <b>среднюю зарплату</b>.
+    actions:
+      - wait: 3500
+
+  - title: Формула =C4*D4
+    text: >-
+      Зарплата Luka — это часы × ставка. Выделите <code>E4</code>, введите <code>=</code>, щёлкните
+      <code>C4</code>, введите <code>*</code> и щёлкните <code>D4</code>. Ссылки окрашиваются в разные
+      цвета, и сразу видно, откуда берутся данные. После <kbd>Enter</kbd> получаем <b>$490.00</b>.
+    actions:
+      - click: E4
+      - type: "="
+      - clickRef: C4
+      - type: "*"
+      - clickRef: D4
+      - keys: [Enter]
+
+  - title: "Копирование: Ctrl+C"
+    text: >-
+      Не нужно вводить формулу для каждого вручную. Выделите <code>E4</code> и нажмите
+      <kbd>Ctrl</kbd>+<kbd>C</kbd> (команда <b>Копировать</b>). Вокруг ячейки появится «бегущая»
+      рамка: формула скопирована в буфер обмена.
+    actions:
+      - click: E4
+      - keys: [Ctrl, C]
+
+  - title: Вставка в E5:E11
+    text: >-
+      Выделите диапазон <code>E5:E11</code> и нажмите <kbd>Enter</kbd> (или <kbd>Ctrl</kbd>+<kbd>V</kbd>).
+      Формула применится ко всем сотрудникам сразу. Так можно обработать хоть миллион строк:
+      в Excel 2007 и новее их 1 048 576.
+    actions:
+      - dragSelect: E5:E11
+      - keys: [Enter]
+
+  - title: Маркер заполнения
+    text: >-
+      Есть второй способ. Отменим вставку (<kbd>Ctrl</kbd>+<kbd>Z</kbd>) и наведём курсор на квадратик
+      в правом нижнем углу <code>E4</code>. Курсор станет <b>тонким чёрным перекрестьем</b>. Зажмите
+      левую кнопку мыши и протяните до <code>E11</code>.
+    actions:
+      - keys: [Ctrl, Z]
+      - click: E4
+      - fill: E4:E11
+
+  - title: Относительные ссылки
+    text: >-
+      Выделим <code>E8</code>: в ней записано <code>=C8*D8</code>. В каждой строке Excel перемножает
+      два значения <b>слева</b> от ячейки, потому что при копировании ссылки сдвигаются вместе с формулой.
+    actions:
+      - click: E8
+      - showRefs: E8
+      - click: E5
+      - showRefs: E5
+
+  - title: "{fn:FORMULATEXT}: текст формулы на листе"
+    text: >-
+      Чтобы формулы были видны прямо на листе, используем функцию <code>{fn:FORMULATEXT}</code>
+      (появилась в Excel 2013). Вводим в <code>F4</code> формулу <code>{f:=FORMULATEXT(E4)}</code>
+      и протягиваем вниз.
+    actions:
+      - click: F4
+      - type: "=FORMULATEXT("
+      - clickRef: E4
+      - type: ")"
+      - keys: [Enter]
+      - click: F4
+      - fill: F4:F11
+
+  - title: "Сумма часов: {fn:SUM}"
+    text: >-
+      В <code>C12</code> считаем общее число часов за неделю: <code>{f:=SUM(C4:C11)}</code>.
+      Получаем <b>320</b>. В <code>C13</code> выводим текст формулы через <code>{fn:FORMULATEXT}</code>.
+    actions:
+      - click: C12
+      - type: "=SUM("
+      - dragRef: C4:C11
+      - type: ")"
+      - keys: [Enter]
+      - type: "=FORMULATEXT(C12)"
+      - keys: [Enter]
+
+  - title: "Средняя зарплата: {fn:AVERAGE}"
+    text: >-
+      В <code>E14</code> вводим <code>{f:=AVERAGE(E4:E11)}</code>. Средняя недельная зарплата
+      равна <b>$449.63</b>.
+    actions:
+      - click: E14
+      - type: "=AVERAGE("
+      - dragRef: E4:E11
+      - type: ")"
+      - keys: [Enter]
+      - type: "=FORMULATEXT(E14)"
+      - keys: [Enter]
+
+  - title: Готово!
+    text: >-
+      Вы научились: писать формулу со ссылками (<code>=C4*D4</code>), копировать её через
+      <kbd>Ctrl</kbd>+<kbd>C</kbd> / <kbd>Enter</kbd> и маркером заполнения, показывать формулы через
+      <code>{fn:FORMULATEXT}</code>, считать <code>{fn:SUM}</code> и <code>{fn:AVERAGE}</code>.
+    actions:
+      - click: E14

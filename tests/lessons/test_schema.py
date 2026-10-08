@@ -6,7 +6,7 @@ from pydantic import ValidationError
 
 from lessons.loader import ContentError
 from lessons.registry import build_registry
-from lessons.schema import Fill, Keys, Lesson
+from lessons.schema import Fill, Keys, Lesson, Step
 
 COURSE = """
 id: test-course
@@ -195,3 +195,27 @@ def test_json_schema_is_generated():
 
     assert schema["title"] == "Lesson"
     assert "Click" in schema["$defs"]
+
+
+@pytest.mark.parametrize(
+    "text",
+    ["Функция {fn:SUM}", "Формула <code>{f:=SUM(B2:D2)}</code>", "{fn:FORMULATEXT} и {fn:AVERAGE}"],
+)
+def test_text_placeholders_are_allowed(text):
+    Step(title="t", text=text, actions=[{"click": "A1"}])
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "fragment"),
+    [
+        ("text", "{SUM}", "только плейсхолдеры"),
+        ("text", "{fn:sum}", "только плейсхолдеры"),
+        ("text", "незакрытая {fn:SUM", "только плейсхолдеры"),
+        ("say", "Формула {f:=SUM(B2:D2)}", "нельзя в say"),
+    ],
+)
+def test_bad_placeholders_are_rejected(field, value, fragment):
+    fields = {"title": "t", "text": "ok", "actions": [{"click": "A1"}], field: value}
+
+    with pytest.raises(ValidationError, match=fragment):
+        Step(**fields)

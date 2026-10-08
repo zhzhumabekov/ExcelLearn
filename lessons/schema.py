@@ -153,11 +153,37 @@ Action = Annotated[
 # ---------- Урок ----------
 
 
+# {fn:SUM} → «СУММ» / «SUM»; {f:=SUM(B2:D2)} → формула с разделителями языка (только в text).
+PLACEHOLDER_RE = re.compile(r"\{(fn:[A-Z][A-Z0-9.]*|f:=[^{}]+)\}")
+
+
+def _check_placeholders(value: str, allow_formula: bool) -> str:
+    rest = PLACEHOLDER_RE.sub("", value)
+    if "{" in rest or "}" in rest:
+        raise ValueError("фигурные скобки — только плейсхолдеры {fn:SUM} и {f:=SUM(A1:A3)}")
+    if not allow_formula and "{f:" in value:
+        raise ValueError("{f:…} нельзя в say: диктору нужны слова, а не формула")
+    return value
+
+
 class Step(Model):
-    title: str = Field(min_length=1)
-    text: str = Field(min_length=1, description="Пояснение на экране; разрешены <b>, <code>, <kbd>")
+    title: str = Field(min_length=1, description="Заголовок шага; плейсхолдеры как в text")
+    text: str = Field(
+        min_length=1,
+        description="Пояснение на экране; разрешены <b>, <code>, <kbd>, плейсхолдеры {fn:SUM} и {f:=SUM(A1:A3)}",
+    )
     say: str | None = Field(default=None, description="Текст для диктора; {fn:SUM} подставляется по языку")
     actions: list[Action] = Field(min_length=1)
+
+    @field_validator("title", "text")
+    @classmethod
+    def text_placeholders(cls, value: str) -> str:
+        return _check_placeholders(value, allow_formula=True)
+
+    @field_validator("say")
+    @classmethod
+    def say_placeholders(cls, value: str | None) -> str | None:
+        return value if value is None else _check_placeholders(value, allow_formula=False)
 
 
 class Lesson(Model):
