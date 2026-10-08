@@ -104,14 +104,15 @@ describe("SheetModel", () => {
     expect(sheet.value("H2")).toEqual(new ExcelError("#DIV/0!"));
   });
 
-  // Пробел fast-formula-parser 1.0.19: SUM/AVERAGE по диапазону пропускают ошибки, Excel вернул бы #DIV/0!
-  it.fails("ошибка в диапазоне распространяется через SUM", () => {
+  it("ошибка в диапазоне распространяется через SUM, а IFERROR её перехватывает", () => {
     const sheet = wages();
 
     sheet.setInput("H1", "=C4/0");
     sheet.setInput("H3", "=SUM(H1:H2)");
+    sheet.setInput("H4", "=IFERROR(H1,-1)");
 
     expect(sheet.value("H3")).toEqual(new ExcelError("#DIV/0!"));
+    expect(sheet.value("H4")).toBe(-1);
   });
 
   it("циклическая ссылка не зависает и даёт 0, как в Excel", () => {

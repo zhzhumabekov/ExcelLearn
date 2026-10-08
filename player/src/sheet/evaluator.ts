@@ -1,6 +1,7 @@
 import FormulaParser, { type CellRef, type FunctionArg, type RangeRef } from "fast-formula-parser";
 
 import { cellName } from "./address";
+import { installFormulajs, PARSER_ERRORS } from "./formulajs-bridge";
 
 /** Ошибка Excel (#DIV/0!, #REF!, #NAME? …) — отдельный тип, чтобы не путать с текстом. */
 export class ExcelError {
@@ -21,15 +22,10 @@ export interface CellSource {
 }
 
 // Функции, которым нужна ссылка, а не значение аргумента. В fast-formula-parser нет публичной настройки
-// для этого — дописываем в funsPreserveRef (проверено на 1.0.19, версия закреплена; см. evaluator.test.ts).
+// для этого — дописываем в funsPreserveRef (проверено на 1.0.19, версия закреплена; см. sheet-model.test.ts).
 const PRESERVE_REF = ["FORMULATEXT"];
 
 const { FormulaError } = FormulaParser;
-const PARSER_ERRORS = new Map(
-  [FormulaError.DIV0, FormulaError.NA, FormulaError.NAME, FormulaError.NULL, FormulaError.NUM, FormulaError.REF, FormulaError.VALUE].map(
-    (e) => [e.error, e],
-  ),
-);
 
 // Ошибка в ячейке должна распространяться дальше (=A1+1 при A1 = #DIV/0! → #DIV/0!), а не читаться как текст.
 function toParserValue(value: CellValue): unknown {
@@ -68,6 +64,7 @@ export function createEvaluator(source: CellSource) {
     },
   });
   parser.funsPreserveRef.push(...PRESERVE_REF);
+  installFormulajs(parser, PRESERVE_REF);
 
   /** formula — с ведущим «=»; at — адрес ячейки, где стоит формула (нужен ROW(), COLUMN()). */
   return function evaluate(formula: string, at: { row: number; col: number }): CellValue {

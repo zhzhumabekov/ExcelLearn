@@ -26,17 +26,38 @@ describe("поддержка функций книги", () => {
   });
 
 
-  // Известные пробелы fast-formula-parser 1.0.19: функций нет или они заглушки (#ERROR!).
-  // Когда появится реализация — тест «упадёт» как прошедший, и его нужно перенести выше.
-  it.fails.each([
+  // Раньше были пробелами fast-formula-parser 1.0.19 — теперь их считает formulajs (formulajs-bridge.ts).
+  it.each([
     ["=MATCH(\"Matt\",A1:A3,0)", 3], // гл. 5
     ["=MAX(B1:B3)-MIN(B1:B3)", 20],
     ["=UPPER(A1)", "KIM"],
     ["=PMT(0.1/12,12,-1000)", 87.91588723], // финансовые главы
     ["=NPV(0.1,100,100)", 173.553719],
-  ])("пока не поддерживается: %s", (formula, expected) => {
+    ["=DATE(2026,10,9)", 46304], // даты — серийные числа Excel
+    ["=DATE(2026,10,9)-DATE(2026,1,1)", 281],
+    ["=BETA.DIST(0.5,2,3,TRUE)", 0.6875], // вложенные имена formulajs
+    ["=SUM(B1:B3,,5)", 65], // пропущенный аргумент
+    ["=ISERROR(1/0)", true],
+    ["=IFNA(MATCH(\"Nobody\",A1:A3,0),\"нет\")", "нет"],
+  ])("formulajs: %s → %j", (formula, expected) => {
+    sheet.setInput("Z1", formula);
+    const value = sheet.value("Z1");
+
+    if (typeof expected === "number") expect(value).toBeCloseTo(expected, 6);
+    else expect(value).toBe(expected);
+  });
+
+
+  // Функции с контекстом или ссылками считает сам парсер (их formulajs не перекрывает).
+  it.each([
+    ["=IF(B1>5,1,2)", 1],
+    ["=ISBLANK(C9)", true],
+    ["=ROW(B3)", 3],
+    ["=SUMIF(B1:B3,\">15\")", 50],
+    ["=INDEX(A1:B3,2,2)", 20],
+  ])("парсер: %s → %j", (formula, expected) => {
     sheet.setInput("Z1", formula);
 
-    expect(sheet.value("Z1")).toEqual(expected);
+    expect(sheet.value("Z1")).toBe(expected);
   });
 });

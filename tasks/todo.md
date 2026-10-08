@@ -91,7 +91,7 @@
   - Files: `player/src/sheet/address.ts`, `sheet-model.ts`, `evaluator.ts`, `*.test.ts`
   - Deps: T5
 
-- [ ] **T8a. Недостающие функции Excel** · S · *ждёт решения: новая зависимость*
+- [x] **T8a. Недостающие функции Excel** · S · *formulajs согласован 2026-10-09*
   - Проблема (найдена в T8): в fast-formula-parser 1.0.19 нет `MAX`, `MIN`, `MATCH`, `UPPER`, финансовых `PMT`, `NPV` и др.; `SUM`/`AVERAGE` по диапазону пропускают ошибки. Для глав 0–1 не нужно, для глав 3+ и финансовых — нужно
   - Предложение: `@formulajs/formulajs` (MIT) как запасная реализация — если функции нет в парсере, вызывается formulajs
   - Acceptance: тесты `it.fails` в `functions-support.test.ts` и `sheet-model.test.ts` становятся обычными и проходят

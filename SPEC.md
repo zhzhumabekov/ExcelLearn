@@ -39,7 +39,7 @@
 | Шаблоны / интерактив | Django Templates, `django-htmx`, Alpine.js 3 | Каталог и настройки без SPA; Alpine закрывает мелкий интерактив |
 | Стили | Tailwind CSS 4 (standalone CLI) для сайта; отдельный CSS плеера | Плеер изолирован от стилей сайта |
 | Плеер | TypeScript 6.0 (strict; 7.x пока не поддерживается typescript-eslint), чистый DOM, без фреймворка, сборка esbuild | Развитие прототипов; анимация на rAF |
-| Формулы | `fast-formula-parser` (MIT) внутри плеера | Единственный вычислитель формул в проекте, значения не вписываются руками |
+| Формулы | `fast-formula-parser` 1.0.19 (MIT) — разбор формул и ссылок; `@formulajs/formulajs` 4.6.1 (MIT) — реализации ~400 функций Excel. Обе версии закреплены | Единственный вычислитель формул в проекте, значения не вписываются руками. У парсера нет MAX, MATCH, PMT, NPV и др. — их считает formulajs |
 | Формат урока | YAML → Pydantic 2 → JSON Schema → TS-типы (`json-schema-to-typescript`) | Одна схема-источник для Python и TS |
 | БД | PostgreSQL 16 (прод), SQLite (локальная разработка) | Старт без Docker, прод на надёжной БД |
 | Зависимости | `uv` (Python), `pnpm` + Node 24 LTS (плеер) | |

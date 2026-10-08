@@ -15,6 +15,7 @@ declare module "fast-formula-parser" {
   export interface FunctionArg {
     value: unknown;
     isArray: boolean;
+    omitted?: boolean;
     ref?: CellRef | RangeRef;
   }
 
@@ -38,7 +39,10 @@ declare module "fast-formula-parser" {
   export default class FormulaParser {
     static readonly FormulaError: typeof FormulaError;
     constructor(config: ParserConfig);
+    functions: Record<string, (...args: FunctionArg[]) => unknown>;
     funsPreserveRef: string[];
+    funsNeedContext: string[];
+    funsNeedContextAndNoDataRetrieve: string[];
     parse(formula: string, position: CellRef): unknown;
   }
 }

@@ -29,6 +29,7 @@
     ]
   },
   "dependencies": {
+    "@formulajs/formulajs": "4.6.1",
     "fast-formula-parser": "1.0.19"
   }
 }
