@@ -49,3 +49,29 @@ def test_consent_link_opens_document(page: Page):
         page.get_by_role("link", name="согласие на сбор и обработку персональных данных").click()
 
     expect(popup.value.get_by_role("heading", level=1)).to_have_text("Согласие на сбор и обработку персональных данных")
+
+
+def test_login_logout_and_forgot_password(page: Page, django_user_model):
+    django_user_model.objects.create_user(
+        email="kim@example.kz", password="Excel-learn-2026", first_name="Ким", last_name="Акерс", phone="+77010000001"
+    )
+    page.goto(f"{page.base_url}/course/")
+
+    page.get_by_role("link", name="Войти").click()
+    page.get_by_label("Email", exact=True).fill("kim@example.kz")
+    page.get_by_label("Пароль", exact=True).fill("wrong-password")
+    page.get_by_role("button", name="Войти").click()
+    expect(page.get_by_role("alert")).to_have_text("Неверный email или пароль.")
+
+    page.get_by_label("Пароль", exact=True).fill("Excel-learn-2026")
+    page.get_by_role("button", name="Войти").click()
+    expect(page).to_have_url(f"{page.base_url}/course/")
+    expect(page.get_by_test_id("user-name")).to_have_text("Ким")
+
+    page.get_by_role("button", name="Выйти").click()
+    expect(page.get_by_role("link", name="Войти")).to_be_visible()
+
+    page.get_by_role("link", name="Войти").click()
+    page.get_by_role("link", name="Забыли пароль?").click()
+    expect(page.get_by_role("heading", name="Восстановление пароля")).to_be_visible()
+    assert page.errors == []

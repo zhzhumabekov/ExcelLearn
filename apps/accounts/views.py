@@ -21,4 +21,4 @@ def signup(request):
         user = form.save()
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
         return redirect(next_url(request))
-    return render(request, "registration/signup.html", {"form": form, "next": next_url(request)})
+    return render(request, "accounts/signup.html", {"form": form, "next": next_url(request)})

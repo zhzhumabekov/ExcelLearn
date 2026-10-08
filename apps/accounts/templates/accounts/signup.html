@@ -13,13 +13,13 @@
       <input type="hidden" name="next" value="{{ next }}">
 
       <div class="grid gap-4 sm:grid-cols-2">
-        {% include "registration/_field.html" with field=form.first_name %}
-        {% include "registration/_field.html" with field=form.last_name %}
+        {% include "accounts/_field.html" with field=form.first_name %}
+        {% include "accounts/_field.html" with field=form.last_name %}
       </div>
-      {% include "registration/_field.html" with field=form.email %}
-      {% include "registration/_field.html" with field=form.phone %}
-      {% include "registration/_field.html" with field=form.password1 %}
-      {% include "registration/_field.html" with field=form.password2 %}
+      {% include "accounts/_field.html" with field=form.email %}
+      {% include "accounts/_field.html" with field=form.phone %}
+      {% include "accounts/_field.html" with field=form.password1 %}
+      {% include "accounts/_field.html" with field=form.password2 %}
 
       <div>
         <label class="flex items-start gap-3 text-sm">

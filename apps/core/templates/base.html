@@ -33,7 +33,13 @@
       <div class="ml-auto flex items-center gap-3 text-sm">
         {% if user.is_authenticated %}
           <span class="text-stone-600 dark:text-stone-300" data-testid="user-name">{{ user.first_name|default:user.email }}</span>
+          <form method="post" action="{% url 'accounts:logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="text-stone-500 hover:text-brand-700 dark:text-stone-400 dark:hover:text-brand-100">Выйти</button>
+          </form>
         {% else %}
+          <a href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}"
+             class="text-stone-600 hover:text-brand-700 dark:text-stone-300 dark:hover:text-brand-100">Войти</a>
           <a href="{% url 'accounts:signup' %}?next={{ request.path|urlencode }}"
              class="rounded-lg bg-brand-600 px-3 py-2 font-medium text-white hover:bg-brand-700">Регистрация</a>
         {% endif %}

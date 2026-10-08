@@ -28,3 +28,6 @@ player/.cache/
 
 # Сборка Tailwind (pnpm css)
 static/css/site.css
+
+# Файловый кэш Django (счётчики попыток входа)
+var/

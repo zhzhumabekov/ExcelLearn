@@ -6,3 +6,5 @@ os.environ.setdefault("DATABASE_URL", "sqlite://:memory:")
 from config.settings import *  # noqa: E402, F403
 
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
+
+CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}

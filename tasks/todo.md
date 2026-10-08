@@ -220,7 +220,7 @@
   - Files: `apps/accounts/forms.py`, `views.py`, `apps/accounts/templates/registration/signup.html`, `apps/legal/views.py`, `tests/accounts/test_signup.py`
   - Deps: T2, T17
 
-- [ ] **T23. Вход, выход, сброс пароля** · M
+- [x] **T23. Вход, выход, сброс пароля** · M
   - Acceptance: вход по email; выход (POST); если `EMAIL_HOST` задан — стандартный сброс по email, иначе страница «Обратитесь к администратору» с контактом; админка — поиск пользователей и смена пароля; защита от перебора (ограничение попыток входа)
   - Verify: pytest — оба режима сброса (`override_settings`), вход/выход, ограничение попыток
   - Files: `apps/accounts/views.py`, `urls.py`, `apps/accounts/templates/registration/*.html`, `config/settings.py`, `tests/accounts/test_auth.py`
