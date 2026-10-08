@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация — ExcelLearn{% endblock %}
+
+{% block content %}
+  <div class="mx-auto max-w-md">
+    <h1 class="text-2xl font-bold">Регистрация</h1>
+    <p class="mt-1 text-sm text-stone-500 dark:text-stone-400">Чтобы сохранять прогресс и настройки на всех устройствах.</p>
+
+    <form method="post" novalidate
+          class="mt-6 space-y-4 rounded-2xl border border-stone-200 bg-white p-6 dark:border-stone-800 dark:bg-stone-900">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        {% include "registration/_field.html" with field=form.first_name %}
+        {% include "registration/_field.html" with field=form.last_name %}
+      </div>
+      {% include "registration/_field.html" with field=form.email %}
+      {% include "registration/_field.html" with field=form.phone %}
+      {% include "registration/_field.html" with field=form.password1 %}
+      {% include "registration/_field.html" with field=form.password2 %}
+
+      <div>
+        <label class="flex items-start gap-3 text-sm">
+          <input type="checkbox" name="{{ form.consent.html_name }}" id="{{ form.consent.id_for_label }}"
+                 {% if form.consent.value %}checked{% endif %} class="mt-0.5 size-4 accent-brand-600">
+          <span class="[&_a]:text-brand-700 [&_a]:underline dark:[&_a]:text-brand-100">{{ form.consent.label }}</span>
+        </label>
+        {% for error in form.consent.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ error }}</p>{% endfor %}
+      </div>
+
+      <button type="submit" class="w-full rounded-xl bg-brand-600 px-5 py-3 font-semibold text-white hover:bg-brand-700">
+        Зарегистрироваться
+      </button>
+    </form>
+  </div>
+{% endblock %}

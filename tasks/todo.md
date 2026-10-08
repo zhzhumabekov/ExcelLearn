@@ -214,7 +214,7 @@
 
 ## Phase 5 — Аккаунты
 
-- [ ] **T22. Регистрация с согласием** · M
+- [x] **T22. Регистрация с согласием** · M
   - Acceptance: форма — имя, фамилия, email, телефон (+7…, нормализация в E.164), пароль ×2, обязательная галочка согласия со ссылкой на `/legal/consent/` (рендер `docs/legal/consent-ru.md`); сохраняются `consent_at` и `consent_version`; после регистрации — автоматический вход
   - Verify: pytest — без согласия нельзя, неверный телефон, дубль email, версия сохраняется
   - Files: `apps/accounts/forms.py`, `views.py`, `apps/accounts/templates/registration/signup.html`, `apps/legal/views.py`, `tests/accounts/test_signup.py`

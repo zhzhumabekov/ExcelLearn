@@ -30,7 +30,13 @@
       <nav class="flex items-center gap-4 text-sm" aria-label="Основная навигация">
         {% block nav %}<a href="{% url 'catalog:course' %}" class="text-stone-600 hover:text-brand-700 dark:text-stone-300 dark:hover:text-brand-100">Курс</a>{% endblock %}
       </nav>
-      <div class="ml-auto flex items-center gap-2">
+      <div class="ml-auto flex items-center gap-3 text-sm">
+        {% if user.is_authenticated %}
+          <span class="text-stone-600 dark:text-stone-300" data-testid="user-name">{{ user.first_name|default:user.email }}</span>
+        {% else %}
+          <a href="{% url 'accounts:signup' %}?next={{ request.path|urlencode }}"
+             class="rounded-lg bg-brand-600 px-3 py-2 font-medium text-white hover:bg-brand-700">Регистрация</a>
+        {% endif %}
         <button type="button" x-data="themeToggle" @click="next()" :title="title"
                 class="grid size-9 place-items-center rounded-lg border border-stone-200 text-base hover:border-brand-600 dark:border-stone-700"
                 aria-label="Тема оформления">
@@ -48,6 +54,7 @@
     <div class="mx-auto flex max-w-7xl flex-wrap gap-x-6 gap-y-2 px-4 sm:px-6">
       <span>© ExcelLearn</span>
       <span>Анимированные уроки по книге У. Уинстона «Microsoft Excel: анализ данных и бизнес-моделирование»</span>
+      <a href="{% url 'legal:consent' %}" class="hover:text-brand-700 dark:hover:text-brand-100">Согласие на обработку персональных данных</a>
     </div>
   </footer>
 </body>

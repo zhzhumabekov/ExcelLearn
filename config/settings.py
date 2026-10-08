@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "django_htmx",
     "apps.core",
     "apps.accounts",
+    "apps.legal",
     "lessons",
     "narration",
     "apps.catalog",

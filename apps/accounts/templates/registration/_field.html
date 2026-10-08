@@ -1,0 +1,10 @@
+{# Поле формы в стиле сайта: подпись, ввод, ошибки. Пароли не подставляются обратно в форму. #}
+<div>
+  <label for="{{ field.id_for_label }}" class="block text-sm font-medium">{{ field.label }}</label>
+  <input type="{{ field.field.widget.input_type }}" name="{{ field.html_name }}" id="{{ field.id_for_label }}"
+         {% if field.field.widget.input_type != "password" %}value="{{ field.value|default_if_none:"" }}"{% endif %}
+         {% for name, value in field.field.widget.attrs.items %}{{ name }}="{{ value }}" {% endfor %}
+         class="mt-1 w-full rounded-lg border px-3 py-2 focus:border-brand-600 focus:outline-none dark:bg-stone-950
+                {% if field.errors %}border-red-500{% else %}border-stone-300 dark:border-stone-700{% endif %}">
+  {% for error in field.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ error }}</p>{% endfor %}
+</div>
