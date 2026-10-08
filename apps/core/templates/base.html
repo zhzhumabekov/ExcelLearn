@@ -16,6 +16,11 @@
   </script>
   <link rel="stylesheet" href="{% static 'css/site.css' %}">
   <script src="{% static 'js/theme.js' %}" defer></script>
+  <script src="{% static 'js/guest-progress.js' %}"></script>
+  {% if user.is_authenticated %}
+    <script src="{% static 'js/merge-progress.js' %}" defer
+            data-url="{% url 'progress:merge' %}" data-csrf="{{ csrf_token }}"></script>
+  {% endif %}
   <script src="{% static 'vendor/htmx.min.js' %}" defer></script>
   <script src="{% static 'vendor/alpine.min.js' %}" defer></script>
   {% block head %}{% endblock %}

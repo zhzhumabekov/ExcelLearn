@@ -236,7 +236,7 @@
   - Files: `apps/progress/models.py`, `views.py`, `urls.py`, `player/src/integrations/progress.ts`, `tests/progress/test_api.py`
   - Deps: T23, T18
 
-- [ ] **T25. Прогресс в каталоге, «продолжить», гость → аккаунт** · M
+- [x] **T25. Прогресс в каталоге, «продолжить», гость → аккаунт** · M
   - Acceptance: оглавление показывает статусы уроков и процент по главам; урок открывается с последнего шага («Продолжить с шага N» / «Сначала»); гость хранит прогресс в localStorage, при входе — `POST /api/progress/merge` (берётся максимум)
   - Verify: pytest для merge; e2e — гость смотрит урок → регистрируется → прогресс на месте; другой «браузер» продолжает с того же шага
   - Files: `apps/progress/services.py`, `apps/catalog/templates/catalog/course.html`, `apps/catalog/templates/catalog/lesson.html`, `player/src/integrations/progress.ts`, `e2e/test_progress.py`

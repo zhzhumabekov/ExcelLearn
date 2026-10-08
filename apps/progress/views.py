@@ -5,7 +5,7 @@ from django.views.decorators.http import require_POST
 
 from lessons.registry import get_registry
 
-from .services import record_progress
+from .services import merge_guest_progress, record_progress
 
 
 @require_POST
@@ -27,3 +27,18 @@ def save_progress(request, lesson_id: str):
 
     progress = record_progress(request.user, lesson_id, step, completed, step_count=len(lesson.steps))
     return JsonResponse({"last_step": progress.last_step, "completed": progress.completed})
+
+
+@require_POST
+def merge(request):
+    """POST /api/progress/merge/  {"<lesson_id>": {"step": 4, "completed": false}, …} — прогресс гостя после входа."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Нужно войти"}, status=401)
+    try:
+        guest = json.loads(request.body)
+        if not isinstance(guest, dict):
+            raise ValueError
+    except ValueError:
+        return JsonResponse({"error": "Ожидается объект {lesson_id: {step, completed}}"}, status=400)
+    step_counts = {lesson.id: len(lesson.steps) for lesson in get_registry().lessons}
+    return JsonResponse({"merged": merge_guest_progress(request.user, guest, step_counts)})

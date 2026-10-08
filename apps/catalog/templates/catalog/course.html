@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load ru %}
+{% load ru static %}
 
 {% block title %}Оглавление — {{ course.title }}{% endblock %}
 
@@ -7,24 +7,39 @@
   <h1 class="text-3xl font-bold tracking-tight">{{ course.title }}</h1>
   {% if course.source %}<p class="mt-2 text-stone-500 dark:text-stone-400">{{ course.source }}</p>{% endif %}
 
-  <ol class="mt-8 space-y-6">
+  {# Статусы: у вошедшего — с сервера; у гостя их проставляет static/js/course-page.js из браузера #}
+  <ol class="mt-8 space-y-6" data-course data-guest="{{ user.is_authenticated|yesno:'0,1' }}">
     {% for entry in chapters %}
-      <li class="rounded-2xl border border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900" id="{{ entry.chapter.id }}">
-        <h2 class="flex items-baseline gap-3 border-b border-stone-100 px-5 py-4 text-lg font-semibold dark:border-stone-800">
+      <li class="rounded-2xl border border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900"
+          id="{{ entry.chapter.id }}" data-chapter>
+        <h2 class="flex flex-wrap items-baseline gap-3 border-b border-stone-100 px-5 py-4 text-lg font-semibold dark:border-stone-800">
           <span class="text-sm font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-100">
             {% if entry.chapter.number %}Глава {{ entry.chapter.number }}{% else %}Вступление{% endif %}
           </span>
           {{ entry.chapter.title }}
+          {% if entry.lessons %}
+            <span class="ml-auto text-sm font-normal text-stone-500 dark:text-stone-400" data-chapter-percent>
+              {% if user.is_authenticated %}пройдено {{ entry.percent }}%{% endif %}
+            </span>
+          {% endif %}
         </h2>
         {% if entry.lessons %}
           <ol class="divide-y divide-stone-100 dark:divide-stone-800">
-            {% for lesson in entry.lessons %}
-              <li>
-                <a href="{% url 'catalog:lesson' lesson.id %}"
+            {% for item in entry.lessons %}
+              <li data-lesson="{{ item.lesson.id }}" data-steps="{{ item.lesson.steps|length }}">
+                <a href="{% url 'catalog:lesson' item.lesson.id %}"
                    class="flex items-center gap-4 px-5 py-3 hover:bg-brand-50 dark:hover:bg-stone-800">
-                  <span class="w-10 flex-none text-sm tabular-nums text-stone-500">{{ entry.chapter.number }}.{{ lesson.order }}</span>
-                  <span class="flex-1 font-medium">{{ lesson.title }}</span>
-                  <span class="text-sm text-stone-500 dark:text-stone-400">{{ lesson.steps|length|ru_plural:"шаг,шага,шагов" }}</span>
+                  <span class="w-10 flex-none text-sm tabular-nums text-stone-500">{{ entry.chapter.number }}.{{ item.lesson.order }}</span>
+                  <span class="flex-1 font-medium">{{ item.lesson.title }}</span>
+                  <span class="text-sm" data-status>
+                    {% if item.progress.completed %}
+                      <span class="font-medium text-brand-600 dark:text-brand-100">✓ Пройден</span>
+                    {% elif item.progress %}
+                      <span class="text-amber-700 dark:text-amber-300">Шаг {{ item.progress.last_step|add:1 }} из {{ item.lesson.steps|length }}</span>
+                    {% else %}
+                      <span class="text-stone-500 dark:text-stone-400">{{ item.lesson.steps|length|ru_plural:"шаг,шага,шагов" }}</span>
+                    {% endif %}
+                  </span>
                 </a>
               </li>
             {% endfor %}
@@ -35,4 +50,6 @@
       </li>
     {% endfor %}
   </ol>
+
+  <script src="{% static 'js/course-page.js' %}"></script>
 {% endblock %}
