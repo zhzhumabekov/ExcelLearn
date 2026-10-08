@@ -8,7 +8,7 @@
 
 ## Phase 0 — Каркас
 
-- [ ] **T1. Django-каркас, инструменты, git** · M
+- [x] **T1. Django-каркас, инструменты, git** · M
   - Acceptance:
     - `uv` проект (Python 3.12), Django 5.2, `config/` с настройками из `.env` (`django-environ`), SQLite по умолчанию, `DATABASE_URL` для Postgres
     - ruff, pytest-django; `.gitignore` (в т.ч. `.env`, `media/`, `Practice Files/`, `Solution Files/`, `Templates/`); `.env.example`
@@ -31,7 +31,7 @@
     - `player/`: pnpm, TypeScript strict, esbuild (`dev` с watch, `build`) → `static/player/player.js` + `player.css`; Vitest + jsdom; ESLint
     - экспорт-заглушка `ExcelLearnPlayer.mount(el, opts)`; dev-страница `/dev/player/` (только при `DEBUG`) подключает бандл
   - Verify: `pnpm --dir player build typecheck test lint`; страница `/dev/player/` открывается без ошибок в консоли
-  - Files: `player/package.json`, `tsconfig.json`, `esbuild.config.mjs`, `src/index.ts`, `templates/dev/player.html`
+  - Files: `player/package.json`, `tsconfig.json`, `esbuild.config.mjs`, `src/index.ts`, `apps/core/templates/dev/player.html`
   - Deps: T1
 
 ### ✅ Checkpoint A
@@ -153,13 +153,13 @@
 - [ ] **T17. Базовый шаблон, Tailwind, тема** · S
   - Acceptance: `base.html` (шапка, навигация, футер со ссылкой на согласие), Tailwind standalone CLI, светлая/тёмная/системная тема, htmx и Alpine подключены локально (без CDN)
   - Verify: страницы рендерятся; переключение темы; pytest smoke
-  - Files: `templates/base.html`, `static/css/input.css`, `tailwind.config.js`, `package.json` скрипт `css`
+  - Files: `apps/core/templates/base.html`, `static/css/input.css`, `tailwind.config.js`, `package.json` скрипт `css`
   - Deps: T1
 
 - [ ] **T18. Главная, оглавление, страница урока** · M
   - Acceptance: `/` — главная; `/course/` — главы и уроки по порядку; `/lessons/<id>/` — плеер с данными через `json_script`, кнопки пред./след.; 404 для неизвестного урока
   - Verify: pytest — статусы, порядок, соседи, 404; e2e переходит с главной в урок и дальше
-  - Files: `apps/catalog/views.py`, `urls.py`, `templates/catalog/{home,course,lesson}.html`, `tests/catalog/test_views.py`
+  - Files: `apps/catalog/views.py`, `urls.py`, `apps/catalog/templates/catalog/{home,course,lesson}.html`, `tests/catalog/test_views.py`
   - Deps: T16, T17
 
 ### ✅ Checkpoint D
@@ -184,7 +184,7 @@
 - [ ] **T21. `NarrationTrack` + тексты `say`** · M
   - Acceptance: аудио шага стартует вместе с анимацией, шаг ждёт оба; пауза, перемотка, скорость (`playbackRate` + `preservesPitch`), громкость, выключение; без аудио урок идёт по анимации; `say` написан для всех шагов уроков 0-01 и 1-01; страница урока передаёт манифест
   - Verify: Vitest с фейковым `HTMLAudioElement`; ручное прослушивание
-  - Files: `player/src/narration/track.ts`, `player/src/timeline/timeline.ts`, `templates/catalog/lesson.html`, `content/lessons/*.yaml`, `track.test.ts`
+  - Files: `player/src/narration/track.ts`, `player/src/timeline/timeline.ts`, `apps/catalog/templates/catalog/lesson.html`, `content/lessons/*.yaml`, `track.test.ts`
   - Deps: T14, T19
 
 ### ✅ Checkpoint E
@@ -197,13 +197,13 @@
 - [ ] **T22. Регистрация с согласием** · M
   - Acceptance: форма — имя, фамилия, email, телефон (+7…, нормализация в E.164), пароль ×2, обязательная галочка согласия со ссылкой на `/legal/consent/` (рендер `docs/legal/consent-ru.md`); сохраняются `consent_at` и `consent_version`; после регистрации — автоматический вход
   - Verify: pytest — без согласия нельзя, неверный телефон, дубль email, версия сохраняется
-  - Files: `apps/accounts/forms.py`, `views.py`, `templates/registration/signup.html`, `apps/legal/views.py`, `tests/accounts/test_signup.py`
+  - Files: `apps/accounts/forms.py`, `views.py`, `apps/accounts/templates/registration/signup.html`, `apps/legal/views.py`, `tests/accounts/test_signup.py`
   - Deps: T2, T17
 
 - [ ] **T23. Вход, выход, сброс пароля** · M
   - Acceptance: вход по email; выход (POST); если `EMAIL_HOST` задан — стандартный сброс по email, иначе страница «Обратитесь к администратору» с контактом; админка — поиск пользователей и смена пароля; защита от перебора (ограничение попыток входа)
   - Verify: pytest — оба режима сброса (`override_settings`), вход/выход, ограничение попыток
-  - Files: `apps/accounts/views.py`, `urls.py`, `templates/registration/*.html`, `config/settings.py`, `tests/accounts/test_auth.py`
+  - Files: `apps/accounts/views.py`, `urls.py`, `apps/accounts/templates/registration/*.html`, `config/settings.py`, `tests/accounts/test_auth.py`
   - Deps: T22
 
 ---
@@ -219,13 +219,13 @@
 - [ ] **T25. Прогресс в каталоге, «продолжить», гость → аккаунт** · M
   - Acceptance: оглавление показывает статусы уроков и процент по главам; урок открывается с последнего шага («Продолжить с шага N» / «Сначала»); гость хранит прогресс в localStorage, при входе — `POST /api/progress/merge` (берётся максимум)
   - Verify: pytest для merge; e2e — гость смотрит урок → регистрируется → прогресс на месте; другой «браузер» продолжает с того же шага
-  - Files: `apps/progress/services.py`, `templates/catalog/course.html`, `templates/catalog/lesson.html`, `player/src/integrations/progress.ts`, `e2e/test_progress.py`
+  - Files: `apps/progress/services.py`, `apps/catalog/templates/catalog/course.html`, `apps/catalog/templates/catalog/lesson.html`, `player/src/integrations/progress.ts`, `e2e/test_progress.py`
   - Deps: T24
 
 - [ ] **T26. Настройки** · M
   - Acceptance: `Preferences` (скорость, язык функций — по умолчанию RU, озвучка, громкость, автопереход, тема); страница `/settings/` с HTMX-сохранением; плеер применяет настройки сразу; гость — localStorage, перенос при входе; автопереход открывает следующий урок
   - Verify: pytest — форма и значения по умолчанию; e2e — смена языка показывает `SUM` вместо `СУММ`
-  - Files: `apps/preferences/models.py`, `forms.py`, `views.py`, `templates/preferences/settings.html`, `tests/preferences/test_views.py`
+  - Files: `apps/preferences/models.py`, `forms.py`, `views.py`, `apps/preferences/templates/preferences/settings.html`, `tests/preferences/test_views.py`
   - Deps: T23, T21
 
 ### ✅ Checkpoint F

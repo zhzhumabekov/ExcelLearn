@@ -42,7 +42,7 @@
 | Формулы | `fast-formula-parser` (MIT) внутри плеера | Единственный вычислитель формул в проекте, значения не вписываются руками |
 | Формат урока | YAML → Pydantic 2 → JSON Schema → TS-типы (`json-schema-to-typescript`) | Одна схема-источник для Python и TS |
 | БД | PostgreSQL 16 (прод), SQLite (локальная разработка) | Старт без Docker, прод на надёжной БД |
-| Зависимости | `uv` (Python), `pnpm` + Node 22 LTS (плеер) | |
+| Зависимости | `uv` (Python), `pnpm` + Node 24 LTS (плеер) | |
 | Озвучка | Синтез речи через интерфейс `TTSProvider`; основной провайдер — Yandex SpeechKit (лучшее качество русской речи), для разработки и тестов — `silent` (тишина расчётной длительности, без сети) | Провайдер меняется одной настройкой |
 | Почта | Django SMTP backend, настройки из окружения; без `EMAIL_HOST` — console backend | SMTP подключается позже без правок кода |
 | Тесты | pytest + pytest-django, Vitest (+ jsdom), Playwright (Python) | |
@@ -282,7 +282,7 @@ player/                    → TypeScript-проект плеера
   src/generated/           →   TS-типы из JSON Schema (не править руками)
   schema/                  →   lesson.schema.json (генерируется)
   scripts/verify.ts        →   lessons:verify
-templates/                 → base.html, общие partials
+apps/core/templates/       → base.html, общие partials. Корневой папки templates/ нет: на Windows она совпадает с папкой книги Templates/
 static/                    → css, alpine, htmx; static/player/ — сборка плеера
 media/narration/           → сгенерированные MP3 (не в git; постоянный том на VPS)
 tests/                     → pytest (по папке на app)
@@ -294,7 +294,7 @@ prototypes/                → lesson-01-sum.html, lesson-02-wages.html (эта�
 
 - **Python:** ruff (lint + format), type hints везде, Django-идиомы: тонкие views, логика в моделях или сервисах. Функции и переменные в snake_case, классы в PascalCase.
 - **TypeScript:** strict, без `any`, именованные экспорты, файлы в kebab-case.
-- **Шаблоны:** HTMX-партиалы в `templates/<app>/partials/_name.html`.
+- **Шаблоны:** только внутри приложений — `apps/<app>/templates/<app>/…`, HTMX-партиалы в `apps/<app>/templates/<app>/partials/_name.html`.
 - **Тексты шагов:** ограниченный HTML (`<b>`, `<code>`, `<kbd>`), санитизируется в плеере.
 - Комментарии только там, где неочевидно «почему».
 
