@@ -242,14 +242,14 @@
   - Files: `apps/progress/services.py`, `apps/catalog/templates/catalog/course.html`, `apps/catalog/templates/catalog/lesson.html`, `player/src/integrations/progress.ts`, `e2e/test_progress.py`
   - Deps: T24
 
-- [ ] **T26. Настройки** · M
+- [x] **T26. Настройки** · M
   - Acceptance: `Preferences` (скорость, язык функций — по умолчанию RU, озвучка, громкость, автопереход, тема); страница `/settings/` с HTMX-сохранением; плеер применяет настройки сразу; гость — localStorage, перенос при входе; автопереход открывает следующий урок
   - Verify: pytest — форма и значения по умолчанию; e2e — смена языка показывает `SUM` вместо `СУММ`
   - Files: `apps/preferences/models.py`, `forms.py`, `views.py`, `apps/preferences/templates/preferences/settings.html`, `tests/preferences/test_views.py`
   - Deps: T23, T21
 
 ### ✅ Checkpoint F
-- [ ] Все пользовательские сценарии из SPEC работают локально; полный набор тестов и e2e зелёный
+- [x] Все пользовательские сценарии из SPEC работают локально; полный набор тестов и e2e зелёный
 
 ---
 

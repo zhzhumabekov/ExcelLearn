@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Настройки — ExcelLearn{% endblock %}
+
+{% block content %}
+  <div class="mx-auto max-w-2xl">
+    <div class="flex flex-wrap items-baseline justify-between gap-2">
+      <h1 class="text-2xl font-bold">Настройки</h1>
+      <p id="settings-status" class="text-sm text-stone-500 dark:text-stone-400" aria-live="polite">
+        {% if user.is_authenticated %}Изменения сохраняются сразу{% else %}Сохраняются в этом браузере · <a href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}" class="text-brand-700 underline dark:text-brand-100">войдите</a>, чтобы на всех устройствах{% endif %}
+      </p>
+    </div>
+
+    <form method="post" id="settings-form" data-guest="{{ user.is_authenticated|yesno:'0,1' }}"
+          {% if user.is_authenticated %}hx-post="{% url 'preferences:page' %}" hx-trigger="change delay:300ms"
+          hx-target="#settings-status" hx-swap="innerHTML"{% endif %}
+          class="mt-6 divide-y divide-stone-100 rounded-2xl border border-stone-200 bg-white dark:divide-stone-800 dark:border-stone-800 dark:bg-stone-900">
+      {% csrf_token %}
+
+      <fieldset class="p-6">
+        <legend class="sr-only">Язык функций</legend>
+        <h2 class="font-semibold">Язык Excel</h2>
+        <p class="mt-1 text-sm text-stone-500 dark:text-stone-400">Как показывать формулы, пояснения и озвучку — как в вашем Excel.</p>
+        <div class="mt-3 grid gap-3 sm:grid-cols-2">
+          {% for choice in form.function_locale %}
+            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-stone-200 p-3 has-checked:border-brand-600 has-checked:bg-brand-50 dark:border-stone-700 dark:has-checked:bg-stone-800">
+              {{ choice.tag }}
+              <span>
+                <span class="block font-medium">{{ choice.choice_label }}</span>
+                <code class="text-sm text-stone-500">{% if choice.data.value == "ru" %}=СУММ(A1:A3; 1,5){% else %}=SUM(A1:A3, 1.5){% endif %}</code>
+              </span>
+            </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      <fieldset class="p-6">
+        <legend class="sr-only">Скорость</legend>
+        <h2 class="font-semibold">Скорость по умолчанию</h2>
+        <div class="mt-3 inline-flex overflow-hidden rounded-xl border border-stone-200 dark:border-stone-700">
+          {% for choice in form.speed %}
+            <label class="cursor-pointer px-4 py-2 has-checked:bg-brand-600 has-checked:text-white">
+              <span class="sr-only">{{ choice.tag }}</span>{{ choice.choice_label }}
+            </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      <fieldset class="space-y-4 p-6">
+        <legend class="sr-only">Озвучка</legend>
+        <label class="flex items-center gap-3">
+          <input type="checkbox" name="narration_on" {% if form.narration_on.value %}checked{% endif %} class="size-4 accent-brand-600">
+          <span class="font-semibold">Озвучка уроков</span>
+        </label>
+        <label class="flex items-center gap-3 text-sm">
+          <span class="w-24">Громкость</span>
+          <input type="range" name="narration_volume" min="0" max="100" step="5" value="{{ form.narration_volume.value }}"
+                 class="w-56 accent-brand-600" oninput="this.nextElementSibling.textContent = this.value + '%'">
+          <span class="w-12 tabular-nums">{{ form.narration_volume.value }}%</span>
+        </label>
+      </fieldset>
+
+      <fieldset class="p-6">
+        <legend class="sr-only">Автопереход</legend>
+        <label class="flex items-start gap-3">
+          <input type="checkbox" name="autoplay_next" {% if form.autoplay_next.value %}checked{% endif %} class="mt-1 size-4 accent-brand-600">
+          <span>
+            <span class="block font-semibold">Автопереход к следующему уроку</span>
+            <span class="text-sm text-stone-500 dark:text-stone-400">Через 5 секунд после конца урока открывается и запускается следующий.</span>
+          </span>
+        </label>
+      </fieldset>
+
+      <fieldset class="p-6">
+        <legend class="sr-only">Тема</legend>
+        <h2 class="font-semibold">Тема оформления</h2>
+        <div class="mt-3 flex flex-wrap gap-3">
+          {% for choice in form.theme %}
+            <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-stone-200 px-4 py-2 has-checked:border-brand-600 has-checked:bg-brand-50 dark:border-stone-700 dark:has-checked:bg-stone-800">
+              {{ choice.tag }} {{ choice.choice_label }}
+            </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      <noscript><div class="p-6"><button type="submit" class="rounded-xl bg-brand-600 px-5 py-2 text-white">Сохранить</button></div></noscript>
+    </form>
+  </div>
+  <script src="{% static 'js/settings-page.js' %}"></script>
+{% endblock %}

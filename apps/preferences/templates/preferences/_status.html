@@ -1,0 +1,1 @@
+{% if saved %}<span class="text-brand-700 dark:text-brand-100">Сохранено ✓</span>{% else %}<span class="text-red-600 dark:text-red-400">Не сохранено: {% for field, errors in form.errors.items %}{{ errors|join:" " }} {% endfor %}</span>{% endif %}

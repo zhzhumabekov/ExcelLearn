@@ -119,6 +119,6 @@ def test_lesson_opens_from_last_step_unless_completed(client, user):
 
 
 def test_merge_script_only_for_logged_in(client, user):
-    assert "merge-progress.js" not in client.get("/").content.decode()
+    assert "merge-guest.js" not in client.get("/").content.decode()
     client.force_login(user)
-    assert "merge-progress.js" in client.get("/").content.decode()
+    assert "merge-guest.js" in client.get("/").content.decode()

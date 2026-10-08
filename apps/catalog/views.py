@@ -3,6 +3,7 @@ from django.middleware.csrf import get_token
 from django.shortcuts import render
 from django.urls import reverse
 
+from apps.preferences.services import get_preferences
 from apps.progress.services import progress_by_lesson, start_step
 from lessons.registry import get_registry
 from narration.builder import narration_urls
@@ -52,6 +53,8 @@ def lesson(request, lesson_id: str):
                 "progressUrl": reverse("progress:save", args=[current.id]) if request.user.is_authenticated else None,
                 "csrfToken": get_token(request),
                 "startStep": start_step(request.user, current.id),
+                # У гостя настройки — в браузере (guest-settings.js)
+                "settings": get_preferences(request.user).player_settings() if request.user.is_authenticated else None,
             },
             "chapter": chapter,
             "prev_lesson": prev_lesson,
