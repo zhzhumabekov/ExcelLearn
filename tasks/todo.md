@@ -82,7 +82,7 @@
 
 ## Phase 2 — Плеер
 
-- [ ] **T8. SheetModel и формулы** · M
+- [x] **T8. SheetModel и формулы** · M
   - Acceptance:
     - адреса и диапазоны, `SheetModel` (значения, формулы, формат, стиль), пересчёт зависимых ячеек
     - вычисление через `fast-formula-parser`; кастомные функции, которых нет в библиотеке (минимум `FORMULATEXT`)
@@ -90,6 +90,12 @@
   - Verify: Vitest — `SUM`, `AVERAGE`, `*`, `FORMULATEXT`, сдвиг ссылок, пересчёт
   - Files: `player/src/sheet/address.ts`, `sheet-model.ts`, `evaluator.ts`, `*.test.ts`
   - Deps: T5
+
+- [ ] **T8a. Недостающие функции Excel** · S · *ждёт решения: новая зависимость*
+  - Проблема (найдена в T8): в fast-formula-parser 1.0.19 нет `MAX`, `MIN`, `MATCH`, `UPPER`, финансовых `PMT`, `NPV` и др.; `SUM`/`AVERAGE` по диапазону пропускают ошибки. Для глав 0–1 не нужно, для глав 3+ и финансовых — нужно
+  - Предложение: `@formulajs/formulajs` (MIT) как запасная реализация — если функции нет в парсере, вызывается formulajs
+  - Acceptance: тесты `it.fails` в `functions-support.test.ts` и `sheet-model.test.ts` становятся обычными и проходят
+  - Deps: T8
 
 - [ ] **T9. Локализация формул** · S
   - Acceptance: `toDisplay(formula, 'ru')` → `=СУММ(C4:C11)`, `;` между аргументами, `449,63`; `'en'` — без изменений; словарь функций расширяется одной строкой
