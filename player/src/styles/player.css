@@ -1,0 +1,12 @@
+/* Все стили плеера — под .xl-player, чтобы не пересекаться со стилями сайта. */
+.xl-player {
+  --xl-green: #217346;
+  --xl-green-dark: #185c37;
+
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  color: #1f2a24;
+  border: 1px solid #cfd6d2;
+  border-radius: 8px;
+  padding: 16px;
+  background: #fff;
+}

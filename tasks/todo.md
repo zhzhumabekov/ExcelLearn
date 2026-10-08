@@ -26,7 +26,7 @@
   - Files: `apps/accounts/models.py`, `managers.py`, `admin.py`, `migrations/0001_initial.py`, `tests/accounts/test_models.py`
   - Deps: T1
 
-- [ ] **T3. Каркас TS-плеера** · S
+- [x] **T3. Каркас TS-плеера** · S
   - Acceptance:
     - `player/`: pnpm, TypeScript strict, esbuild (`dev` с watch, `build`) → `static/player/player.js` + `player.css`; Vitest + jsdom; ESLint
     - экспорт-заглушка `ExcelLearnPlayer.mount(el, opts)`; dev-страница `/dev/player/` (только при `DEBUG`) подключает бандл

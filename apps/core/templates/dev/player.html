@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Песочница плеера — ExcelLearn{% endblock %}
+
+{% block content %}
+  <link rel="stylesheet" href="{% static 'player/player.css' %}">
+  <h1>Песочница плеера</h1>
+  <p>Собрать плеер: <code>pnpm --dir player dev</code></p>
+  <div id="player"></div>
+  <script src="{% static 'player/player.js' %}"></script>
+  <script>
+    ExcelLearnPlayer.mount(document.getElementById("player"), { lesson: {} });
+  </script>
+{% endblock %}
