@@ -54,24 +54,40 @@ describe("PanelView", () => {
     expect(html(stepHtml("Функция {fn:SUM}", "en"))).toBe("Функция SUM");
   });
 
-  it("план шагов: пройденные, текущий, клик — перемотка", () => {
+  it("шкала и план: пройденные, текущий, клик — перемотка", () => {
     const panel = new PanelView(lesson, "ru", handlers, 1);
 
     panel.showStep(1, "playing");
+    const segments = [...panel.el.querySelectorAll<HTMLButtonElement>(".xl-seg")];
+    expect(segments.map((s) => s.className)).toEqual(["xl-seg xl-done", "xl-seg xl-active"]);
+    expect(segments[0]?.title).toBe("1. Функция СУММ");
+    segments[1]?.click();
+    expect(handlers.onSeek).toHaveBeenCalledWith(1);
+
     const items = [...panel.el.querySelectorAll(".xl-steps li")];
     expect(items.map((li) => li.className)).toEqual(["xl-done", "xl-active"]);
-
     items[0]?.querySelector("button")?.click();
     expect(handlers.onSeek).toHaveBeenCalledWith(0);
+  });
+
+  it("план урока свёрнут, кнопка «План» его раскрывает", () => {
+    const panel = new PanelView(lesson, "ru", handlers, 1);
+    const plan = panel.el.querySelector<HTMLElement>(".xl-plan");
+    expect(plan?.hidden).toBe(true);
+
+    [...panel.el.querySelectorAll("button")].find((b) => b.textContent === "☰ План")?.click();
+
+    expect(plan?.hidden).toBe(false);
   });
 
   it("кнопка воспроизведения и скорость", () => {
     const panel = new PanelView(lesson, "ru", handlers, 1.5);
 
+    const play = panel.el.querySelector<HTMLButtonElement>(".xl-primary");
     panel.showStatus("playing");
-    expect(panel.el.querySelector(".xl-primary")?.textContent).toBe("⏸ Пауза");
+    expect([play?.textContent, play?.title]).toEqual(["⏸", "Пауза"]);
     panel.showStatus("done");
-    expect(panel.el.querySelector(".xl-primary")?.textContent).toBe("↻ Ещё раз");
+    expect([play?.textContent, play?.title]).toEqual(["↻", "Ещё раз"]);
     expect(panel.el.querySelector(".xl-speed .xl-on")?.textContent).toBe("1,5×");
   });
 });

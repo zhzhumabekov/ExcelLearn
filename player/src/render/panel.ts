@@ -19,9 +19,10 @@ function el<K extends keyof HTMLElementTagNameMap>(tag: K, className = "", text 
   return node;
 }
 
-function button(className: string, text: string, onClick: () => void): HTMLButtonElement {
+function button(className: string, text: string, onClick: () => void, title = ""): HTMLButtonElement {
   const b = el("button", className, text);
   b.type = "button";
+  if (title) b.title = title;
   b.addEventListener("click", onClick);
   return b;
 }
@@ -31,15 +32,21 @@ export function stepHtml(text: string, locale: FunctionLocale): DocumentFragment
   return sanitizeHtml(renderPlaceholders(text, locale));
 }
 
-/** Панель урока: номер и прогресс, заголовок и пояснение шага, управление, план шагов. */
+const plainText = (fragment: DocumentFragment) => fragment.textContent ?? "";
+
+/**
+ * Всё, что под окном Excel, — как у видеоплеера: субтитры шага (сразу под таблицей, чтобы читать,
+ * не отводя глаз от анимации), панель управления со шкалой шагов и сворачиваемый план урока.
+ */
 export class PanelView {
   readonly el: HTMLElement;
-  private readonly counter = el("span");
-  private readonly bar = el("i");
-  private readonly title = el("h2", "xl-step-title");
+  private readonly counter = el("span", "xl-meta");
+  private readonly title = el("span", "xl-step-title");
   private readonly text = el("p", "xl-step-text");
   private readonly playButton: HTMLButtonElement;
+  private readonly segments: HTMLButtonElement[];
   private readonly speedButtons: HTMLButtonElement[];
+  private readonly plan: HTMLElement;
   private readonly items: HTMLLIElement[];
 
   constructor(
@@ -48,28 +55,36 @@ export class PanelView {
     handlers: PanelHandlers,
     speed: number,
   ) {
-    this.el = el("aside", "xl-panel");
+    this.el = el("div", "xl-panel");
 
-    const card = el("div", "xl-card");
-    const meta = el("div", "xl-meta");
-    meta.append(this.counter, el("span", "", lesson.source ?? ""));
-    const progress = el("div", "xl-bar");
-    progress.append(this.bar);
+    // Субтитры
+    const caption = el("div", "xl-caption");
+    const head = el("div", "xl-caption-head");
+    head.append(this.counter, this.title);
+    caption.append(head, this.text);
 
-    this.playButton = button("xl-btn xl-primary", "", () => handlers.onPlayPause());
-    const restart = button("xl-btn", "⟲ Сначала", () => handlers.onRestart());
+    // Управление
+    this.playButton = button("xl-ctl xl-primary", "", () => handlers.onPlayPause());
+    const restart = button("xl-ctl", "⟲", () => handlers.onRestart(), "Сначала");
+    const progress = el("div", "xl-progress");
+    this.segments = lesson.steps.map((step, i) =>
+      button("xl-seg", "", () => handlers.onSeek(i), `${i + 1}. ${plainText(stepHtml(step.title, locale))}`),
+    );
+    progress.append(...this.segments);
     const speeds = el("div", "xl-speed");
     this.speedButtons = SPEEDS.map((s) => {
-      const b = button("", `${String(s).replace(".", ",")}×`, () => handlers.onSpeed(s));
+      const b = button("", `${String(s).replace(".", ",")}×`, () => handlers.onSpeed(s), "Скорость");
       b.dataset.speed = String(s);
       return b;
     });
     speeds.append(...this.speedButtons);
+    const planToggle = button("xl-ctl", "☰ План", () => this.togglePlan());
     const controls = el("div", "xl-controls");
-    controls.append(this.playButton, restart, speeds);
-    card.append(meta, progress, this.title, this.text, controls);
+    controls.append(this.playButton, restart, progress, speeds, planToggle);
 
-    const plan = el("div", "xl-card");
+    // План урока (свёрнут)
+    this.plan = el("div", "xl-plan");
+    this.plan.hidden = true;
     const list = el("ol", "xl-steps");
     this.items = lesson.steps.map((step, i) => {
       const li = el("li");
@@ -79,33 +94,45 @@ export class PanelView {
       return li;
     });
     list.append(...this.items);
-    plan.append(el("h3", "", "План урока"), list);
+    this.plan.append(list);
 
-    this.el.append(card, plan);
+    this.el.append(caption, controls, this.plan);
     this.setSpeed(speed);
   }
 
   showStep(i: number, status: TimelineStatus): void {
     const step = this.lesson.steps[i];
     if (!step) return;
-    const total = this.lesson.steps.length;
     const finished = status === "done";
-    this.counter.textContent = `Шаг ${i + 1} из ${total}`;
-    this.bar.style.width = `${((finished ? total : i + 1) / total) * 100}%`;
+    this.counter.textContent = `Шаг ${i + 1} из ${this.lesson.steps.length}`;
     this.title.replaceChildren(stepHtml(step.title, this.locale));
     this.text.replaceChildren(stepHtml(step.text, this.locale));
-    this.items.forEach((li, k) => {
-      li.classList.toggle("xl-done", k < i || finished);
-      li.classList.toggle("xl-active", k === i && !finished);
-    });
+    const mark = (node: Element, k: number) => {
+      node.classList.toggle("xl-done", k < i || finished);
+      node.classList.toggle("xl-active", k === i && !finished);
+    };
+    this.segments.forEach(mark);
+    this.items.forEach(mark);
   }
 
   showStatus(status: TimelineStatus): void {
-    this.playButton.textContent =
-      status === "playing" ? "⏸ Пауза" : status === "paused" ? "▶ Продолжить" : status === "done" ? "↻ Ещё раз" : "▶ Смотреть";
+    const [icon, label] =
+      status === "playing"
+        ? ["⏸", "Пауза"]
+        : status === "paused"
+          ? ["▶", "Продолжить"]
+          : status === "done"
+            ? ["↻", "Ещё раз"]
+            : ["▶", "Смотреть"];
+    this.playButton.textContent = icon;
+    this.playButton.title = label;
   }
 
   setSpeed(speed: number): void {
     for (const b of this.speedButtons) b.classList.toggle("xl-on", Number(b.dataset.speed) === speed);
+  }
+
+  togglePlan(): void {
+    this.plan.hidden = !this.plan.hidden;
   }
 }
