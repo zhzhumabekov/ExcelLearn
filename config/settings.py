@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "django_htmx",
     "apps.core",
     "apps.accounts",
+    "lessons",
     "apps.catalog",
 ]
 
@@ -80,6 +81,9 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# Курс и уроки в YAML (content-as-code)
+CONTENT_DIR = BASE_DIR / "content"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

@@ -42,7 +42,7 @@
 
 ## Phase 1 — Формат урока
 
-- [ ] **T4. Схема урока, загрузчик, реестр** · M
+- [x] **T4. Схема урока, загрузчик, реестр** · M
   - Acceptance:
     - `lessons/schema.py`: `Course`, `Chapter`, `Lesson`, `Sheet`, `Cell` (значение | `{v, fmt, style}`), `Step` (`title`, `text`, `say?`), действия — дискриминированный union по ключу (`click`, `select`, `type`, `clickRef`, `dragRef`, `dragSelect`, `fill`, `keys`, `showRefs`, `wait`)
     - адреса и диапазоны валидируются (`A1`, `A1:B5`); `id` — kebab-case

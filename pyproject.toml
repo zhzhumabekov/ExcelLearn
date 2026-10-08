@@ -6,6 +6,8 @@ dependencies = [
     "django>=5.2,<5.3",
     "django-environ>=0.14.0",
     "django-htmx>=1.29.0",
+    "pydantic>=2.14.0",
+    "pyyaml>=6.0.3",
 ]
 
 [dependency-groups]

@@ -1,0 +1,13 @@
+id: excel-data-analysis
+title: Анализ данных в Excel
+source: >-
+  У. Уинстон. «Microsoft Excel: анализ данных и бизнес-моделирование»
+
+# Главы по порядку книги. id главы стабилен — на него ссылаются уроки.
+chapters:
+  - id: ch00
+    number: 0
+    title: Введение
+  - id: ch01
+    number: 1
+    title: Основы работы с формулами
