@@ -1,13 +1,8 @@
-import { editorText, type EditorState } from "../lesson/state";
+import { editorRefs, editorText, type EditorState } from "../lesson/state";
 import { type FunctionLocale, localizeFormula } from "../locale/format";
 import { signatureAt } from "../locale/signatures";
 import { relativeRect, type Rect } from "./geometry";
 import type { GridView } from "./grid";
-
-interface Segment {
-  text: string;
-  ref?: number;
-}
 
 const REF_RE =
   /(?<![A-Za-z0-9_.Ѐ-ӿ])\$?[A-Z]{1,3}\$?[1-9][0-9]*(?::\$?[A-Z]{1,3}\$?[1-9][0-9]*)?(?![A-Za-z0-9_(Ѐ-ӿ])/g;
@@ -16,32 +11,8 @@ export function escapeHtml(text: string): string {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-function segmentsHtml(segments: Segment[]): string {
-  return segments
-    .map((s) => (s.ref === undefined ? escapeHtml(s.text) : `<span class="xl-reftext xl-ref${s.ref % 4}">${escapeHtml(s.text)}</span>`))
-    .join("");
-}
-
-/** Текст редактора на языке ученика, по кускам; limit — сколько символов видно (анимация набора). */
-export function editorSegments(editor: EditorState, locale: FunctionLocale, limit = Infinity): Segment[] {
-  const segments: Segment[] = [];
-  let left = limit;
-  for (const part of editor.parts) {
-    if (left <= 0) break;
-    const text = part.ref === undefined ? localizeFormula(part.text, locale) : part.text;
-    segments.push({ text: text.slice(0, left), ref: part.ref });
-    left -= text.length;
-  }
-  return segments;
-}
-
-export function editorLength(editor: EditorState, locale: FunctionLocale): number {
-  return editorSegments(editor, locale).reduce((n, s) => n + s.text.length, 0);
-}
-
-/** Формула с подсвеченными ссылками (по порядку refs), как в строке формул Excel при выделении. */
-export function coloredFormulaHtml(formula: string, refs: readonly string[], locale: FunctionLocale): string {
-  const text = localizeFormula(formula, locale);
+/** Подсветить ссылки в (уже локализованном) тексте формулы цветами по порядку refs — как в Excel. */
+function colorRefsHtml(text: string, refs: readonly string[]): string {
   let html = "";
   let last = 0;
   for (const m of text.matchAll(REF_RE)) {
@@ -51,6 +22,28 @@ export function coloredFormulaHtml(formula: string, refs: readonly string[], loc
     last = m.index + m[0].length;
   }
   return html + escapeHtml(text.slice(last));
+}
+
+/** Набранный текст на языке ученика (=СУММ(B2:D2) при вводе =SUM(B2:D2). */
+export function editorDisplayText(editor: EditorState, locale: FunctionLocale): string {
+  return editor.parts.map((p) => (p.ref === undefined ? localizeFormula(p.text, locale) : p.text)).join("");
+}
+
+export function editorLength(editor: EditorState, locale: FunctionLocale): number {
+  return editorDisplayText(editor, locale).length;
+}
+
+/**
+ * HTML редактора: видимые limit символов (анимация набора) с цветными ссылками. Ссылки окрашиваются
+ * и вставленные мышью, и набранные с клавиатуры — цвет по порядку появления, как в Excel.
+ */
+export function editorHtml(editor: EditorState, locale: FunctionLocale, limit = Infinity): string {
+  return colorRefsHtml(editorDisplayText(editor, locale).slice(0, limit), editorRefs(editor));
+}
+
+/** Формула с подсвеченными ссылками (по порядку refs), как в строке формул Excel при выделении. */
+export function coloredFormulaHtml(formula: string, refs: readonly string[], locale: FunctionLocale): string {
+  return colorRefsHtml(localizeFormula(formula, locale), refs);
 }
 
 /** Редактор ячейки поверх сетки (как при вводе в Excel) и подсказка синтаксиса функции под ним. */
@@ -78,7 +71,7 @@ export class EditorView {
       this.hint.style.display = "none";
       return "";
     }
-    const html = segmentsHtml(editorSegments(editor, locale, limit));
+    const html = editorHtml(editor, locale, limit);
     this.el.innerHTML = `${html}<span class="xl-caret"></span>`;
 
     const rect = relativeRect(this.grid.cell(editor.cell), this.container);

@@ -109,6 +109,12 @@ class Wait(Model):
     wait: int = Field(ge=0, le=10_000, description="Пауза в миллисекундах")
 
 
+class ClickRibbon(Model):
+    """Щелчок по кнопке ленты: «Σ Автосумма» (на выделенный диапазон), «Копировать», «Вставить»."""
+
+    clickRibbon: Literal["autosum", "copy", "paste"]
+
+
 ACTION_MODELS: dict[str, type[Model]] = {
     "click": Click,
     "select": Select,
@@ -120,6 +126,7 @@ ACTION_MODELS: dict[str, type[Model]] = {
     "keys": Keys,
     "showRefs": ShowRefs,
     "wait": Wait,
+    "clickRibbon": ClickRibbon,
 }
 
 
@@ -141,7 +148,8 @@ Action = Annotated[
     | Annotated[Fill, Tag("fill")]
     | Annotated[Keys, Tag("keys")]
     | Annotated[ShowRefs, Tag("showRefs")]
-    | Annotated[Wait, Tag("wait")],
+    | Annotated[Wait, Tag("wait")]
+    | Annotated[ClickRibbon, Tag("clickRibbon")],
     Discriminator(
         _action_kind,
         custom_error_type="unknown_action",

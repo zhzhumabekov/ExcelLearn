@@ -5,6 +5,7 @@ import {
   ensureEditor,
   type LessonState,
   pasteClipboard,
+  toggleLastRef,
   typeChars,
   undo,
 } from "../lesson/state";
@@ -48,6 +49,12 @@ const HANDLERS: Record<string, KeyHandler> = {
   "Ctrl+Z": {
     apply(state) {
       undo(state);
+      return undefined;
+    },
+  },
+  F4: {
+    apply(state) {
+      toggleLastRef(state);
       return undefined;
     },
   },

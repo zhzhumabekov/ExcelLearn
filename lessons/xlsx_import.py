@@ -24,7 +24,8 @@ class ImportResult:
 
 
 def column_width_px(width: float | None) -> int:
-    return round((width or DEFAULT_COLUMN_WIDTH) * 7 + 5)
+    # Ширина Excel — в цифрах Calibri 11 (~7 px); у плеера шрифт ячеек крупнее (Segoe UI 14 px, цифра ~8 px)
+    return round((width or DEFAULT_COLUMN_WIDTH) * 8 + 12)
 
 
 def cell_format(number_format: str) -> str:

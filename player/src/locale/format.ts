@@ -63,14 +63,40 @@ function decimalComma(text: string, locale: FunctionLocale): string {
   return locale === "ru" ? text.replace(".", ",") : text;
 }
 
-/** «Общий» формат Excel: целые как есть, дробные — до 10 значащих цифр без хвостовых нулей. */
-export function formatGeneral(n: number, locale: FunctionLocale): string {
+/** «Общий» формат Excel: целые как есть, дробные — до precision значащих цифр без хвостовых нулей. */
+export function formatGeneral(n: number, locale: FunctionLocale, precision = 10): string {
   if (Number.isInteger(n)) return String(n);
-  const text = Number(n.toPrecision(10)).toString();
+  const text = Number(n.toPrecision(precision)).toString();
   return decimalComma(text, locale);
 }
 
-export function formatValue(value: CellValue, fmt: Fmt, locale: FunctionLocale): DisplayValue {
+/**
+ * Число, не влезающее в ширину ячейки, Excel не выпускает на соседние ячейки (в отличие от текста):
+ * в «общем» формате он сокращает дробную часть, а если не помогает или формат фиксированный — «#####».
+ */
+function fitNumber(value: number, display: DisplayValue, fmt: Fmt, locale: FunctionLocale, fits: Fits): DisplayValue {
+  if (fits(display)) return display;
+  if (fmt === "general" && !Number.isInteger(value)) {
+    for (let precision = 9; precision >= 1; precision--) {
+      const shorter = { ...display, text: formatGeneral(value, locale, precision) };
+      if (fits(shorter)) return shorter;
+    }
+  }
+  let hashes = "#";
+  while (fits({ text: hashes + "#", align: display.align })) hashes += "#";
+  return { text: hashes, align: display.align };
+}
+
+/** Помещается ли текст в ячейку (решает отрисовка — она знает шрифт и ширину колонки). */
+export type Fits = (display: DisplayValue) => boolean;
+
+/** fits — помещается ли число в ячейку; если нет — меньше знаков или «#####», как в Excel. */
+export function formatValue(value: CellValue, fmt: Fmt, locale: FunctionLocale, fits?: Fits): DisplayValue {
+  const display = formatPlain(value, fmt, locale);
+  return typeof value === "number" && fits ? fitNumber(value, display, fmt, locale, fits) : display;
+}
+
+function formatPlain(value: CellValue, fmt: Fmt, locale: FunctionLocale): DisplayValue {
   if (value === null) return { text: "", align: "left" };
   if (value instanceof ExcelError) return { text: errorCode(value.code, locale), align: "center" };
   if (typeof value === "boolean") return { text: functionName(value ? "TRUE" : "FALSE", locale), align: "center" };

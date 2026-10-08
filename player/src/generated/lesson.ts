@@ -85,8 +85,8 @@ export interface Step {
    * @minItems 1
    */
   actions: [
-    Click | Select | Type | ClickRef | DragRef | DragSelect | Fill | Keys | ShowRefs | Wait,
-    ...(Click | Select | Type | ClickRef | DragRef | DragSelect | Fill | Keys | ShowRefs | Wait)[]
+    Click | Select | Type | ClickRef | DragRef | DragSelect | Fill | Keys | ShowRefs | Wait | ClickRibbon,
+    ...(Click | Select | Type | ClickRef | DragRef | DragSelect | Fill | Keys | ShowRefs | Wait | ClickRibbon)[]
   ];
 }
 export interface Click {
@@ -127,4 +127,10 @@ export interface Wait {
    * Пауза в миллисекундах
    */
   wait: number;
+}
+/**
+ * Щелчок по кнопке ленты: «Σ Автосумма» (на выделенный диапазон), «Копировать», «Вставить».
+ */
+export interface ClickRibbon {
+  clickRibbon: "autosum" | "copy" | "paste";
 }

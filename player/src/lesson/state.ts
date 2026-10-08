@@ -1,4 +1,14 @@
-import { type CellPos, cellName, cellsInRange, offsetCell, parseCell, parseRange, rangeName, shiftFormula } from "../sheet/address";
+import {
+  type CellPos,
+  cellName,
+  cellsInRange,
+  formulaRefs,
+  offsetCell,
+  parseCell,
+  parseRange,
+  rangeName,
+  shiftFormula,
+} from "../sheet/address";
 import { isFormula, type SheetModel, type SheetSnapshot } from "../sheet/sheet-model";
 
 /** Кусок текста в редакторе формулы: обычный текст или ссылка, вставленная мышью (цветная). */
@@ -39,8 +49,9 @@ export function editorText(editor: EditorState): string {
   return editor.parts.map((p) => p.text).join("");
 }
 
+/** Ссылки набранной формулы по порядку появления (и вставленные мышью, и набранные) — для цветных рамок. */
 export function editorRefs(editor: EditorState): string[] {
-  return editor.parts.filter((p) => p.ref !== undefined).map((p) => p.text);
+  return formulaRefs(editorText(editor));
 }
 
 // ---------- Операции над состоянием: из них собираются apply() и animate() действий ----------
@@ -171,4 +182,67 @@ export function autosumRange(sheet: SheetModel, addr: string): string | null {
     return rangeName(parseRange(`${cellName({ row, col })}:${cellName(end)}`));
   }
   return null;
+}
+
+// ---------- F4: тип ссылки ----------
+
+const CELL_REF_RE = /^(\$?)([A-Z]{1,3})(\$?)([1-9][0-9]*)$/;
+
+/** Следующий тип ссылки, как по F4 в Excel: A1 → $A$1 → A$1 → $A1 → A1 (у диапазона — обе части). */
+export function cycleAbsolute(ref: string): string {
+  return ref
+    .split(":")
+    .map((cell) => {
+      const [, colAbs, col, rowAbs, row] = CELL_REF_RE.exec(cell) ?? [];
+      if (!col || !row) return cell;
+      const [nextCol, nextRow] = colAbs && rowAbs ? ["", "$"] : rowAbs ? ["$", ""] : colAbs ? ["", ""] : ["$", "$"];
+      return `${nextCol}${col}${nextRow}${row}`;
+    })
+    .join(":");
+}
+
+const REF_IN_TEXT_RE = /\$?[A-Z]{1,3}\$?[1-9][0-9]*(?::\$?[A-Z]{1,3}\$?[1-9][0-9]*)?/g;
+
+/** F4 во время ввода формулы: меняет тип последней ссылки (той, у которой стоит курсор ввода). */
+export function toggleLastRef(state: LessonState): void {
+  const editor = state.editor;
+  if (!editor) throw new Error("F4 меняет ссылку только во время ввода формулы");
+  for (let i = editor.parts.length - 1; i >= 0; i--) {
+    const part = editor.parts[i];
+    const match = part && [...part.text.matchAll(REF_IN_TEXT_RE)].at(-1);
+    if (part && match) {
+      const end = match.index + match[0].length;
+      part.text = part.text.slice(0, match.index) + cycleAbsolute(match[0]) + part.text.slice(end);
+      return;
+    }
+  }
+  throw new Error("F4: в формуле ещё нет ссылки");
+}
+
+// ---------- Кнопка «Σ Автосумма» на ленте ----------
+
+/**
+ * Автосумма с ленты. Одна ячейка — как Alt+= (формула открывается для проверки). Диапазон — Excel сразу
+ * вписывает =SUM(…) в каждую пустую ячейку: сумма блока чисел над ней (или слева). → заполненные ячейки.
+ */
+export function ribbonAutosum(state: LessonState): string[] {
+  const cells = cellsInRange(state.selection);
+  if (cells.length === 1) {
+    const range = autosumRange(state.sheet, state.active);
+    ensureEditor(state);
+    typeChars(state, "=SUM(");
+    if (range) addRef(state, range);
+    typeChars(state, ")");
+    return [];
+  }
+  rememberForUndo(state);
+  const filled: string[] = [];
+  for (const addr of cells) {
+    if (state.sheet.get(addr).input !== null) continue;
+    const range = autosumRange(state.sheet, addr);
+    if (!range) continue;
+    state.sheet.setInput(addr, `=SUM(${range})`);
+    filled.push(addr);
+  }
+  return filled;
 }

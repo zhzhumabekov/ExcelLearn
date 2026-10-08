@@ -43,8 +43,8 @@ def test_template_becomes_valid_sheet(template):
     assert cells["B6"] == {"v": "Totals", "style": "label"}
     assert cells["G9"] == {"f": "=B4"}
     assert "E5" not in cells
-    assert result.sheet["columns"]["B"] == 135
-    assert result.sheet["columns"]["A"] == 64  # ширина по умолчанию
+    assert result.sheet["columns"]["B"] == 161
+    assert result.sheet["columns"]["A"] == 79  # ширина по умолчанию
     assert result.sheet["rows"] == 10
     assert any("лишние пробелы" in w for w in result.warnings)
     Sheet.model_validate(result.sheet)

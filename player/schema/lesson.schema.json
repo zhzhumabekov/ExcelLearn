@@ -91,6 +91,25 @@
       "title": "ClickRef",
       "type": "object"
     },
+    "ClickRibbon": {
+      "additionalProperties": false,
+      "description": "Щелчок по кнопке ленты: «Σ Автосумма» (на выделенный диапазон), «Копировать», «Вставить».",
+      "properties": {
+        "clickRibbon": {
+          "enum": [
+            "autosum",
+            "copy",
+            "paste"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "clickRibbon"
+      ],
+      "title": "ClickRibbon",
+      "type": "object"
+    },
     "DragRef": {
       "additionalProperties": false,
       "properties": {
@@ -318,6 +337,9 @@
               },
               {
                 "$ref": "#/$defs/Wait"
+              },
+              {
+                "$ref": "#/$defs/ClickRibbon"
               }
             ]
           },

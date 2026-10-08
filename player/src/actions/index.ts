@@ -2,6 +2,7 @@ import { click, select, showRefs, wait } from "./basic";
 import { clickRef, dragRef, type } from "./editing";
 import { keys } from "./keys";
 import { dragSelect, fill } from "./mouse";
+import { clickRibbon } from "./ribbon";
 import { type Action, type ActionSpec, UnsupportedAction } from "./types";
 
 export { type Action, type ActionContext, type ActionSpec, UnsupportedAction } from "./types";
@@ -18,5 +19,6 @@ export function createAction(spec: ActionSpec): Action {
   if ("keys" in spec) return keys(spec.keys, spec);
   if ("showRefs" in spec) return showRefs(spec.showRefs);
   if ("wait" in spec) return wait(spec.wait);
+  if ("clickRibbon" in spec) return clickRibbon(spec.clickRibbon);
   throw new UnsupportedAction(spec);
 }

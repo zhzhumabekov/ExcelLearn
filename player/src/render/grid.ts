@@ -1,9 +1,37 @@
 import { cellName, colToLetters, lettersToCol, parseCell, parseRange } from "../sheet/address";
 import { type CellState, isFormula, type SheetModel } from "../sheet/sheet-model";
-import { type FunctionLocale, formatGeneral, formatValue, localizeFormula } from "../locale/format";
+import { type Fits, type FunctionLocale, formatGeneral, formatValue, localizeFormula } from "../locale/format";
 
 export const DEFAULT_COLUMN_WIDTH = 64;
 export const ROW_HEADER_WIDTH = 40;
+const CELL_FONT = '14px "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif';
+const CELL_PADDING_PX = 16; // 7px слева и справа + граница
+const CURRENCY_GAP_PX = 6;
+
+let measureContext: CanvasRenderingContext2D | null | undefined;
+
+/** Ширина текста шрифтом ячейки; null — измерить нечем (тестовая среда без canvas). */
+function textWidth(text: string): number | null {
+  if (measureContext === undefined) {
+    try {
+      measureContext = document.createElement("canvas").getContext("2d");
+    } catch {
+      measureContext = null; // jsdom без пакета canvas
+    }
+    if (measureContext) measureContext.font = CELL_FONT;
+  }
+  return measureContext ? measureContext.measureText(text).width : null;
+}
+
+/** Помещается ли число в колонку шириной widthPx — как решает Excel, показывать ли «#####». */
+export function fitsIn(widthPx: number): Fits {
+  return (display) => {
+    const text = textWidth(display.text);
+    if (text === null) return true;
+    const currency = display.currency ? (textWidth(display.currency) ?? 0) + CURRENCY_GAP_PX : 0;
+    return text + currency + CELL_PADDING_PX <= widthPx;
+  };
+}
 
 /** Размер видимой сетки: колонки из урока и все заполненные ячейки плюс одна про запас. */
 export function gridSize(sheet: SheetModel): { cols: number; rows: number } {
@@ -63,10 +91,11 @@ export class GridView {
   renderCell(addr: string): void {
     const td = this.cell(addr);
     const state = this.sheet.get(addr);
-    const display = formatValue(state.value, state.fmt, this.locale);
+    const width = this.sheet.columns[colToLetters(parseCell(addr).col)] ?? DEFAULT_COLUMN_WIDTH;
+    const display = formatValue(state.value, state.fmt, this.locale, fitsIn(width));
 
     td.className = ["xl-cell", `xl-${display.align}`, state.style ? `xl-${state.style}` : ""].filter(Boolean).join(" ");
-    if (display.currency) {
+    if (display.currency && !display.text.startsWith("#")) {
       td.replaceChildren(span("xl-acc", [span("", display.currency), span("", display.text)]));
     } else {
       td.textContent = display.text;

@@ -84,3 +84,27 @@ describe("renderPlaceholders", () => {
     expect(renderPlaceholders("Нажмите <kbd>Enter</kbd>", "ru")).toBe("Нажмите <kbd>Enter</kbd>");
   });
 });
+
+describe("число не влезает в ячейку — как в Excel", () => {
+  // Для теста: помещается не больше n символов (в плеере решает измерение шрифтом)
+  const upTo = (n: number) => (d: { text: string; currency?: string }) => d.text.length + (d.currency ? 2 : 0) <= n;
+
+  it("финансовый формат: решётки вместо числа", () => {
+    expect(formatValue(105560, "usd", "ru", upTo(8))).toEqual({ text: "########", align: "right" });
+    expect(formatValue(490, "usd", "ru", upTo(8)).text).toBe("490,00");
+  });
+
+  it("общий формат: сокращается дробная часть", () => {
+    expect(formatValue(18.637547374804686, "general", "ru", upTo(9)).text).toBe("18,637547");
+    expect(formatValue(Math.sqrt(0.5), "general", "en", upTo(5)).text).toBe("0.707");
+  });
+
+  it("целое, не влезающее даже без дробей, — решётки", () => {
+    expect(formatValue(123456789, "general", "ru", upTo(5)).text).toBe("#####");
+  });
+
+  it("без проверки ширины и для текста — как есть", () => {
+    expect(formatValue(105560, "usd", "ru").text).toMatch(/^105\s560,00$/u);
+    expect(formatValue("Square Root of Improvement", "general", "en", upTo(5)).text).toBe("Square Root of Improvement");
+  });
+});
