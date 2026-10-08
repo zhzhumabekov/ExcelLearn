@@ -19,3 +19,17 @@ export function fakeClock() {
   };
   return { clock: new Clock(scheduler), advance };
 }
+
+/** Дождаться конца анимации, прокручивая время порциями. */
+export async function finish<T>(promise: Promise<T>, advance: (ms: number) => Promise<void>): Promise<T> {
+  let done = false;
+  let result: { value: T } | { error: unknown } | undefined;
+  promise.then(
+    (value) => ((done = true), (result = { value })),
+    (error: unknown) => ((done = true), (result = { error })),
+  );
+  for (let i = 0; i < 2000 && !done; i++) await advance(100);
+  if (!result) throw new Error("Анимация не закончилась за 200 секунд урочного времени");
+  if ("error" in result) throw result.error;
+  return result.value;
+}

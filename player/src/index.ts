@@ -3,6 +3,7 @@ import "./styles/player.css";
 import type { Lesson } from "./generated/lesson";
 import type { FunctionLocale } from "./locale/format";
 import { runDemo } from "./dev-demo";
+import { createState } from "./lesson/state";
 import { Stage } from "./render/stage";
 import { SheetModel } from "./sheet/sheet-model";
 
@@ -25,7 +26,7 @@ export interface MountOptions {
 
 export interface PlayerHandle {
   destroy(): void;
-  /** Только для песочницы /dev/player/?demo=1 — демонстрация анимационного ядра. */
+  /** Только для песочницы /dev/player/?demo=1 — проиграть действия урока подряд. */
   demo(): Promise<void>;
 }
 
@@ -49,8 +50,8 @@ export function mount(el: HTMLElement, options: MountOptions): PlayerHandle {
   root.append(stage.el);
   // Сначала на страницу, потом рамки и курсор: координаты считаются по реальной раскладке
   el.replaceChildren(root);
-  stage.window.showActive("A1");
-  stage.overlays.showSelection("A1");
+  const state = createState(sheet);
+  stage.render(state);
   stage.cursor.jump(stage.restPoint());
 
   return {
@@ -58,6 +59,6 @@ export function mount(el: HTMLElement, options: MountOptions): PlayerHandle {
       stage.clock.cancel();
       root.remove();
     },
-    demo: () => runDemo(stage),
+    demo: () => runDemo(stage, state, options.lesson),
   };
 }

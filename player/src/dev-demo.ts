@@ -1,35 +1,26 @@
+import { type ActionSpec, createAction, UnsupportedAction } from "./actions";
+import type { Lesson } from "./generated/lesson";
+import type { LessonState } from "./lesson/state";
 import type { Stage } from "./render/stage";
 
 /**
- * Демонстрация анимационного ядра для песочницы /dev/player/?demo=1 (T11): курсор, рамки, клавиши.
- * Заменится настоящими шагами урока в T12–T14.
+ * Песочница /dev/player/?demo=1: проигрывает действия урока подряд, пока не встретит действие,
+ * которое плеер ещё не умеет. Заменится настоящим таймлайном с панелью шагов в T14.
  */
-export async function runDemo(stage: Stage): Promise<void> {
-  const { cursor, overlays, keys, window } = stage;
-  const show = (addr: string) => {
-    overlays.showSelection(addr);
-    window.showActive(addr);
-  };
-
-  cursor.jump(stage.restPoint());
-  await cursor.moveTo(stage.cellPoint("E4"));
-  await cursor.click();
-  show("E4");
-  await cursor.moveTo(stage.cellPoint("C4"), 500);
-  await cursor.click();
-  overlays.showRefs(["C4"]);
-  await cursor.moveTo(stage.cellPoint("D4"), 400);
-  await cursor.click();
-  overlays.showRefs(["C4", "D4"]);
-  await keys.show(["Ctrl", "C"]);
-  overlays.showAnts("E4");
-
-  await cursor.moveTo(stage.cellPoint("E4", "handle"), 500);
-  cursor.setShape("plus");
-  await cursor.press();
-  await cursor.moveTo(stage.cellPoint("E11", "handle"), 1200, (t) => {
-    const row = 4 + Math.round(t * 7);
-    overlays.showFill(`E4:E${row}`);
-  });
-  cursor.release();
+export async function runDemo(stage: Stage, state: LessonState, lesson: Lesson): Promise<void> {
+  stage.cursor.jump(stage.restPoint());
+  for (const [i, step] of lesson.steps.entries()) {
+    console.info(`Шаг ${i + 1}: ${step.title}`);
+    for (const spec of step.actions as ActionSpec[]) {
+      try {
+        await createAction(spec).animate({ state, stage, clock: stage.clock });
+      } catch (e) {
+        if (e instanceof UnsupportedAction) {
+          console.warn(`Демо остановлено на шаге ${i + 1}: ${e.message}`);
+          return;
+        }
+        throw e;
+      }
+    }
+  }
 }

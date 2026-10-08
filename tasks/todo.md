@@ -115,7 +115,7 @@
   - Files: `player/src/anim/clock.ts`, `cursor.ts`, `overlays.ts`, `keys.ts`, `clock.test.ts`
   - Deps: T10
 
-- [ ] **T12. Действия-1** · M
+- [x] **T12. Действия-1** · M
   - Acceptance: `click`, `select`, `type`, `clickRef`, `dragRef`, `keys: [Enter]`, редактор ячейки с цветными ссылками и подсказкой синтаксиса; у каждого действия есть `animate()` и `apply()`, `animate` меняет модель только через `apply`
   - Verify: Vitest — `apply()` каждого действия на `SheetModel`; шаг 1 урока 1-01 анимируется на dev-странице
   - Files: `player/src/actions/{click,select,type,ref,keys}.ts`, `player/src/render/editor.ts`, `actions.test.ts`
