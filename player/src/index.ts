@@ -3,11 +3,12 @@ import "./styles/player.css";
 import type { Lesson } from "./generated/lesson";
 import { Timeline, type TimelineStatus } from "./lesson/timeline";
 import type { FunctionLocale } from "./locale/format";
+import { type NarrationManifest, NarrationTrack } from "./narration/track";
 import { PanelView } from "./render/panel";
 import { Stage } from "./render/stage";
 import { SheetModel } from "./sheet/sheet-model";
 
-export type { FunctionLocale, Lesson, TimelineStatus };
+export type { FunctionLocale, Lesson, NarrationManifest, TimelineStatus };
 
 export interface PlayerSettings {
   speed: number;
@@ -19,6 +20,8 @@ export interface PlayerSettings {
 export interface MountOptions {
   lesson: Lesson;
   settings?: Partial<PlayerSettings>;
+  /** Озвучка: номер шага → URL аудио для ru/en (манифест narration_build). */
+  narration?: NarrationManifest;
   /** С какого шага открыть урок (продолжение после перерыва). */
   startStep?: number;
   onStepChange?: (step: number) => void;
@@ -54,6 +57,12 @@ export function mount(el: HTMLElement, options: MountOptions): PlayerHandle {
 
   const stage = new Stage(new SheetModel(lesson.sheet), settings.functionLocale);
   stage.clock.setSpeed(settings.speed);
+  const hasNarration = Object.keys(options.narration ?? {}).length > 0;
+  const narration = new NarrationTrack(options.narration ?? {}, settings.functionLocale, {
+    enabled: settings.narrationOn,
+    volume: settings.narrationVolume,
+  });
+  narration.setRate(settings.speed);
 
   // Стартовый экран поверх окна: первый запуск — по клику (браузеры разрешают звук только так)
   const start = document.createElement("div");
@@ -78,12 +87,20 @@ export function mount(el: HTMLElement, options: MountOptions): PlayerHandle {
       },
       onSpeed: (speed) => {
         stage.clock.setSpeed(speed);
+        narration.setRate(speed);
         panel.setSpeed(speed);
       },
       onSeek: (step) => timeline.seek(step),
+      onToggleSound: hasNarration
+        ? () => {
+            narration.setEnabled(!narration.isEnabled);
+            panel.showSound(narration.isEnabled);
+          }
+        : undefined,
     },
     settings.speed,
   );
+  panel.showSound(narration.isEnabled);
 
   layout.append(stage.el, panel.el);
   root.append(layout);
@@ -103,7 +120,7 @@ export function mount(el: HTMLElement, options: MountOptions): PlayerHandle {
     },
     onWaitNext: (progress, nextStep) => panel.showWaitNext(progress, nextStep),
     onComplete: () => options.onComplete?.(),
-  });
+  }, narration);
   const firstStep = options.startStep ?? 0;
   timeline.seek(firstStep);
   go.textContent = firstStep > 0 ? `▶ Продолжить с шага ${firstStep + 1}` : "▶ Начать урок";
@@ -131,6 +148,7 @@ export function mount(el: HTMLElement, options: MountOptions): PlayerHandle {
     },
     destroy() {
       document.removeEventListener("keydown", onKey);
+      narration.stop();
       stage.clock.cancel();
       root.remove();
     },

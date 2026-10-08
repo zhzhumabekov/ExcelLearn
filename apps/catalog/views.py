@@ -2,6 +2,7 @@ from django.http import Http404
 from django.shortcuts import render
 
 from lessons.registry import get_registry
+from narration.builder import narration_urls
 
 
 def home(request):
@@ -36,6 +37,7 @@ def lesson(request, lesson_id: str):
         {
             "lesson": current,
             "lesson_data": current.model_dump(mode="json"),
+            "narration": narration_urls(current.id),
             "chapter": chapter,
             "prev_lesson": prev_lesson,
             "next_lesson": next_lesson,

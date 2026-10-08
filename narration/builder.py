@@ -29,10 +29,23 @@ def ru_function_names() -> dict[str, str]:
     return json.loads(path.read_text(encoding="utf-8"))["functions"]
 
 
+#: Как диктору произносить русские имена, которые синтезатор читает невнятно (на экране — как в Excel)
+SPOKEN_RU = {
+    "AVERAGE": "эс-эр-знач",
+    "FORMULATEXT": "эф-текст",
+    "VLOOKUP": "вэ-пэ-эр",
+    "HLOOKUP": "гэ-пэ-эр",
+    "COUNTIF": "счёт-если",
+    "SUMIF": "сумм-если",
+}
+
+
 def render_say(say: str, locale: str) -> str:
     """{fn:SUM} → «СУММ» (ru) или «SUM» (en): диктор называет функцию так, как она видна на экране."""
-    names = ru_function_names() if locale == "ru" else {}
-    return FN_RE.sub(lambda m: names.get(m.group(1), m.group(1)), say)
+    if locale == "ru":
+        names = {**ru_function_names(), **SPOKEN_RU}
+        return FN_RE.sub(lambda m: names.get(m.group(1), m.group(1)), say)
+    return FN_RE.sub(lambda m: m.group(1), say)
 
 
 def cache_key(provider: str, voice: str, text: str) -> str:
@@ -89,3 +102,14 @@ def load_manifest(lesson_id: str, out_dir: Path | None = None) -> dict | None:
     if not path.exists():
         return None
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def narration_urls(lesson_id: str) -> dict[str, dict[str, str]]:
+    """Манифест урока с полными URL аудио — то, что получает плеер. Пусто, если озвучки нет."""
+    manifest = load_manifest(lesson_id)
+    if not manifest:
+        return {}
+    return {
+        step: {locale: f"{settings.MEDIA_URL}{path}" for locale, path in files.items()}
+        for step, files in manifest["steps"].items()
+    }

@@ -201,14 +201,14 @@
   - Files: `narration/providers/yandex.py`, `tests/narration/test_yandex.py`
   - Deps: T19
 
-- [ ] **T21. `NarrationTrack` + тексты `say`** · M
+- [x] **T21. `NarrationTrack` + тексты `say`** · M
   - Acceptance: аудио шага стартует вместе с анимацией, шаг ждёт оба; пауза, перемотка, скорость (`playbackRate` + `preservesPitch`), громкость, выключение; без аудио урок идёт по анимации; `say` написан для всех шагов уроков 0-01 и 1-01; страница урока передаёт манифест
   - Verify: Vitest с фейковым `HTMLAudioElement`; ручное прослушивание
   - Files: `player/src/narration/track.ts`, `player/src/timeline/timeline.ts`, `apps/catalog/templates/catalog/lesson.html`, `content/lessons/*.yaml`, `track.test.ts`
   - Deps: T14, T19
 
 ### ✅ Checkpoint E
-- [ ] Уроки озвучены, звук синхронен с шагами при паузе, перемотке и 2×
+- [x] Уроки озвучены, звук синхронен с шагами при паузе, перемотке и 2× (проверено на провайдере silent; живой голос — после ключа Yandex)
 
 ---
 

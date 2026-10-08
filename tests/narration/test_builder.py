@@ -37,10 +37,15 @@ def lesson(**say) -> Lesson:
 
 @pytest.mark.parametrize(
     ("locale", "spoken"),
-    [("ru", "Функция СУММ, затем СРЗНАЧ"), ("en", "Функция SUM, затем AVERAGE")],
+    [("ru", "Функция СУММ, затем эс-эр-знач, ВПР → вэ-пэ-эр"), ("en", "Функция SUM, затем AVERAGE, VLOOKUP → VLOOKUP")],
 )
 def test_render_say_uses_function_names_of_locale(locale, spoken):
-    assert render_say("Функция {fn:SUM}, затем {fn:AVERAGE}", locale) == spoken
+    say = (
+        "Функция {fn:SUM}, затем {fn:AVERAGE}, ВПР → {fn:VLOOKUP}"
+        if locale == "ru"
+        else "Функция {fn:SUM}, затем {fn:AVERAGE}, VLOOKUP → {fn:VLOOKUP}"
+    )
+    assert render_say(say, locale) == spoken
 
 
 def test_build_writes_audio_per_locale_and_manifest(tmp_path: Path):

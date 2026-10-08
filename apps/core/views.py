@@ -1,8 +1,10 @@
 from django.conf import settings
 from django.http import Http404
 from django.shortcuts import render
+from django.views.static import serve
 
 from lessons.registry import get_registry
+from narration.builder import narration_urls
 
 
 def dev_player(request):
@@ -32,8 +34,16 @@ def dev_player(request):
             "lessons": registry.lessons,
             "lesson": lesson,
             "lesson_data": lesson.model_dump(mode="json") if lesson else None,
+            "narration": narration_urls(lesson.id) if lesson else {},
             "locale": locale,
             "demo": request.GET.get("demo") == "1",
             "speed": speed,
         },
     )
+
+
+def dev_media(request, path: str):
+    """media/ (озвучка) при разработке. В проде /media/ отдаёт Nginx, сюда запросы не доходят."""
+    if not settings.DEBUG:
+        raise Http404
+    return serve(request, path, document_root=settings.MEDIA_ROOT)

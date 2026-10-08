@@ -22,5 +22,6 @@ def test_lesson_page_plays(page: Page):
 
     page.click(".xl-start button")
     expect(page.locator(".xl-primary")).to_have_attribute("title", "Пауза")
-    expect(page.locator(".xl-editor")).to_contain_text("=СУММ(", timeout=15_000)
+    # Шаги ждут озвучку (если собрана) — набор формулы начинается позже
+    expect(page.locator(".xl-editor")).to_contain_text("=СУММ(", timeout=60_000)
     assert page.errors == []

@@ -10,6 +10,8 @@ export interface PanelHandlers {
   onRestart(): void;
   onSpeed(speed: number): void;
   onSeek(step: number): void;
+  /** Есть только у уроков с озвучкой. */
+  onToggleSound?(): void;
 }
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, className = "", text = ""): HTMLElementTagNameMap[K] {
@@ -47,6 +49,7 @@ export class PanelView {
   private readonly nextRing = el("span", "xl-ring");
   private readonly nextLabel = el("span");
   private readonly playButton: HTMLButtonElement;
+  private readonly soundButton: HTMLButtonElement | null;
   private readonly segments: HTMLButtonElement[];
   private readonly speedButtons: HTMLButtonElement[];
   private readonly plan: HTMLElement;
@@ -84,8 +87,10 @@ export class PanelView {
     });
     speeds.append(...this.speedButtons);
     const planToggle = button("xl-ctl", "☰ План", () => this.togglePlan());
+    const onToggleSound = handlers.onToggleSound;
+    this.soundButton = onToggleSound ? button("xl-ctl", "", () => onToggleSound()) : null;
     const controls = el("div", "xl-controls");
-    controls.append(this.playButton, restart, progress, speeds, planToggle);
+    controls.append(this.playButton, restart, progress, ...(this.soundButton ? [this.soundButton] : []), speeds, planToggle);
 
     // План урока (свёрнут)
     this.plan = el("div", "xl-plan");
@@ -149,6 +154,12 @@ export class PanelView {
 
   setSpeed(speed: number): void {
     for (const b of this.speedButtons) b.classList.toggle("xl-on", Number(b.dataset.speed) === speed);
+  }
+
+  showSound(on: boolean): void {
+    if (!this.soundButton) return;
+    this.soundButton.textContent = on ? "🔊" : "🔇";
+    this.soundButton.title = on ? "Выключить озвучку" : "Включить озвучку";
   }
 
   togglePlan(): void {

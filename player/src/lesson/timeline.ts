@@ -1,6 +1,7 @@
 import { type Action, type ActionSpec, createAction } from "../actions";
 import { Aborted } from "../anim/clock";
 import type { Lesson } from "../generated/lesson";
+import type { NarrationTrack } from "../narration/track";
 import type { Stage } from "../render/stage";
 import type { SheetSnapshot } from "../sheet/sheet-model";
 import { createState, type LessonState } from "./state";
@@ -36,6 +37,8 @@ export class Timeline {
     readonly lesson: Lesson,
     private readonly stage: Stage,
     private readonly events: TimelineEvents = {},
+    /** Озвучка: шаг заканчивается, когда доиграли и анимация, и голос. */
+    private readonly narration?: NarrationTrack,
   ) {
     this.steps = lesson.steps.map((step) => step.actions.map((spec) => createAction(spec as ActionSpec)));
     this.initial = stage.sheet.snapshot();
@@ -68,10 +71,13 @@ export class Timeline {
     try {
       for (let i = this.stepIndex; i < this.steps.length; i++) {
         this.enterStep(i);
+        const voice = this.narration?.start(i) ?? Promise.resolve();
         for (const action of this.steps[i] ?? []) {
           await action.animate({ state: this.state, stage: this.stage, clock: this.stage.clock });
           if (run !== this.run) return;
         }
+        await voice;
+        if (run !== this.run) return;
         if (i < this.steps.length - 1) {
           try {
             await this.stage.clock.tween(BETWEEN_STEPS_MS, (t) => this.events.onWaitNext?.(t, i + 1));
@@ -94,12 +100,14 @@ export class Timeline {
   pause(): void {
     if (this.currentStatus !== "playing") return;
     this.stage.clock.pause();
+    this.narration?.pause();
     this.setStatus("paused");
   }
 
   resume(): Promise<void> {
     if (this.currentStatus === "paused") {
       this.stage.clock.resume();
+      this.narration?.resume();
       this.setStatus("playing");
     }
     return Promise.resolve();
@@ -111,6 +119,7 @@ export class Timeline {
     const wasPlaying = this.currentStatus === "playing" || this.currentStatus === "paused";
     this.run++;
     const { clock, cursor, keys, overlays } = this.stage;
+    this.narration?.stop();
     clock.cancel();
     clock.resume();
     keys.hide();
