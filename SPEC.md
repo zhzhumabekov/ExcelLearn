@@ -134,8 +134,8 @@ class User(AbstractUser):
     username = None
     email = models.EmailField(unique=True)               # логин
     phone = models.CharField(max_length=20)              # E.164, валидация формата (+7…)
-    consent_at = models.DateTimeField()                  # когда дано согласие на обработку ПДн
-    consent_version = models.CharField(max_length=20)    # версия текста docs/legal/consent-ru.md
+    consent_at = models.DateTimeField(null=True)         # когда дано согласие; пусто только у созданных админом
+    consent_version = models.CharField(max_length=20, blank=True)  # версия текста docs/legal/consent-ru.md
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["first_name", "last_name", "phone"]

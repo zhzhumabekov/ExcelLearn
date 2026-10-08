@@ -18,7 +18,7 @@
   - Files: `pyproject.toml`, `manage.py`, `config/settings.py`, `config/urls.py`, `.gitignore`, `.env.example`
   - Deps: —
 
-- [ ] **T2. Своя модель User** · S
+- [x] **T2. Своя модель User** · S
   - Acceptance:
     - `apps/accounts`: `User(AbstractUser)` без `username`, `email` уникальный и логин, `phone`, `consent_at`, `consent_version`; менеджер `create_user/create_superuser` по email
     - `AUTH_USER_MODEL = "accounts.User"`; первая миграция; модель зарегистрирована в админке

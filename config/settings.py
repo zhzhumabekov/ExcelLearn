@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_htmx",
     "apps.core",
+    "apps.accounts",
     "apps.catalog",
 ]
 
@@ -55,6 +56,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
+
+AUTH_USER_MODEL = "accounts.User"
 
 # SQLite локально; в проде DATABASE_URL=postgres://...
 DATABASES = {"default": env.db_url_config(env("DATABASE_URL", default="") or f"sqlite:///{BASE_DIR / 'db.sqlite3'}")}
