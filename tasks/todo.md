@@ -121,6 +121,16 @@
   - Files: `player/src/actions/{clipboard,fill,select-range,autosum}.ts`, `actions2.test.ts`
   - Deps: T12
 
+- [ ] **T13a. Действия для главы 1** · M · *новые типы действий — согласовано 2026-10-08*
+  - Acceptance:
+    - `fill` с двумерной целью: протянуть строку `E23:G23` до `E28` (в схеме: `fill: {from: E23:G23, to: E28}`, короткая форма `fill: E4:E11` остаётся)
+    - `select` нескольких диапазонов с Ctrl (`select: [H23:H28, E29:G29]`) и `clickRibbon: autosum` — автосумма заполняет все выделенные ячейки
+    - `keys: [F4]` в редакторе циклически меняет ссылку `E12 → $E$12 → E$12 → $E12 → E12`
+    - оператор `^`, формат чисел с заданным числом знаков (`fmt: {number: 3}`), подсветка ячейки фоном (`style: highlight`)
+  - Verify: Vitest для `apply()`; `lessons:verify` на уроках 01-02 … 01-06 после их написания
+  - Files: `lessons/schema.py`, `player/src/actions/{fill,select-range,ribbon,abs-ref}.ts`, тесты
+  - Deps: T13; список уроков и расхождения с книгой — `content/sources/ch01.md`
+
 - [ ] **T14. Timeline, панель, контролы** · M
   - Acceptance:
     - `Timeline`: play/pause/restart, скорость 0.5–2×, `seek(n)` = сброс → `apply()` шагов 0..n−1 → анимация шага n; события `onStepChange`, `onComplete`
