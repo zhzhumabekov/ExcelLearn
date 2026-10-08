@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "apps.core",
     "apps.accounts",
     "lessons",
+    "narration",
     "apps.catalog",
 ]
 
@@ -84,6 +85,13 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 # Курс и уроки в YAML (content-as-code)
 CONTENT_DIR = BASE_DIR / "content"
+
+# Озвучка: provider silent (разработка, без сети) | yandex; аудио — в media/narration (не в git)
+TTS_PROVIDER = env("TTS_PROVIDER", default="silent")
+TTS_API_KEY = env("TTS_API_KEY", default="")
+TTS_FOLDER_ID = env("TTS_FOLDER_ID", default="")
+TTS_VOICE = env("TTS_VOICE", default="alena")
+NARRATION_DIR = MEDIA_ROOT / "narration"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

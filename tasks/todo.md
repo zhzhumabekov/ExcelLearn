@@ -189,7 +189,7 @@
 
 ## Phase 4 — Озвучка
 
-- [ ] **T19. `TTSProvider`, builder, `narration_build`** · M
+- [x] **T19. `TTSProvider`, builder, `narration_build`** · M
   - Acceptance: интерфейс провайдера; `silent` (тишина расчётной длины); builder — плейсхолдеры `{fn:…}` → RU/EN, хэш (текст, голос, язык) → `media/narration/<hash>.mp3`, манифест урока `{step: {ru, en}}`; повторный запуск без изменений не вызывает провайдера
   - Verify: pytest с `silent` и счётчиком вызовов
   - Files: `narration/providers/{base,silent}.py`, `narration/builder.py`, `management/commands/narration_build.py`, `tests/narration/test_builder.py`

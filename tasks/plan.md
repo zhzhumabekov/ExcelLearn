@@ -80,7 +80,7 @@ T1 Django-каркас ─► T2 User-модель ─────────�
 ### Checkpoint D — работающий сайт без аккаунтов
 
 ### Phase 4 — Озвучка (`narration`)
-- [ ] T19 `TTSProvider`, `silent`, builder с кэшем, `narration_build`
+- [x] T19 `TTSProvider`, `silent`, builder с кэшем, `narration_build`
 - [ ] T20 Провайдер Yandex SpeechKit
 - [ ] T21 `NarrationTrack` в плеере + тексты `say` для уроков 0–1
 
