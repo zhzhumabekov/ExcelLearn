@@ -10,7 +10,8 @@
     Собрать плеер: <code>pnpm --dir player dev</code>.
     Язык функций:
     <a href="?lesson={{ lesson.id }}&amp;locale=ru">RU</a> ·
-    <a href="?lesson={{ lesson.id }}&amp;locale=en">EN</a>
+    <a href="?lesson={{ lesson.id }}&amp;locale=en">EN</a> ·
+    <a href="?lesson={{ lesson.id }}&amp;locale={{ locale }}&amp;demo=1">демо анимации</a>
   </p>
   <ul>
     {% for item in lessons %}
@@ -26,10 +27,11 @@
     {{ lesson_data|json_script:"lesson-data" }}
     <script src="{% static 'player/player.js' %}"></script>
     <script>
-      ExcelLearnPlayer.mount(document.getElementById("player"), {
+      const player = ExcelLearnPlayer.mount(document.getElementById("player"), {
         lesson: JSON.parse(document.getElementById("lesson-data").textContent),
         settings: { functionLocale: "{{ locale }}" },
       });
+      {% if demo %}player.demo();{% endif %}
     </script>
   {% else %}
     <p>Уроков пока нет: добавьте YAML в <code>content/lessons/</code>.</p>

@@ -109,7 +109,7 @@
   - Files: `player/src/render/window.ts`, `grid.ts`, `player/src/styles/player.css`, `grid.test.ts`
   - Deps: T8, T9
 
-- [ ] **T11. Анимационное ядро** · M
+- [x] **T11. Анимационное ядро** · M
   - Acceptance: `Clock` (tween/wait с паузой, скоростью и отменой), курсор (стрелка/перекрестье, клик, рябь), оверлеи (выделение, цветные ссылки, рамка заполнения, «бегущая» рамка), показ клавиш
   - Verify: Vitest для `Clock` (пауза останавливает время, отмена прерывает); ручная проверка оверлеев на dev-странице
   - Files: `player/src/anim/clock.ts`, `cursor.ts`, `overlays.ts`, `keys.ts`, `clock.test.ts`
