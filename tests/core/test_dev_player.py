@@ -33,6 +33,14 @@ def test_dev_player_selects_lesson_and_locale(client):
     assert 'functionLocale: "en"' in response.content.decode()
 
 
+@pytest.mark.parametrize(("speed", "rendered"), [("16", "speed: 16"), ("1000", "speed: 32"), ("abc", "speed: 1")])
+@override_settings(DEBUG=True)
+def test_dev_player_speed_is_clamped(client, speed, rendered):
+    response = client.get(reverse("core:dev-player"), {"speed": speed})
+
+    assert rendered in response.content.decode()
+
+
 @override_settings(DEBUG=True)
 def test_dev_player_unknown_lesson_is_404(client):
     assert client.get(reverse("core:dev-player"), {"lesson": "nope"}).status_code == 404

@@ -29,7 +29,7 @@
     <script>
       const player = ExcelLearnPlayer.mount(document.getElementById("player"), {
         lesson: JSON.parse(document.getElementById("lesson-data").textContent),
-        settings: { functionLocale: "{{ locale }}" },
+        settings: { functionLocale: "{{ locale }}", speed: {{ speed|stringformat:"g" }} },
       });
       {% if demo %}player.play().then(() => { window.demoDone = true; });{% endif %}
     </script>

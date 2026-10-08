@@ -1,0 +1,51 @@
+"""E2E: настоящий браузер против живого сервера Django.
+
+Запуск: uv run pytest e2e. Браузер — установленный Edge (E2E_BROWSER_CHANNEL=msedge по умолчанию);
+в CI без Edge: E2E_BROWSER_CHANNEL=chromium после `uv run playwright install chromium`.
+Плеер должен быть собран: pnpm --dir player build.
+"""
+
+import os
+from pathlib import Path
+
+import pytest
+from django.conf import settings
+from playwright.sync_api import Browser, Page, sync_playwright
+
+# Playwright (sync API) держит цикл событий в главном потоке, а фикстуры pytest-django ходят в БД
+# оттуда же — без этого флага Django считает это асинхронным контекстом.
+os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
+
+PLAYER_BUNDLE = Path(settings.BASE_DIR) / "static" / "player" / "player.js"
+
+
+@pytest.fixture(scope="session")
+def browser() -> Browser:
+    if not PLAYER_BUNDLE.exists():
+        pytest.fail("Плеер не собран: выполните pnpm --dir player build")
+    channel = os.environ.get("E2E_BROWSER_CHANNEL", "msedge")
+    with sync_playwright() as p:
+        browser = p.chromium.launch(channel=None if channel == "chromium" else channel, headless=True)
+        yield browser
+        browser.close()
+
+
+class PageErrors(list):
+    """Ошибки JavaScript и консоли за время теста (404 на favicon не считаем)."""
+
+
+@pytest.fixture
+def page(browser: Browser, live_server, settings) -> Page:
+    settings.DEBUG = True  # песочница /dev/player/ доступна только в режиме разработки
+    context = browser.new_context(viewport={"width": 1440, "height": 900})
+    page = context.new_page()
+    errors = PageErrors()
+    page.on("pageerror", lambda e: errors.append(f"pageerror: {e}"))
+    page.on(
+        "console",
+        lambda m: m.type == "error" and "favicon" not in m.location.get("url", "") and errors.append(m.text),
+    )
+    page.errors = errors
+    page.base_url = live_server.url
+    yield page
+    context.close()

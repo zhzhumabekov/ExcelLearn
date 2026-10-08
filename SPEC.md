@@ -249,7 +249,8 @@ uv run ruff check . && uv run ruff format --check .
 pnpm --dir player lint && pnpm --dir player typecheck
 uv run pytest                             # бэкенд
 pnpm --dir player test                    # Vitest
-uv run pytest e2e                         # Playwright: каждый урок проигрывается до конца
+pnpm --dir player build && uv run pytest e2e   # Playwright в установленном Edge: каждый урок до конца (RU/EN, 16×)
+                                          # без Edge (CI): E2E_BROWSER_CHANNEL=chromium после uv run playwright install chromium
 uv run python manage.py narration_build   # озвучка: генерирует только новые/изменённые шаги (TTS_PROVIDER)
 uv run python manage.py narration_build --provider silent   # без сети, для разработки и тестов
 uv run python manage.py changepassword user@mail.kz          # сброс пароля администратором из консоли
