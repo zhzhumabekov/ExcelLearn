@@ -562,6 +562,8 @@
 .xl-player .xl-start h2 {
   margin: 0;
   font-size: 22px;
+  /* Явно: страница сайта (Tailwind preflight) сбрасывает оформление заголовков */
+  font-weight: 700;
 }
 
 .xl-player .xl-big {

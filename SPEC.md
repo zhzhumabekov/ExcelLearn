@@ -37,7 +37,7 @@
 |---|---|---|
 | Бэкенд | Python 3.12, Django 5.2 LTS | Встроенные аутентификация, ORM, миграции и админка; бэкенд — классический сайт с аккаунтами |
 | Шаблоны / интерактив | Django Templates, `django-htmx`, Alpine.js 3 | Каталог и настройки без SPA; Alpine закрывает мелкий интерактив |
-| Стили | Tailwind CSS 4 (standalone CLI) для сайта; отдельный CSS плеера | Плеер изолирован от стилей сайта |
+| Стили | Tailwind CSS 4 (`@tailwindcss/cli` в корневом `package.json`, версии закреплены) для сайта; отдельный CSS плеера | Плеер изолирован от стилей сайта; одинаковая сборка на Windows и в Linux-контейнере |
 | Плеер | TypeScript 6.0 (strict; 7.x пока не поддерживается typescript-eslint), чистый DOM, без фреймворка, сборка esbuild | Развитие прототипов; анимация на rAF |
 | Формулы | `fast-formula-parser` 1.0.19 (MIT) — разбор формул и ссылок; `@formulajs/formulajs` 4.6.1 (MIT) — реализации ~400 функций Excel. Обе версии закреплены | Единственный вычислитель формул в проекте, значения не вписываются руками. У парсера нет MAX, MATCH, PMT, NPV и др. — их считает formulajs |
 | Формат урока | YAML → Pydantic 2 → JSON Schema → TS-типы (`json-schema-to-typescript`) | Одна схема-источник для Python и TS |
@@ -237,6 +237,8 @@ uv sync                                   # Python-зависимости
 pnpm --dir player install                 # зависимости плеера
 uv run python manage.py migrate           # миграции (SQLite локально)
 uv run python manage.py runserver         # http://localhost:8000
+pnpm install && pnpm css                  # Tailwind → static/css/site.css (при разработке: pnpm css:watch)
+pnpm vendor                               # htmx и Alpine из node_modules → static/vendor/ (после обновления версий)
 pnpm --dir player dev                     # esbuild --watch → static/player/
 pnpm --dir player build                   # прод-сборка плеера
 

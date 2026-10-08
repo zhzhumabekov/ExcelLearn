@@ -1,0 +1,17 @@
+{
+  "name": "excellearn-site",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Ассеты сайта: Tailwind CSS, htmx и Alpine.js (плеер — отдельный проект в player/)",
+  "scripts": {
+    "css": "tailwindcss -i static/css/input.css -o static/css/site.css --minify",
+    "css:watch": "tailwindcss -i static/css/input.css -o static/css/site.css --watch",
+    "vendor": "node scripts/vendor.mjs"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "4.3.3",
+    "alpinejs": "3.17.4",
+    "htmx.org": "2.0.11",
+    "tailwindcss": "4.3.3"
+  }
+}

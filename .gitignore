@@ -25,3 +25,6 @@ Thumbs.db
 
 # Сборки служебных скриптов плеера (lessons:verify)
 player/.cache/
+
+# Сборка Tailwind (pnpm css)
+static/css/site.css

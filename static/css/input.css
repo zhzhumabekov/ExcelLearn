@@ -1,0 +1,29 @@
+/* Стили сайта (Tailwind CSS 4). Сборка: pnpm css (или pnpm css:watch при разработке) → static/css/site.css.
+   Плеер урока стилизуется отдельно (player/src/styles/player.css). */
+@import "tailwindcss" source(none);
+
+/* Где искать классы: только шаблоны Django-приложений */
+@source "../../apps/**/templates/**/*.html";
+
+/* Тёмная тема — по атрибуту data-theme на <html> (его ставит скрипт в base.html) */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  --font-sans: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --color-brand-50: #eef7f1;
+  --color-brand-100: #d6eedf;
+  --color-brand-500: #2e8b57;
+  --color-brand-600: #217346;
+  --color-brand-700: #185c37;
+  --color-brand-900: #0f3a23;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  html[data-theme="dark"] {
+    color-scheme: dark;
+  }
+}

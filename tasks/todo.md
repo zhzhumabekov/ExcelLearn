@@ -170,7 +170,7 @@
 
 ## Phase 3 — Каталог
 
-- [ ] **T17. Базовый шаблон, Tailwind, тема** · S
+- [x] **T17. Базовый шаблон, Tailwind, тема** · S
   - Acceptance: `base.html` (шапка, навигация, футер со ссылкой на согласие), Tailwind standalone CLI, светлая/тёмная/системная тема, htmx и Alpine подключены локально (без CDN)
   - Verify: страницы рендерятся; переключение темы; pytest smoke
   - Files: `apps/core/templates/base.html`, `static/css/input.css`, `tailwind.config.js`, `package.json` скрипт `css`
