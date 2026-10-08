@@ -11,7 +11,7 @@
     Язык функций:
     <a href="?lesson={{ lesson.id }}&amp;locale=ru">RU</a> ·
     <a href="?lesson={{ lesson.id }}&amp;locale=en">EN</a> ·
-    <a href="?lesson={{ lesson.id }}&amp;locale={{ locale }}&amp;demo=1">демо анимации</a>
+    <a href="?lesson={{ lesson.id }}&amp;locale={{ locale }}&amp;demo=1">автозапуск</a>
   </p>
   <ul>
     {% for item in lessons %}
@@ -31,7 +31,7 @@
         lesson: JSON.parse(document.getElementById("lesson-data").textContent),
         settings: { functionLocale: "{{ locale }}" },
       });
-      {% if demo %}player.demo().then(() => { window.demoDone = true; });{% endif %}
+      {% if demo %}player.play().then(() => { window.demoDone = true; });{% endif %}
     </script>
   {% else %}
     <p>Уроков пока нет: добавьте YAML в <code>content/lessons/</code>.</p>

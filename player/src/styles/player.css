@@ -499,3 +499,255 @@
 .xl-player .xl-ftext .xl-reftext {
   font-weight: 600;
 }
+
+/* ---------- Раскладка: сцена + панель ---------- */
+.xl-player .xl-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .xl-player .xl-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.xl-player .xl-stage {
+  overflow-x: auto;
+}
+
+/* ---------- Стартовый экран ---------- */
+.xl-player .xl-start {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 20px;
+  text-align: center;
+  background: rgba(247, 248, 247, 0.78);
+  backdrop-filter: blur(3px);
+}
+
+.xl-player .xl-start[hidden] {
+  display: none;
+}
+
+.xl-player .xl-start h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.xl-player .xl-big {
+  font: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--xl-green);
+  border: 0;
+  border-radius: 12px;
+  padding: 14px 28px;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(33, 115, 70, 0.35);
+}
+
+.xl-player .xl-big:hover {
+  background: var(--xl-green-dark);
+}
+
+/* ---------- Панель шагов ---------- */
+.xl-player .xl-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.xl-player .xl-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  padding: 18px;
+}
+
+.xl-player .xl-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: #5d6b63;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.xl-player .xl-bar {
+  height: 6px;
+  background: #e3e9e5;
+  border-radius: 3px;
+  margin: 10px 0 14px;
+  overflow: hidden;
+}
+
+.xl-player .xl-bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--xl-green);
+  transition: width 0.4s;
+}
+
+.xl-player .xl-step-title {
+  margin: 0 0 8px;
+  font-size: 19px;
+}
+
+.xl-player .xl-step-text {
+  margin: 0;
+  line-height: 1.55;
+  font-size: 15px;
+  min-height: 120px;
+}
+
+.xl-player .xl-panel code {
+  font-family: Consolas, "Cascadia Mono", monospace;
+  background: #eef4f0;
+  color: var(--xl-green-dark);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.92em;
+}
+
+.xl-player .xl-panel kbd {
+  font-family: inherit;
+  font-size: 0.85em;
+  font-weight: 700;
+  border: 1px solid #c6ccc8;
+  border-bottom-width: 3px;
+  border-radius: 5px;
+  padding: 0 6px;
+  background: #fff;
+}
+
+.xl-player .xl-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.xl-player .xl-btn {
+  font: inherit;
+  font-size: 14px;
+  border: 1px solid #cfd8d2;
+  background: #fff;
+  border-radius: 9px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.xl-player .xl-btn:hover {
+  border-color: var(--xl-green);
+}
+
+.xl-player .xl-btn.xl-primary {
+  background: var(--xl-green);
+  border-color: var(--xl-green);
+  color: #fff;
+}
+
+.xl-player .xl-speed {
+  display: flex;
+  margin-left: auto;
+  border: 1px solid #cfd8d2;
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+.xl-player .xl-speed button {
+  font: inherit;
+  font-size: 13px;
+  border: 0;
+  background: #fff;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.xl-player .xl-speed button.xl-on {
+  background: var(--xl-green-soft);
+  color: var(--xl-green-dark);
+  font-weight: 700;
+}
+
+.xl-player .xl-panel h3 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: #5d6b63;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.xl-player .xl-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.xl-player .xl-steps button {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  color: #5d6b63;
+  text-align: left;
+  cursor: pointer;
+}
+
+.xl-player .xl-steps button:hover {
+  background: #f3f6f4;
+}
+
+.xl-player .xl-n {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 2px solid #cfd8d2;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.xl-player .xl-steps .xl-done button {
+  color: #1f2a24;
+}
+
+.xl-player .xl-steps .xl-done .xl-n {
+  background: var(--xl-green);
+  border-color: var(--xl-green);
+  color: #fff;
+}
+
+.xl-player .xl-steps .xl-active button {
+  background: var(--xl-green-soft);
+  color: var(--xl-green-dark);
+  font-weight: 600;
+}
+
+.xl-player .xl-steps .xl-active .xl-n {
+  border-color: var(--xl-green);
+}

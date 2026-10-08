@@ -141,7 +141,7 @@
   - Files: `lessons/schema.py`, `player/src/actions/{fill,select-range,ribbon,abs-ref}.ts`, тесты
   - Deps: T13; список уроков и расхождения с книгой — `content/sources/ch01.md`
 
-- [ ] **T14. Timeline, панель, контролы** · M
+- [x] **T14. Timeline, панель, контролы** · M
   - Acceptance:
     - `Timeline`: play/pause/restart, скорость 0.5–2×, `seek(n)` = сброс → `apply()` шагов 0..n−1 → анимация шага n; события `onStepChange`, `onComplete`
     - панель: номер шага, прогресс, заголовок, текст (санитизированный HTML), список шагов (клик — переход), пробел — пауза
