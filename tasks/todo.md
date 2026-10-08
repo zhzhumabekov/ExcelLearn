@@ -97,7 +97,7 @@
   - Acceptance: тесты `it.fails` в `functions-support.test.ts` и `sheet-model.test.ts` становятся обычными и проходят
   - Deps: T8
 
-- [ ] **T9. Локализация формул** · S
+- [x] **T9. Локализация формул** · S
   - Acceptance: `toDisplay(formula, 'ru')` → `=СУММ(C4:C11)`, `;` между аргументами, `449,63`; `'en'` — без изменений; словарь функций расширяется одной строкой
   - Verify: Vitest — таблица случаев, включая вложенные функции и строки в кавычках
   - Files: `player/src/locale/functions.ts`, `format.ts`, `*.test.ts`

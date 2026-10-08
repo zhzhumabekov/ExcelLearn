@@ -60,7 +60,7 @@ T1 Django-каркас ─► T2 User-модель ─────────�
 ### Phase 2 — Плеер (`player`)
 - [x] T8 SheetModel, адреса, вычислитель формул, сдвиг ссылок
 - [x] T8a Недостающие функции Excel (MAX, MATCH, PMT, NPV…) — formulajs
-- [ ] T9 Локализация формул RU/EN
+- [x] T9 Локализация формул RU/EN
 - [ ] T10 Статический рендер окна Excel из SheetModel
 - [ ] T11 Анимационное ядро: часы, курсор, оверлеи, клавиши
 - [ ] T12 Действия-1: click, select, type, clickRef, dragRef, Enter
