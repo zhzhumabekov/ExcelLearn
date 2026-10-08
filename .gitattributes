@@ -1,0 +1,7 @@
+# LF везде: сгенерированные файлы (JSON Schema, TS-типы) сравниваются побайтно в тестах,
+# а Docker/VPS — Linux. Работает и при core.autocrlf=true на Windows.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.mp3 binary
+*.xlsx binary
