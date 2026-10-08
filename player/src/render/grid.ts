@@ -85,9 +85,15 @@ export class GridView {
   private build(): void {
     const colgroup = document.createElement("colgroup");
     colgroup.append(colWidth(ROW_HEADER_WIDTH));
+    let width = ROW_HEADER_WIDTH;
     for (let col = 1; col <= this.cols; col++) {
-      colgroup.append(colWidth(this.sheet.columns[colToLetters(col)] ?? DEFAULT_COLUMN_WIDTH));
+      const px = this.sheet.columns[colToLetters(col)] ?? DEFAULT_COLUMN_WIDTH;
+      colgroup.append(colWidth(px));
+      width += px;
     }
+    // Явная ширина: длинный текст (=СУММ(C4:C11)) выходит на соседние ячейки, как в Excel,
+    // а не раздвигает колонку
+    this.table.style.width = `${width}px`;
 
     const head = document.createElement("tr");
     head.append(document.createElement("th"));

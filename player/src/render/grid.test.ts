@@ -42,6 +42,7 @@ describe("GridView", () => {
     expect(grid.table.querySelectorAll("th.xl-rowh")).toHaveLength(6);
     const widths = [...grid.table.querySelectorAll("col")].map((c) => c.style.width);
     expect(widths.slice(0, 4)).toEqual(["40px", "30px", "140px", "64px"]);
+    expect(grid.table.style.width).toBe(`${40 + 30 + 140 + 64 * 5}px`); // длинный текст не раздвигает колонки
   });
 
   it("отрисовывает значения, формат, стиль и выравнивание", () => {

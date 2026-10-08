@@ -54,6 +54,7 @@ export class Stage {
 
     overlays.showSelection(editing ? null : state.selection);
     overlays.showRefs(editing ? editorRefs(editing) : state.shownRefs);
+    overlays.showAnts(state.clipboard);
     const editorHtml = this.editor.render(editing, locale, editorChars);
 
     window.nameBox.textContent = editing?.cell ?? state.active;

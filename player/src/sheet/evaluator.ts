@@ -42,7 +42,7 @@ function fromParserResult(result: unknown): CellValue {
   return new ExcelError("#VALUE!");
 }
 
-export function createEvaluator(source: CellSource) {
+function createParser(source: CellSource): FormulaParser {
   const parser = new FormulaParser({
     onCell: (ref: CellRef) => toParserValue(source.value(cellName(ref))),
     onRange: (ref: RangeRef) => {
@@ -65,15 +65,28 @@ export function createEvaluator(source: CellSource) {
   });
   parser.funsPreserveRef.push(...PRESERVE_REF);
   installFormulajs(parser, PRESERVE_REF);
+  return parser;
+}
+
+export function createEvaluator(source: CellSource) {
+  // fast-formula-parser не допускает повторного входа: если при разборе формулы нужно значение
+  // другой формулы (onCell → вычисление), вложенный разбор на том же экземпляре даёт #ERROR!.
+  // Поэтому на каждый уровень вложенности — свой экземпляр парсера.
+  const parsers: FormulaParser[] = [];
+  let depth = 0;
 
   /** formula — с ведущим «=»; at — адрес ячейки, где стоит формула (нужен ROW(), COLUMN()). */
   return function evaluate(formula: string, at: { row: number; col: number }): CellValue {
+    const parser = (parsers[depth] ??= createParser(source));
+    depth++;
     try {
       const result = parser.parse(formula.replace(/^=/, ""), { sheet: "Sheet1", ...at });
       return fromParserResult(result);
     } catch (e) {
       if (e && typeof e === "object" && "error" in e) return new ExcelError(String(e.error));
       throw e;
+    } finally {
+      depth--;
     }
   };
 }

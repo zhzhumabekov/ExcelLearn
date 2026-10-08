@@ -97,6 +97,10 @@
   - Acceptance: тесты `it.fails` в `functions-support.test.ts` и `sheet-model.test.ts` становятся обычными и проходят
   - Deps: T8
 
+- [ ] **T8b. INDIRECT и OFFSET** · S · *когда дойдём до глав книги об OFFSET/INDIRECT*
+  - Найдено в T13: нет ни в fast-formula-parser, ни в formulajs (#NAME?); нужны функции, возвращающие ссылку
+  - Acceptance: `it.fails("INDIRECT…")` в `sheet-model.test.ts` проходит; OFFSET со сдвигом и размером
+
 - [x] **T9. Локализация формул** · S
   - Acceptance: `toDisplay(formula, 'ru')` → `=СУММ(C4:C11)`, `;` между аргументами, `449,63`; `'en'` — без изменений; словарь функций расширяется одной строкой
   - Verify: Vitest — таблица случаев, включая вложенные функции и строки в кавычках
@@ -121,7 +125,7 @@
   - Files: `player/src/actions/{click,select,type,ref,keys}.ts`, `player/src/render/editor.ts`, `actions.test.ts`
   - Deps: T11
 
-- [ ] **T13. Действия-2** · M
+- [x] **T13. Действия-2** · M
   - Acceptance: `keys: [Ctrl, C]` (бегущая рамка), вставка `Enter`/`Ctrl+V` в выделенный диапазон, `Ctrl+Z` (отмена последнего действия), `dragSelect`, `fill` (маркер заполнения, сдвиг ссылок), `Alt+=` (автосумма с угадыванием диапазона)
   - Verify: Vitest — `apply()` для каждого; шаги 2–4 урока 1-01 и шаг 7 урока 0-01 на dev-странице
   - Files: `player/src/actions/{clipboard,fill,select-range,autosum}.ts`, `actions2.test.ts`

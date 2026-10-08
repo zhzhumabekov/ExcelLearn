@@ -85,6 +85,27 @@ describe("SheetModel", () => {
     expect(sheet.value("F5")).toEqual(new ExcelError("#N/A"));
   });
 
+  it("формула над диапазоном формул, которые вычисляются позже (порядок ячеек в листе)", () => {
+    // E6 есть в листе с самого начала (стиль итога), а E2:E3 получают формулы позже —
+    // при пересчёте E6 идёт раньше, и её зависимости вычисляются вложенно.
+    const sheet = new SheetModel({ cells: { E6: { style: "total" }, B2: 1, B3: 2 } });
+    sheet.setInput("E6", "=SUM(E2:E3)");
+    sheet.setInput("E2", "=B2*10");
+    sheet.setInput("E3", "=B3*10");
+
+    expect(sheet.value("E6")).toBe(30);
+  });
+
+  // Известный пробел: INDIRECT и OFFSET не реализованы ни в fast-formula-parser, ни в formulajs (#NAME?).
+  // Понадобятся для глав книги об OFFSET и INDIRECT — тогда дописать как функции со ссылками.
+  it.fails("INDIRECT: ссылка, заданная текстом", () => {
+    const sheet = new SheetModel({ cells: { A1: { style: "total" }, B1: 5 } });
+    sheet.setInput("A1", '=INDIRECT("C1")+1');
+    sheet.setInput("C1", "=B1*2");
+
+    expect(sheet.value("A1")).toBe(11);
+  });
+
   it("ошибки Excel — значения типа ExcelError", () => {
     const sheet = wages();
 

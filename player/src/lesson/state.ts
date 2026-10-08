@@ -1,5 +1,5 @@
-import { offsetCell, parseRange, rangeName } from "../sheet/address";
-import type { SheetModel } from "../sheet/sheet-model";
+import { type CellPos, cellName, cellsInRange, offsetCell, parseCell, parseRange, rangeName, shiftFormula } from "../sheet/address";
+import { isFormula, type SheetModel, type SheetSnapshot } from "../sheet/sheet-model";
 
 /** Кусок текста в редакторе формулы: обычный текст или ссылка, вставленная мышью (цветная). */
 export interface EditorPart {
@@ -25,10 +25,14 @@ export interface LessonState {
   editor: EditorState | null;
   /** Ссылки формулы, подсвеченные действием showRefs (без редактора). */
   shownRefs: string[];
+  /** Скопированный диапазон (Ctrl+C) — вокруг него «бегущая» рамка. */
+  clipboard: string | null;
+  /** Снимки листа до каждого изменения — для Ctrl+Z. */
+  undo: SheetSnapshot[];
 }
 
 export function createState(sheet: SheetModel): LessonState {
-  return { sheet, active: "A1", selection: "A1", editor: null, shownRefs: [] };
+  return { sheet, active: "A1", selection: "A1", editor: null, shownRefs: [], clipboard: null, undo: [] };
 }
 
 export function editorText(editor: EditorState): string {
@@ -50,7 +54,10 @@ export function selectRange(state: LessonState, range: string): void {
 
 /** Начать ввод в активную ячейку, если он ещё не начат (как при наборе первого символа в Excel). */
 export function ensureEditor(state: LessonState): EditorState {
-  state.editor ??= { cell: state.active, parts: [] };
+  if (!state.editor) {
+    state.editor = { cell: state.active, parts: [] };
+    state.clipboard = null; // как в Excel: начало ввода убирает «бегущую» рамку
+  }
   state.shownRefs = [];
   return state.editor;
 }
@@ -79,8 +86,89 @@ export function setRef(part: EditorPart, range: string): void {
 export function commitEditor(state: LessonState): void {
   const editor = state.editor;
   if (editor) {
+    rememberForUndo(state);
     state.sheet.setInput(editor.cell, editorText(editor));
     state.editor = null;
   }
   selectRange(state, offsetCell(state.active, 1, 0));
+}
+
+export function rememberForUndo(state: LessonState): void {
+  state.undo.push(state.sheet.snapshot());
+}
+
+/** Ctrl+Z: вернуть лист к состоянию до последнего изменения. Выделение остаётся. */
+export function undo(state: LessonState): void {
+  const snapshot = state.undo.pop();
+  if (snapshot) state.sheet.restore(snapshot);
+}
+
+/** Скопировать ячейку целиком (ввод + формат), сдвинув относительные ссылки формулы. */
+function copyCell(state: LessonState, from: CellPos, to: CellPos): void {
+  const source = state.sheet.get(cellName(from));
+  const input = isFormula(source.input) ? shiftFormula(source.input, to.row - from.row, to.col - from.col) : source.input;
+  state.sheet.setCell(cellName(to), { input, fmt: source.fmt, style: source.style });
+}
+
+/**
+ * Вставка буфера в выделение (Enter или Ctrl+V). Источник повторяется по выделению, как в Excel;
+ * если выделена одна ячейка — вставляется блок размера источника. Enter очищает буфер.
+ */
+export function pasteClipboard(state: LessonState, keepClipboard: boolean): string[] {
+  if (!state.clipboard) return [];
+  const source = parseRange(state.clipboard);
+  const h = source.end.row - source.start.row + 1;
+  const w = source.end.col - source.start.col + 1;
+  let target = parseRange(state.selection);
+  if (target.start.row === target.end.row && target.start.col === target.end.col) {
+    target = { start: target.start, end: { row: target.start.row + h - 1, col: target.start.col + w - 1 } };
+  }
+
+  rememberForUndo(state);
+  const cells = cellsInRange(target);
+  for (const addr of cells) {
+    const to = parseCell(addr);
+    const from = {
+      row: source.start.row + ((to.row - target.start.row) % h),
+      col: source.start.col + ((to.col - target.start.col) % w),
+    };
+    copyCell(state, from, to);
+  }
+  state.selection = rangeName(target);
+  if (!keepClipboard) state.clipboard = null;
+  return cells;
+}
+
+/** Маркер заполнения: первая ячейка диапазона копируется в остальные. Возвращает заполненные. */
+export function fillRange(state: LessonState, range: string): string[] {
+  const { start } = parseRange(range);
+  const cells = cellsInRange(range).filter((addr) => addr !== cellName(start));
+  rememberForUndo(state);
+  for (const addr of cells) copyCell(state, start, parseCell(addr));
+  selectRange(state, range);
+  return cells;
+}
+
+/**
+ * Какой диапазон предложит автосумма (Alt+=) для ячейки: сплошной блок чисел над ней,
+ * а если сверху чисел нет — слева. null, если суммировать нечего.
+ */
+export function autosumRange(sheet: SheetModel, addr: string): string | null {
+  const at = parseCell(addr);
+  const isNumber = (row: number, col: number) => row >= 1 && col >= 1 && typeof sheet.value(cellName({ row, col })) === "number";
+  for (const [dRow, dCol] of [
+    [-1, 0],
+    [0, -1],
+  ] as const) {
+    let row = at.row + dRow;
+    let col = at.col + dCol;
+    if (!isNumber(row, col)) continue;
+    const end = { row, col };
+    while (isNumber(row + dRow, col + dCol)) {
+      row += dRow;
+      col += dCol;
+    }
+    return rangeName(parseRange(`${cellName({ row, col })}:${cellName(end)}`));
+  }
+  return null;
 }
