@@ -113,3 +113,34 @@ describe("ГПР, ПОИСКПОЗ, ошибки аргументов", () => {
     expect(colToLetters(3)).toBe("C");
   });
 });
+
+describe("ИНДЕКС (глава 4)", () => {
+  const cells: Record<string, number | string> = {};
+  for (let r = 1; r <= 3; r++) for (let c = 1; c <= 3; c++) cells[String.fromCharCode(64 + c) + r] = r * 10 + c;
+  const sheet = new SheetModel({
+    cells: {
+      ...cells,
+      E1: "=INDEX(A1:C3,2,3)",
+      E2: "=SUM(INDEX(A1:C3,2,0))",
+      E3: "=SUM(INDEX(A1:C3,0,3))",
+      E4: "=INDEX(A1:A3,2)",
+      E5: "=INDEX(A2:C2,3)",
+      E6: "=INDEX(A1:C3,4,1)",
+      G1: 3,
+      G2: 2,
+      E7: "=INDEX(A1:C3,G1,G2)",
+    },
+  });
+
+  it("строка и столбец, номера из ячеек, ноль — вся строка или столбец", () => {
+    expect(["E1", "E2", "E3", "E7"].map((a) => sheet.value(a))).toEqual([23, 66, 69, 32]);
+  });
+
+  it("один номер: у столбца — строка, у строки — столбец (как в Excel)", () => {
+    expect([sheet.value("E4"), sheet.value("E5")]).toEqual([21, 23]);
+  });
+
+  it("номер за пределами массива — #ССЫЛКА!", () => {
+    expect(sheet.value("E6")).toEqual(new ExcelError("#REF!"));
+  });
+});

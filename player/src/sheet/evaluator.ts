@@ -30,6 +30,11 @@ const PRESERVE_REF = ["FORMULATEXT"];
 
 const { FormulaError } = FormulaParser;
 
+interface CellRefLike {
+  row: number;
+  col: number;
+}
+
 // Ошибка в ячейке должна распространяться дальше (=A1+1 при A1 = #DIV/0! → #DIV/0!), а не читаться как текст.
 function toParserValue(value: CellValue): unknown {
   if (value instanceof ExcelError) return PARSER_ERRORS.get(value.code) ?? FormulaError.VALUE;
@@ -74,6 +79,18 @@ function createParser(source: CellSource): FormulaParser {
     },
   });
   parser.funsPreserveRef.push(...PRESERVE_REF);
+  // ИНДЕКС по одной строке (B3:D3) с одним номером: в Excel это номер столбца, а у парсера — номер строки
+  // (#ССЫЛКА!). Остальное — родная реализация: она возвращает ссылку, поэтому работает СУММ(ИНДЕКС(…;0;2)).
+  const nativeIndex = parser.functions.INDEX;
+  if (nativeIndex) {
+    parser.functions.INDEX = (context: unknown, ranges: unknown, rowNum: unknown, colNum?: unknown, area?: unknown) => {
+      const ref = (ranges as { ref?: { from?: CellRefLike; to?: CellRefLike } } | null)?.ref;
+      const oneRow = ref?.from && ref.to && ref.from.row === ref.to.row && ref.from.col !== ref.to.col;
+      return colNum == null && oneRow
+        ? nativeIndex(context as never, ranges as never, 1 as never, rowNum as never)
+        : nativeIndex(context as never, ranges as never, rowNum as never, colNum as never, area as never);
+    };
+  }
   // ВПР/ГПР/ПОИСКПОЗ — свои, с двоичным поиском Excel (см. lookup.ts); formulajs их не перекрывает
   Object.assign(parser.functions, LOOKUP_FUNCTIONS);
   installFormulajs(parser, [...PRESERVE_REF, ...Object.keys(LOOKUP_FUNCTIONS)]);

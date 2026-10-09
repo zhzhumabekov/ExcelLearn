@@ -17,3 +17,6 @@ chapters:
   - id: ch03
     number: 3
     title: Функции поиска
+  - id: ch04
+    number: 4
+    title: Функция ИНДЕКС
