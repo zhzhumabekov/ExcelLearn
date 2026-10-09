@@ -1,7 +1,8 @@
 import type { CellSpec, Sheet } from "../generated/lesson";
 
 import { parseCell } from "./address";
-import { type CellValue, createEvaluator } from "./evaluator";
+import type { CellValue } from "./evaluator";
+import { Workbook } from "./workbook";
 
 export type Fmt = NonNullable<CellSpec["fmt"]>;
 export type Style = NonNullable<CellSpec["style"]>;
@@ -35,25 +36,19 @@ export function isFormula(input: CellState["input"]): input is string {
 /**
  * Модель листа: ввод ячеек, форматы и вычисленные значения. Не знает об отрисовке и анимации —
  * действия урока меняют лист только через этот класс, поэтому перемотка детерминирована.
+ * Формулы вычисляет книга (Workbook): ссылки на другие листы и имена диапазонов — её забота.
+ * Лист без книги (уроки на одном листе) получает свою книгу из одного листа.
  */
 export class SheetModel {
   readonly name: string;
   readonly file: string | null;
   readonly columns: Readonly<Record<string, number>>;
   readonly rows: number | null;
+  readonly book: Workbook;
   private cells = new Map<string, CellState>();
-  private readonly evaluate = createEvaluator({
-    value: (addr) => this.computeValue(addr),
-    formula: (addr) => {
-      const input = this.cells.get(addr)?.input ?? null;
-      return isFormula(input) ? input : null;
-    },
-  });
-  // Пересчёт: значения формул вычисляются лениво, с защитой от циклов.
-  private computed = new Map<string, CellValue>();
-  private inProgress = new Set<string>();
 
-  constructor(sheet: Sheet) {
+  constructor(sheet: Sheet, book?: Workbook) {
+    this.book = book ?? new Workbook();
     this.name = sheet.name ?? "Лист1";
     this.file = sheet.file ?? null;
     this.columns = sheet.columns ?? {};
@@ -67,6 +62,7 @@ export class SheetModel {
         style: spec.style ?? null,
       });
     }
+    this.book.attach(this);
     this.recalc();
   }
 
@@ -74,8 +70,12 @@ export class SheetModel {
     return this.cells.get(addr) ?? EMPTY;
   }
 
+  /** Значение ячейки; у формулы — вычисленное книгой (с кэшем до следующего изменения). */
   value(addr: string): CellValue {
-    return this.get(addr).value;
+    const input = this.cells.get(addr)?.input ?? null;
+    if (typeof input === "string" && input.startsWith("'")) return input.slice(1); // текст, набранный с апострофом
+    if (isFormula(input)) return this.book.computeFormula(this.name, addr, input);
+    return input;
   }
 
   formula(addr: string): string | null {
@@ -86,6 +86,19 @@ export class SheetModel {
   /** Адреса непустых ячеек (с вводом или форматом). */
   addresses(): string[] {
     return [...this.cells.keys()];
+  }
+
+  /** Заполненная часть листа: последняя строка и столбец с вводом — граница для A:A и 12:12. */
+  extent(): { rows: number; cols: number } {
+    let rows = 1;
+    let cols = 1;
+    for (const [addr, cell] of this.cells) {
+      if (cell.input === null) continue;
+      const { row, col } = parseCell(addr);
+      rows = Math.max(rows, row);
+      cols = Math.max(cols, col);
+    }
+    return { rows, cols };
   }
 
   /** Ввод в ячейку (как набор текста + Enter). Формат и стиль ячейки сохраняются. */
@@ -112,28 +125,22 @@ export class SheetModel {
   }
 
   restore(snapshot: SheetSnapshot): void {
-    this.cells = new Map([...snapshot].map(([addr, cell]) => [addr, { ...cell }]));
+    this.restoreCells(snapshot);
     this.recalc();
   }
 
-  recalc(): void {
-    this.computed.clear();
-    for (const [addr, cell] of this.cells) cell.value = this.computeValue(addr);
+  /** Вернуть ячейки без пересчёта — книга восстанавливает все листы и пересчитывает один раз. */
+  restoreCells(snapshot: SheetSnapshot): void {
+    this.cells = new Map([...snapshot].map(([addr, cell]) => [addr, { ...cell }]));
   }
 
-  private computeValue(addr: string): CellValue {
-    const input = this.cells.get(addr)?.input ?? null;
-    if (!isFormula(input)) return input;
-    const cached = this.computed.get(addr);
-    if (cached !== undefined) return cached;
-    if (this.inProgress.has(addr)) return 0; // циклическая ссылка: Excel показывает 0 и предупреждение
-    this.inProgress.add(addr);
-    try {
-      const value = this.evaluate(input, parseCell(addr));
-      this.computed.set(addr, value);
-      return value;
-    } finally {
-      this.inProgress.delete(addr);
-    }
+  /** Пересчёт всей книги: формулы могут ссылаться на этот лист с других листов. */
+  recalc(): void {
+    this.book.recalc();
+  }
+
+  /** Обновить сохранённые значения ячеек (вызывает книга после пересчёта). */
+  refreshValues(): void {
+    for (const [addr, cell] of this.cells) cell.value = this.value(addr);
   }
 }

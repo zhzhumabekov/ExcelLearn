@@ -8,8 +8,9 @@ declare module "fast-formula-parser" {
 
   export interface RangeRef {
     sheet?: string;
-    from: { row: number; col: number };
-    to: { row: number; col: number };
+    /** null — целый столбец (row) или целая строка (col): A:A, 12:12 */
+    from: { row: number | null; col: number | null };
+    to: { row: number | null; col: number | null };
   }
 
   export interface FunctionArg {

@@ -11,8 +11,8 @@ export interface RangePos {
 }
 
 const CELL_RE = /^([A-Z]{1,3})([1-9][0-9]*)$/;
-const MAX_COL = 16384; // XFD
-const MAX_ROW = 1048576;
+export const MAX_COL = 16384; // XFD
+export const MAX_ROW = 1048576;
 
 export function lettersToCol(letters: string): number {
   let col = 0;
