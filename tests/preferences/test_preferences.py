@@ -164,3 +164,15 @@ def test_lesson_page_passes_player_settings(logged):
         "narrationVolume": 40,
         "autoplayNext": True,
     }
+
+
+def test_narration_settings_hidden_while_narration_disabled(logged, settings):
+    settings.NARRATION_ENABLED = False
+    html = logged.get(PAGE).content.decode()
+    assert "Озвучка уроков" not in html
+    # значения уходят скрытыми полями — форма сохраняется, озвучка не сбрасывается
+    assert '<input type="hidden" name="narration_volume" value="80">' in html
+    assert '<input type="hidden" name="narration_on" value="on">' in html
+
+    settings.NARRATION_ENABLED = True
+    assert "Озвучка уроков" in logged.get(PAGE).content.decode()

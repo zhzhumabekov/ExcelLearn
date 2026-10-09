@@ -105,7 +105,9 @@ def load_manifest(lesson_id: str, out_dir: Path | None = None) -> dict | None:
 
 
 def narration_urls(lesson_id: str) -> dict[str, dict[str, str]]:
-    """Манифест урока с полными URL аудио — то, что получает плеер. Пусто, если озвучки нет."""
+    """Манифест урока с полными URL аудио — то, что получает плеер. Пусто, если озвучки нет или она выключена."""
+    if not settings.NARRATION_ENABLED:
+        return {}  # плеер без аудио не показывает кнопку звука
     manifest = load_manifest(lesson_id)
     if not manifest:
         return {}

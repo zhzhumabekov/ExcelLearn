@@ -8,7 +8,7 @@ import pytest
 from django.core.management import CommandError, call_command
 
 from lessons.schema import Lesson
-from narration.builder import build, load_manifest, render_say
+from narration.builder import build, load_manifest, narration_urls, render_say
 from narration.providers import Audio, ProviderError, get_provider
 from narration.providers.silent import SilentProvider, estimated_seconds
 
@@ -122,3 +122,14 @@ def test_command_rejects_unknown_lesson(settings, tmp_path: Path):
 
     with pytest.raises(CommandError, match="Нет таких уроков: nope"):
         call_command("narration_build", "--provider", "silent", "--lesson", "nope", stdout=StringIO())
+
+
+def test_narration_urls_empty_while_narration_disabled(settings, tmp_path: Path):
+    settings.NARRATION_DIR = tmp_path / "narration"
+    call_command("narration_build", "--provider", "silent", "--lesson", "sum-and-autofill", stdout=StringIO())
+
+    settings.NARRATION_ENABLED = False
+    assert narration_urls("sum-and-autofill") == {}  # плеер без кнопки звука
+
+    settings.NARRATION_ENABLED = True
+    assert narration_urls("sum-and-autofill")["0"]["ru"].endswith(".wav")

@@ -47,6 +47,7 @@
         </div>
       </fieldset>
 
+      {% if narration_enabled %}
       <fieldset class="space-y-4 p-6">
         <legend class="sr-only">Озвучка</legend>
         <label class="flex items-center gap-3">
@@ -60,6 +61,11 @@
           <span class="w-12 tabular-nums">{{ form.narration_volume.value }}%</span>
         </label>
       </fieldset>
+      {% else %}
+      {# Озвучка выключена: поля скрыты, но значения уходят с формой, чтобы не сбросились #}
+      {% if form.narration_on.value %}<input type="hidden" name="narration_on" value="on">{% endif %}
+      <input type="hidden" name="narration_volume" value="{{ form.narration_volume.value }}">
+      {% endif %}
 
       <fieldset class="p-6">
         <legend class="sr-only">Автопереход</legend>

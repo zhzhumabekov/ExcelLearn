@@ -109,6 +109,9 @@ MEDIA_ROOT = BASE_DIR / "media"
 # Курс и уроки в YAML (content-as-code)
 CONTENT_DIR = BASE_DIR / "content"
 
+# Озвучка выключена до решения, нужна ли она (вернёмся после завершения проекта). Код, тексты say и
+# narration_build остаются; NARRATION_ENABLED=true возвращает голос в плеер и пункт в настройках.
+NARRATION_ENABLED = env.bool("NARRATION_ENABLED", default=False)
 # Озвучка: provider silent (разработка, без сети) | yandex; аудио — в media/narration (не в git)
 TTS_PROVIDER = env("TTS_PROVIDER", default="silent")
 TTS_API_KEY = env("TTS_API_KEY", default="")

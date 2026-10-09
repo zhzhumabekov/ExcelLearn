@@ -20,6 +20,7 @@ RECORD_AUDIO = """
 
 @pytest.fixture
 def narration(settings, tmp_path: Path):
+    settings.NARRATION_ENABLED = True  # по умолчанию озвучка выключена
     settings.MEDIA_ROOT = tmp_path
     settings.NARRATION_DIR = tmp_path / "narration"
     call_command("narration_build", "--provider", "silent", stdout=StringIO())
