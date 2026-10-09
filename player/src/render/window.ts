@@ -58,9 +58,13 @@ export class WindowView {
     );
 
     const formulaBar = el("div", "xl-fbar");
-    this.nameBox = el("div", "xl-namebox");
+    // Поле «Имя» — отдельное поле со стрелкой списка, как в Excel, а не просто подпись
+    const nameField = el("div", "xl-namebox");
+    nameField.title = "Поле «Имя»: адрес активной ячейки";
+    this.nameBox = el("span", "xl-name");
+    nameField.append(this.nameBox, el("span", "xl-name-arrow", "▾"));
     this.formulaText = el("div", "xl-ftext");
-    formulaBar.append(this.nameBox, el("div", "xl-fx", "fx"), this.formulaText);
+    formulaBar.append(nameField, el("div", "xl-fx", "fx"), this.formulaText);
 
     this.grid = new GridView(sheet, locale);
     this.gridWrap = el("div", "xl-grid-wrap");

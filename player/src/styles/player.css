@@ -141,21 +141,32 @@
   align-items: stretch;
   border-bottom: 1px solid #d6d6d6;
   font-size: 13px;
-  height: 30px;
+  height: 34px;
+  padding: 4px 0 4px 6px;
+  gap: 6px;
+  background: #f3f3f3;
 }
 
+/* Поле «Имя»: белое поле в рамке со стрелкой списка — как в Excel */
 .xl-player .xl-namebox {
-  width: 86px;
-  border-right: 1px solid #d6d6d6;
+  width: 92px;
   display: flex;
   align-items: center;
-  padding: 0 8px;
+  justify-content: space-between;
+  padding: 0 4px 0 8px;
+  background: #fff;
+  border: 1px solid #c8c8c8;
+  border-radius: 2px;
   font-weight: 600;
 }
 
+.xl-player .xl-name-arrow {
+  color: #777;
+  font-size: 11px;
+}
+
 .xl-player .xl-fx {
-  width: 44px;
-  border-right: 1px solid #d6d6d6;
+  width: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -172,6 +183,9 @@
   white-space: nowrap;
   font-family: Consolas, "Cascadia Mono", monospace;
   min-width: 320px;
+  background: #fff;
+  border: 1px solid #c8c8c8;
+  border-right: 0;
 }
 
 /* ---------- Сетка ---------- */
