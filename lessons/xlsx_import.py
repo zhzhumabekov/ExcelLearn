@@ -29,6 +29,8 @@ def column_width_px(width: float | None) -> int:
 
 
 def cell_format(number_format: str) -> str:
+    if "₸" in number_format:
+        return "kzt"
     if "$" in number_format:
         return "usd"
     if "%" in number_format:

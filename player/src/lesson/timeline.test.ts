@@ -97,6 +97,16 @@ describe("воспроизведение", () => {
     expect(timeline.status).toBe("playing");
   });
 
+  it("stop() во время воспроизведения завершает play() тихо (плеер убрали со страницы)", async () => {
+    const { timeline, advance } = setup(sumLesson);
+    const run = timeline.play();
+    await advance(2000);
+
+    timeline.stop();
+
+    await finish(run, advance); // без Aborted наружу
+  });
+
   it("перемотка во время воспроизведения продолжает играть с нового шага", async () => {
     const onComplete = vi.fn();
     const { timeline, advance } = setup(sumLesson, { onComplete });

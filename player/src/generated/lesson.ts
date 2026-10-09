@@ -65,7 +65,7 @@ export interface CellSpec {
    * Формула, уже записанная в ячейке шаблона
    */
   f?: string | null;
-  fmt?: "general" | "number" | "usd" | "percent";
+  fmt?: "general" | "number" | "usd" | "kzt" | "percent";
   style?: ("head" | "label" | "total") | null;
 }
 export interface Step {

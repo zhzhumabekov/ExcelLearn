@@ -148,8 +148,7 @@ export function mount(el: HTMLElement, options: MountOptions): PlayerHandle {
     },
     destroy() {
       document.removeEventListener("keydown", onKey);
-      narration.stop();
-      stage.clock.cancel();
+      timeline.stop();
       root.remove();
     },
   };

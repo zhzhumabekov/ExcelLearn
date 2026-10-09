@@ -1,3 +1,5 @@
+import re
+
 import pytest
 from playwright.sync_api import Page, expect
 
@@ -26,14 +28,14 @@ def test_lesson_plays_to_the_end_without_errors(page: Page, lesson_id: str, loca
     assert page.errors == []
 
 
-def test_wages_final_sheet_matches_figure_1_1(page: Page):
+def test_wages_final_sheet(page: Page):
     open_lesson(page, "wages-weekly-salary", locale="ru", speed="16", demo="1")
     page.wait_for_function("window.demoDone === true", timeout=60_000)
 
     cell = lambda addr: page.locator(f'td[data-addr="{addr}"]')  # noqa: E731
-    expect(cell("E4")).to_have_text("$490,00")
+    expect(cell("E4")).to_have_text(re.compile(r"^88\s200 ₸$"))
     expect(cell("C12")).to_have_text("320")
-    expect(cell("E14")).to_have_text("$449,63")
+    expect(cell("E14")).to_have_text(re.compile(r"^80\s463 ₸$"))
     expect(cell("C13")).to_have_text("=СУММ(C4:C11)")  # FORMULATEXT в русском Excel
     expect(cell("F11")).to_have_text("=C11*D11")
     assert page.errors == []
@@ -70,5 +72,5 @@ def test_plan_toggles_and_seeks(page: Page):
 
     plan.locator("li >> nth=5").click()  # шаг 6: Enter уже нажат
     expect(page.locator(".xl-meta")).to_have_text("Шаг 6 из 9")
-    expect(page.locator('td[data-addr="E2"]')).to_have_text("400")
+    expect(page.locator('td[data-addr="E2"]')).to_have_text("15410")
     assert page.errors == []

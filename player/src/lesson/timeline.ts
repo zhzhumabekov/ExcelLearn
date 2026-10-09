@@ -97,6 +97,13 @@ export class Timeline {
     }
   }
 
+  /** Остановить всё навсегда (плеер убирают со страницы): текущий play() завершается тихо. */
+  stop(): void {
+    this.run++;
+    this.narration?.stop();
+    this.stage.clock.cancel();
+  }
+
   pause(): void {
     if (this.currentStatus !== "playing") return;
     this.stage.clock.pause();

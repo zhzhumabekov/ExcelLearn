@@ -26,7 +26,7 @@ class Model(BaseModel):
 class CellSpec(Model):
     v: Scalar | None = None
     f: str | None = Field(default=None, pattern=r"^=", description="Формула, уже записанная в ячейке шаблона")
-    fmt: Literal["general", "number", "usd", "percent"] = "general"
+    fmt: Literal["general", "number", "usd", "kzt", "percent"] = "general"
     style: Literal["head", "label", "total"] | None = None
 
 

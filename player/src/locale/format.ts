@@ -59,6 +59,11 @@ const NUMBER_FORMATS: Record<FunctionLocale, Intl.NumberFormat> = {
   ru: new Intl.NumberFormat("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
 };
 
+const KZT_FORMATS: Record<FunctionLocale, Intl.NumberFormat> = {
+  en: new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }),
+  ru: new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 }),
+};
+
 function decimalComma(text: string, locale: FunctionLocale): string {
   return locale === "ru" ? text.replace(".", ",") : text;
 }
@@ -108,6 +113,9 @@ function formatPlain(value: CellValue, fmt: Fmt, locale: FunctionLocale): Displa
   switch (fmt) {
     case "usd":
       return { text: NUMBER_FORMATS[locale].format(value), align: "right", currency: "$" };
+    case "kzt":
+      // Денежный формат Казахстана: «174 720 ₸» — тенге без тиынов, знак после числа
+      return { text: `${KZT_FORMATS[locale].format(value)} ₸`, align: "right" };
     case "number":
       return { text: NUMBER_FORMATS[locale].format(value), align: "right" };
     case "percent": {

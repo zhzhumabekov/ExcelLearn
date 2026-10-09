@@ -48,6 +48,7 @@ describe("formatValue", () => {
     [Math.sqrt(0.5), "general", "ru", { text: "0,7071067812", align: "right" }],
     [320, "general", "ru", { text: "320", align: "right" }],
     [0.1 + 0.2, "general", "en", { text: "0.3", align: "right" }], // без хвоста 0.30000000000000004
+    [2450.6, "kzt", "en", { text: "2,451 ₸", align: "right" }], // тенге без тиынов
     [0.25, "percent", "ru", { text: "25%", align: "right" }],
     [0.125, "percent", "ru", { text: "12,50%", align: "right" }],
     [3.14159, "number", "en", { text: "3.14", align: "right" }],
@@ -61,6 +62,7 @@ describe("formatValue", () => {
 
   it("группирует разряды по-русски", () => {
     expect(formatValue(1320, "usd", "ru").text).toMatch(/^1\s320,00$/u);
+    expect(formatValue(174720, "kzt", "ru").text).toMatch(/^174\s720 ₸$/u);
   });
 
   it("показывает ошибки на языке ученика", () => {

@@ -39,6 +39,7 @@
             "general",
             "number",
             "usd",
+            "kzt",
             "percent"
           ],
           "type": "string"

@@ -69,7 +69,14 @@ def test_collect_expect_takes_only_new_formulas():
 
 @pytest.mark.parametrize(
     ("number_format", "fmt"),
-    [("General", "general"), (USD, "usd"), ("0%", "percent"), ("0.000", "number"), ("0", "general")],
+    [
+        ("General", "general"),
+        (USD, "usd"),
+        ('#,##0 "₸"', "kzt"),
+        ("0%", "percent"),
+        ("0.000", "number"),
+        ("0", "general"),
+    ],
 )
 def test_cell_format(number_format, fmt):
     assert cell_format(number_format) == fmt
@@ -110,17 +117,19 @@ WAGES_FINAL = BOOK / "Practice Files/Chapter 1 Practice Files/wagesfinal.xlsx"
 
 
 @pytest.mark.skipif(not WAGES_FINAL.exists(), reason="файлы книги не в репозитории")
-def test_wages_import_matches_handwritten_lesson():
-    lesson = yaml.safe_load((BOOK / "content/lessons/01-01-wages.yaml").read_text(encoding="utf-8"))
-
+def test_wages_import_from_book_files():
+    # Урок 01-01 теперь на своих данных (тенге), поэтому сверяем импорт с числами рис. 1.1 книги
     result = import_workbook(WAGES_TEMPLATE, WAGES_FINAL)
 
     def value(cell):
         return cell.get("v") if isinstance(cell, dict) else cell
 
-    assert {a: value(c) for a, c in result.sheet["cells"].items()} == {
-        a: value(c) for a, c in lesson["sheet"]["cells"].items()
-    }
-    for addr, expected in lesson["expect"].items():
-        got = result.expect[addr]
-        assert got == pytest.approx(expected, abs=0.005) if isinstance(expected, int | float) else got == expected
+    cells = {a: value(c) for a, c in result.sheet["cells"].items()}
+    assert cells["B4"] == "Luka Abrus"
+    assert cells["C4"] == 49
+    assert cells["D4"] == 10
+    assert result.sheet["cells"]["D4"]["fmt"] == "usd"
+    assert result.expect["E4"] == 490
+    assert result.expect["C12"] == 320
+    assert result.expect["E14"] == pytest.approx(449.625)
+    assert result.expect["F4"] == "=C4*D4"
