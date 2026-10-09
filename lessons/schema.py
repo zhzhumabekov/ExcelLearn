@@ -426,6 +426,7 @@ class Exercise(Model):
     explain: str = Field(min_length=1, description="Как решать: нужный навык, подсказки")
     mistake: str | None = Field(default=None, description="Частая ошибка")
     sheet: Sheet
+    sheets: list[Sheet] = Field(default_factory=list, description="Другие листы с данными (ответы — на первом)")
     solution: Solution
     expect: dict[CellAddr, Scalar] = Field(min_length=1, description="Ответы для сверки решения")
 

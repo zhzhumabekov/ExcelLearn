@@ -136,3 +136,16 @@ def test_relative_name_stored_like_excel():
     assert _relative_to_a1("B6", "B7") == "A1048576"  # строка выше
     assert _relative_to_a1("C7", "B7") == "B1"  # ячейка справа
     assert _relative_to_a1("$B$3", "B7") == "$B$3"  # абсолютная часть не сдвигается
+
+
+def test_placeholders_rendered_on_page_and_in_files(client):
+    from lessons.placeholders import localize_formula, render_placeholders
+
+    assert render_placeholders("Функция {fn:VLOOKUP}: {f:=VLOOKUP(A1,B1:C3,2,FALSE)}") == (
+        "Функция ВПР: =ВПР(A1;B1:C3;2;ЛОЖЬ)"
+    )
+    assert localize_formula('=IF(A1<0.5,"x, y",1.5)') == '=ЕСЛИ(A1<0,5;"x, y";1,5)'
+    assert render_placeholders("{f:=IF(A1<5,1,2)}") == "=ЕСЛИ(A1&lt;5;1;2)"
+
+    html = client.get(reverse("catalog:exercises", args=["ch03"])).content.decode()
+    assert "{fn:" not in html and "ВПР" in html

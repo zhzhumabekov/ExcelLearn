@@ -23,6 +23,7 @@ class Command(BaseCommand):
             {
                 "name": f"{chapter}/{exercise.number} {exercise.id}",
                 "sheet": solution_sheet(exercise).model_dump(mode="json", exclude_none=True),
+                "sheets": [s.model_dump(mode="json", exclude_none=True) for s in exercise.sheets],
                 "names": [n.model_dump(mode="json", exclude_none=True) for n in exercise.solution.names],
                 "expect": exercise.expect,
             }

@@ -77,6 +77,7 @@ export function verifySolutionSheet(
   sheet: Sheet,
   expected: Record<string, string | number>,
   names: NameSpec[] = [],
+  sheets: Sheet[] = [],
 ): VerifyResult {
-  return checkExpect(createBook({ sheet, names }), expected);
+  return checkExpect(createBook({ sheet, sheets, names }), expected);
 }

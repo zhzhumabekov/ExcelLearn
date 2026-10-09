@@ -5,6 +5,7 @@ import pytest
 from django.urls import reverse
 
 from apps.core.templatetags.ru import ru_plural
+from lessons.registry import get_registry
 
 
 def lesson_json(html: str) -> dict:
@@ -18,7 +19,10 @@ def test_home_links_to_first_lesson_and_course(client):
 
     assert reverse("catalog:lesson", args=["sum-and-autofill"]) in html
     assert reverse("catalog:course") in html
-    assert "3 главы · 15 уроков" in html
+    registry = get_registry()
+    chapters = ru_plural(len(registry.chapters), "глава,главы,глав")
+    lessons = ru_plural(len(registry.lessons), "урок,урока,уроков")
+    assert f"{chapters} · {lessons}" in html
 
 
 def test_course_lists_chapters_and_lessons_in_book_order(client):
@@ -43,7 +47,7 @@ def test_lesson_neighbors_across_chapters(client):
     def page(lesson_id):
         return client.get(reverse("catalog:lesson", args=[lesson_id])).content.decode()
 
-    first, second, last = page("sum-and-autofill"), page("wages-weekly-salary"), page("row-names")
+    first, second, last = page("sum-and-autofill"), page("wages-weekly-salary"), page(get_registry().lessons[-1].id)
 
     assert 'rel="prev"' not in first
     assert 'rel="next"' in first and reverse("catalog:lesson", args=["wages-weekly-salary"]) in first  # 0.1 → 1.1

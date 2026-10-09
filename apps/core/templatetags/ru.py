@@ -15,3 +15,11 @@ def ru_plural(count, forms: str) -> str:
     else:
         form = many
     return f"{count} {form}"
+
+
+@register.filter
+def excel_text(text: str, locale: str = "ru") -> str:
+    """Тексты заданий: {fn:VLOOKUP} → «ВПР», {f:=SUM(A1,B1)} → «=СУММ(A1;B1)» — на языке функций ученика."""
+    from lessons.placeholders import render_placeholders
+
+    return render_placeholders(text or "", locale or "ru")

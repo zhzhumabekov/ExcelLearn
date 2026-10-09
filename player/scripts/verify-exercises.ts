@@ -8,6 +8,7 @@ import { verifySolutionSheet } from "../src/lesson/verify";
 interface DumpedExercise {
   name: string;
   sheet: Sheet;
+  sheets: Sheet[];
   names: NameSpec[];
   expect: Record<string, string | number>;
 }
@@ -16,7 +17,7 @@ const exercises = JSON.parse(readFileSync(0, "utf8")) as DumpedExercise[];
 
 let failed = 0;
 for (const exercise of exercises) {
-  const { checked, problems } = verifySolutionSheet(exercise.sheet, exercise.expect, exercise.names);
+  const { checked, problems } = verifySolutionSheet(exercise.sheet, exercise.expect, exercise.names, exercise.sheets);
   if (problems.length === 0) {
     console.log(`✓ ${exercise.name}: значений сверено — ${checked}`);
   } else {

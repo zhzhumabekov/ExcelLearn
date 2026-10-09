@@ -15,6 +15,7 @@ from openpyxl.utils import column_index_from_string, get_column_letter
 from openpyxl.workbook.defined_name import DefinedName
 
 from .exercises import answer_addresses, solution_sheet
+from .placeholders import render_placeholders
 from .schema import CellSpec, Exercise, Lesson, NameSpec, Sheet
 
 XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -170,7 +171,7 @@ def lesson_xlsx(lesson: Lesson) -> bytes:
 
 def plain_text(html: str) -> str:
     """HTML условия → текст для ячейки: <br> и абзацы — переносы строк, остальные теги убираются."""
-    text = re.sub(r"<br\s*/?>|</p>", "\n", html)
+    text = re.sub(r"<br\s*/?>|</p>", "\n", render_placeholders(html))
     text = re.sub(r"<[^>]+>", "", text)
     text = re.sub(r"[ \t]+", " ", unescape(text))
     return "\n".join(line.strip() for line in text.splitlines()).strip()
@@ -209,6 +210,8 @@ def _add_info_sheet(wb: Workbook, exercise: Exercise, kind: Literal["task", "sol
 def exercise_xlsx(exercise: Exercise, kind: Literal["task", "solution"]) -> bytes:
     sheet = exercise.sheet if kind == "task" else solution_sheet(exercise)
     wb = build_workbook(sheet, answers=frozenset(answer_addresses(exercise)))
+    for extra in exercise.sheets:
+        fill_worksheet(wb.create_sheet(), extra)
     if kind == "solution":
         add_names(wb, exercise.solution.names, sheet.name)
     _add_info_sheet(wb, exercise, kind)
