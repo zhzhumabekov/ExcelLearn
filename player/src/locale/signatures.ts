@@ -14,6 +14,8 @@ const SIGNATURES: Record<string, [string, string][]> = {
   VLOOKUP: [["lookup_value", "искомое_значение"], ["table_array", "таблица"], ["col_index_num", "номер_столбца"], ["[range_lookup]", "[интервальный_просмотр]"]],
   MATCH: [["lookup_value", "искомое_значение"], ["lookup_array", "просматриваемый_массив"], ["[match_type]", "[тип_сопоставления]"]],
   INDEX: [["array", "массив"], ["row_num", "номер_строки"], ["[column_num]", "[номер_столбца]"]],
+  LARGE: [["array", "массив"], ["k", "k"]],
+  SMALL: [["array", "массив"], ["k", "k"]],
   SUMPRODUCT: [["array1", "массив1"], ["[array2]", "[массив2]"], ["…", "…"]],
   PMT: [["rate", "ставка"], ["nper", "кпер"], ["pv", "пс"], ["[fv]", "[бс]"], ["[type]", "[тип]"]],
   NPV: [["rate", "ставка"], ["value1", "значение1"], ["[value2]", "[значение2]"], ["…", "…"]],

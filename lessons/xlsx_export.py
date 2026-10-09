@@ -202,6 +202,8 @@ def _add_info_sheet(wb: Workbook, exercise: Exercise, kind: Literal["task", "sol
         rows += [("Частая ошибка", Font(bold=True)), (plain_text(exercise.mistake), None)]
     for i, (text, font) in enumerate(rows, start=1):
         cell = ws.cell(row=i, column=1, value=text)
+        if text.startswith("="):
+            cell.data_type = "s"  # текст подсказки, начинающийся с формулы, — не формула (иначе файл не откроется)
         cell.alignment = Alignment(wrap_text=True, vertical="top")
         if font:
             cell.font = font

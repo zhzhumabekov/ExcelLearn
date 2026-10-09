@@ -149,3 +149,11 @@ def test_placeholders_rendered_on_page_and_in_files(client):
 
     html = client.get(reverse("catalog:exercises", args=["ch03"])).content.decode()
     assert "{fn:" not in html and "ВПР" in html
+
+
+def test_info_text_starting_with_formula_stays_text(client):
+    # Подсказка «<code>=ИНДЕКС(…)</code> …» начинается с «=»: в файле это должен быть текст, а не формула
+    response = client.get(reverse("catalog:exercise-task", args=["ch05", "seller-count"]))
+    info = openpyxl.load_workbook(BytesIO(response.content))["Условие"]
+    cells = [c for row in info.iter_rows() for c in row if isinstance(c.value, str) and c.value.startswith("=")]
+    assert cells and all(c.data_type == "s" for c in cells)
