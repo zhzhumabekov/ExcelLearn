@@ -29,6 +29,16 @@ export function parseInput(raw: string | number | null): number | string | null 
   return Number.isFinite(n) ? n : raw;
 }
 
+const EXCEL_EPOCH = Date.UTC(1899, 11, 30);
+
+/** Дата «2025-05-01» → серийный номер Excel (45778); числа и прочее — как есть. */
+export function dateInput(v: CellSpec["v"]): number | string | null {
+  if (typeof v !== "string") return v ?? null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+  if (!m) return v;
+  return Math.round((Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])) - EXCEL_EPOCH) / 86_400_000);
+}
+
 export function isFormula(input: CellState["input"]): input is string {
   return typeof input === "string" && input.startsWith("=");
 }
@@ -56,7 +66,7 @@ export class SheetModel {
     for (const [addr, cell] of Object.entries(sheet.cells ?? {})) {
       const spec: CellSpec = typeof cell === "object" ? cell : { v: cell };
       this.cells.set(addr, {
-        input: spec.f ?? spec.v ?? null,
+        input: spec.f ?? (spec.fmt === "date" ? dateInput(spec.v) : spec.v) ?? null,
         value: null,
         fmt: spec.fmt ?? "general",
         style: spec.style ?? null,

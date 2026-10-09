@@ -12,10 +12,20 @@ export type RibbonButton =
   | "nameManager"
   | "defineName"
   | "defineNameMenu"
-  | "createFromSelection";
+  | "createFromSelection"
+  | "format";
 
-/** Пункты меню «Присвоить имя ▾». */
-export type MenuItem = "defineName" | "applyNames";
+/** Пункты меню «Присвоить имя ▾» и «Формат ▾» (с подменю «Скрыть или отобразить»). */
+export type MenuItem =
+  | "defineName"
+  | "applyNames"
+  | "hideUnhide"
+  | "hideRows"
+  | "hideColumns"
+  | "unhideRows"
+  | "unhideColumns";
+
+export type MenuState = "defineName" | "format" | "format-hide" | null;
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, className = "", text = ""): HTMLElementTagNameMap[K] {
   const node = document.createElement(tag);
@@ -30,6 +40,19 @@ function ribbonGroup(label: string, ...items: HTMLElement[]): HTMLElement {
   buttons.append(...items);
   group.append(buttons, el("div", "xl-rlabel", label));
   return group;
+}
+
+/** Выпадающее меню ленты; caption — серый заголовок раздела («Видимость»). */
+function menu(items: [MenuItem, string][], caption?: string): HTMLElement {
+  const box = el("div", "xl-menu");
+  box.hidden = true;
+  if (caption) box.append(el("div", "xl-menu-caption", caption));
+  for (const [id, label] of items) {
+    const item = el("div", "xl-menu-item", label);
+    item.dataset.menu = id;
+    box.append(item);
+  }
+  return box;
 }
 
 function ribbonButton(id: RibbonButton | null, icon: string, label: string): HTMLElement {
@@ -62,6 +85,8 @@ export class WindowView {
   private readonly tabs = new Map<RibbonTabId, HTMLElement>();
   private readonly sheetTabs = new Map<string, HTMLElement>();
   private readonly menu: HTMLElement;
+  private readonly formatMenu: HTMLElement;
+  private readonly hideMenu: HTMLElement;
   private current: GridView;
 
   constructor(
@@ -85,26 +110,34 @@ export class WindowView {
       tabs.append(tab);
     }
 
+    // «Формат ▾» → «Скрыть или отобразить ▸» → «Скрыть столбцы» (Главная → Ячейки)
+    const format = el("span", "xl-split");
+    format.append(ribbonButton("format", "▤", "Формат ▾"));
+    this.formatMenu = menu([["hideUnhide", "Скрыть или отобразить ▸"]], "Видимость");
+    this.hideMenu = menu([
+      ["hideRows", "Скрыть строки"],
+      ["hideColumns", "Скрыть столбцы"],
+      ["unhideRows", "Отобразить строки"],
+      ["unhideColumns", "Отобразить столбцы"],
+    ]);
+    this.hideMenu.classList.add("xl-submenu");
+    this.formatMenu.append(this.hideMenu);
+    format.append(this.formatMenu);
     const home = el("div", "xl-ribbon");
     home.append(
       ribbonGroup("Буфер обмена", ribbonButton("paste", "📋", "Вставить"), ribbonButton("copy", "⧉", "Копировать")),
       ribbonGroup("Шрифт", el("span", "xl-font", "Calibri"), el("span", "xl-font", "11"), ribbonButton(null, "Ж", "")),
+      ribbonGroup("Ячейки", format),
       ribbonGroup("Редактирование", ribbonButton("autosum", "Σ", "Автосумма")),
     );
 
     // «Присвоить имя ▾»: основная часть открывает окно, стрелка — меню («Применить имена…»)
     const define = el("span", "xl-split");
     define.append(ribbonButton("defineName", "🏷", "Присвоить имя"), ribbonButton("defineNameMenu", "▾", ""));
-    this.menu = el("div", "xl-menu");
-    this.menu.hidden = true;
-    for (const [id, label] of [
+    this.menu = menu([
       ["defineName", "Присвоить имя…"],
       ["applyNames", "Применить имена…"],
-    ] as const) {
-      const item = el("div", "xl-menu-item", label);
-      item.dataset.menu = id;
-      this.menu.append(item);
-    }
+    ]);
     define.append(this.menu);
     // Как в Excel: большая кнопка «Диспетчер имён» и столбик из трёх маленьких
     const manager = ribbonButton("nameManager", "📇", "Диспетчер имён");
@@ -169,7 +202,7 @@ export class WindowView {
   }
 
   menuItem(id: MenuItem): HTMLElement {
-    const item = this.menu.querySelector<HTMLElement>(`[data-menu="${id}"]`);
+    const item = this.el.querySelector<HTMLElement>(`[data-menu="${id}"]`);
     if (!item) throw new Error(`Нет пункта меню ${id}`);
     return item;
   }
@@ -197,8 +230,10 @@ export class WindowView {
     for (const [key, tab] of this.tabs) tab.classList.toggle("xl-on", key === id);
   }
 
-  showMenu(open: boolean): void {
-    this.menu.hidden = !open;
+  showMenu(open: MenuState): void {
+    this.menu.hidden = open !== "defineName";
+    this.formatMenu.hidden = open !== "format" && open !== "format-hide";
+    this.hideMenu.hidden = open !== "format-hide";
   }
 
   showNameList(names: readonly string[] | null): void {

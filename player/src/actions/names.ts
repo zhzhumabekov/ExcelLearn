@@ -2,10 +2,10 @@
 // строк и столбцов, «Выделить всё», автозавершение формулы.
 
 import { acceptSuggestion, nameBoxEnter, pickFromNameList } from "../lesson/dialogs";
-import { addArea, commitEditor, type LessonState, selectRange, switchSheet } from "../lesson/state";
-import { cellName, parseRange, rangeName } from "../sheet/address";
+import { addArea, commitEditor, hideColumns, type LessonState, selectRange, switchSheet } from "../lesson/state";
+import { cellName, colToLetters, lettersToCol, parseRange, rangeName } from "../sheet/address";
 import { along, dragMs } from "./mouse";
-import { clickAt } from "./ribbon";
+import { clickAt, ensureTab } from "./ribbon";
 import type { Action } from "./types";
 
 const CHAR_MS = 140;
@@ -133,6 +133,56 @@ export function autocomplete(label: string): Action {
       acceptSuggestion(state, label, "ru");
       stage.render(state);
       await clock.wait(300);
+    },
+  };
+}
+
+/**
+ * Скрыть столбцы: протянуть по их заголовкам, затем Главная → Формат ▾ → Скрыть или отобразить ▸ →
+ * Скрыть столбцы.
+ */
+export function hideColumnsAction(range: string): Action {
+  const [first = "A", last = first] = range.split(":");
+  const columns = `${first}:${last}`;
+  const apply = (state: LessonState) => {
+    if (state.editor) commitEditor(state);
+    selectRange(state, columns);
+    hideColumns(state, columns);
+    state.ribbonTab = "home";
+    state.menu = null;
+  };
+  return {
+    kind: "hideColumns",
+    apply,
+    async animate(ctx) {
+      const { state, stage, clock } = ctx;
+      if (state.editor) commitEditor(state);
+      const { cursor } = stage;
+      cursor.setShape("arrow");
+      await cursor.moveTo(stage.headerPoint(first), 700);
+      await cursor.press();
+      selectRange(state, `${first}:${first}`);
+      stage.render(state);
+      const from = lettersToCol(first);
+      const steps = lettersToCol(last) - from;
+      await cursor.moveTo(stage.headerPoint(last), 260 * steps + 500, (t) => {
+        selectRange(state, `${first}:${colToLetters(from + Math.round(t * steps))}`);
+        stage.render(state);
+      });
+      cursor.release();
+      selectRange(state, columns);
+      await ensureTab(ctx, "home");
+      await clickAt(stage, stage.ribbonPoint("format"), stage.window.ribbonButton("format"));
+      state.menu = "format";
+      stage.render(state);
+      await clock.wait(300);
+      await clickAt(stage, stage.menuPoint("hideUnhide"), stage.window.menuItem("hideUnhide"), 500);
+      state.menu = "format-hide";
+      stage.render(state);
+      await clock.wait(300);
+      await clickAt(stage, stage.menuPoint("hideColumns"), stage.window.menuItem("hideColumns"), 500);
+      apply(state);
+      stage.render(state);
     },
   };
 }

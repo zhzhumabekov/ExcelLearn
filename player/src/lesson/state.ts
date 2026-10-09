@@ -2,6 +2,7 @@ import {
   type CellPos,
   cellName,
   cellsInRange,
+  colToLetters,
   formulaRefs,
   offsetCell,
   parseCell,
@@ -47,8 +48,10 @@ export interface LessonState {
   /** Снимки книги (ячейки всех листов и имена) до каждого изменения — для Ctrl+Z. */
   undo: WorkbookSnapshot[];
   ribbonTab: RibbonTabId;
-  /** Открытое меню кнопки ленты («Присвоить имя ▾»). */
-  menu: "defineName" | null;
+  /** Открытое меню кнопки ленты: «Присвоить имя ▾», «Формат ▾» и его подменю «Скрыть или отобразить». */
+  menu: "defineName" | "format" | "format-hide" | null;
+  /** Скрытые столбцы по листам (буквы). */
+  hiddenColumns: Record<string, string[]>;
   /** Раскрыт список поля «Имя». */
   nameListOpen: boolean;
   /** Открытые окна: последнее — сверху (из «Диспетчера имён» открывается «Создание имени»). */
@@ -67,6 +70,7 @@ export function createState(sheet: SheetModel): LessonState {
     undo: [],
     ribbonTab: "home",
     menu: null,
+    hiddenColumns: {},
     nameListOpen: false,
     dialogs: [],
   };
@@ -106,6 +110,14 @@ export function selectRange(state: LessonState, range: string): void {
   state.active = rangeName({ start, end: start });
   state.areas = [];
   state.shownRefs = [];
+}
+
+/** Главная → Формат → Скрыть или отобразить → Скрыть столбцы: столбцы выделения скрываются. */
+export function hideColumns(state: LessonState, range: string): void {
+  const { start, end } = parseRange(range);
+  const hidden = new Set(state.hiddenColumns[state.sheet.name] ?? []);
+  for (let col = start.col; col <= end.col; col++) hidden.add(colToLetters(col));
+  state.hiddenColumns = { ...state.hiddenColumns, [state.sheet.name]: [...hidden].sort() };
 }
 
 /** С нажатым Ctrl выделить ещё диапазон: прежнее выделение остаётся частью несмежного диапазона. */

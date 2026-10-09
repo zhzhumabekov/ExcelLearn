@@ -42,6 +42,7 @@ const comparable = (state: LessonState) => ({
   clipboard: state.clipboard,
   dialogs: state.dialogs,
   ribbonTab: state.ribbonTab,
+  hiddenColumns: state.hiddenColumns,
 });
 
 describe("перемотка", () => {

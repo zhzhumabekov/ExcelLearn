@@ -163,3 +163,11 @@ describe("SheetModel", () => {
     expect(sheet.value("A2")).toBe(6);
   });
 });
+
+describe("даты в уроке", () => {
+  it("«2025-05-01» с форматом date — серийный номер Excel", () => {
+    const sheet = new SheetModel({ cells: { A1: { v: "2025-05-01", fmt: "date" }, A2: "=A1+30" } });
+    expect(sheet.value("A1")).toBe(45778);
+    expect(sheet.value("A2")).toBe(45808);
+  });
+});

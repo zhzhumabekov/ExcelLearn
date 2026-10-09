@@ -58,7 +58,8 @@ export class Stage {
     const editing = state.editor;
     window.showSheet(state.sheet.name);
     window.showTab(state.ribbonTab);
-    window.showMenu(state.menu === "defineName");
+    window.showMenu(state.menu);
+    window.grid.setHidden(state.hiddenColumns[state.sheet.name] ?? []);
     window.showNameList(state.nameListOpen ? visibleNames(state).map((d) => d.name) : null);
     window.grid.renderAll();
 

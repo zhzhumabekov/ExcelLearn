@@ -110,3 +110,11 @@ describe("число не влезает в ячейку — как в Excel", (
     expect(formatValue("Square Root of Improvement", "general", "en", upTo(5)).text).toBe("Square Root of Improvement");
   });
 });
+
+describe("даты", () => {
+  it("серийный номер Excel → дата на языке ученика", () => {
+    expect(formatValue(45778, "date", "ru").text).toBe("01.05.2025");
+    expect(formatValue(45778, "date", "en").text).toBe("5/1/2025");
+    expect(formatValue(45658, "date", "ru").text).toBe("01.01.2025");
+  });
+});

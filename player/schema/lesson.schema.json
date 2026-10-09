@@ -65,12 +65,14 @@
         },
         "fmt": {
           "default": "general",
+          "description": "date: v — дата «2025-05-01» (в листе — серийный номер Excel)",
           "enum": [
             "general",
             "number",
             "usd",
             "kzt",
-            "percent"
+            "percent",
+            "date"
           ],
           "type": "string"
         },
@@ -365,6 +367,21 @@
         "fill"
       ],
       "title": "Fill",
+      "type": "object"
+    },
+    "HideColumns": {
+      "additionalProperties": false,
+      "description": "Протянуть по заголовкам столбцов и скрыть их: Главная → Формат → Скрыть или отобразить → Скрыть столбцы.",
+      "properties": {
+        "hideColumns": {
+          "pattern": "^[A-Z]{1,3}(:[A-Z]{1,3})?$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "hideColumns"
+      ],
+      "title": "HideColumns",
       "type": "object"
     },
     "Keys": {
@@ -746,6 +763,9 @@
               },
               {
                 "$ref": "#/$defs/SelectAll"
+              },
+              {
+                "$ref": "#/$defs/HideColumns"
               },
               {
                 "$ref": "#/$defs/Autocomplete"

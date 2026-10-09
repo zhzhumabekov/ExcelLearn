@@ -68,6 +68,13 @@ function decimalComma(text: string, locale: FunctionLocale): string {
   return locale === "ru" ? text.replace(".", ",") : text;
 }
 
+/** Серийный номер Excel → «01.05.2025» (ru) или «5/1/2025» (en). */
+export function formatDate(serial: number, locale: FunctionLocale): string {
+  const d = new Date(Date.UTC(1899, 11, 30) + Math.floor(serial) * 86_400_000);
+  const [day, month, year] = [d.getUTCDate(), d.getUTCMonth() + 1, d.getUTCFullYear()];
+  return locale === "ru" ? `${String(day).padStart(2, "0")}.${String(month).padStart(2, "0")}.${year}` : `${month}/${day}/${year}`;
+}
+
 /** «Общий» формат Excel: целые как есть, дробные — до precision значащих цифр без хвостовых нулей. */
 export function formatGeneral(n: number, locale: FunctionLocale, precision = 10): string {
   if (Number.isInteger(n)) return String(n);
@@ -116,6 +123,8 @@ function formatPlain(value: CellValue, fmt: Fmt, locale: FunctionLocale): Displa
     case "kzt":
       // Денежный формат Казахстана: «174 720 ₸» — тенге без тиынов, знак после числа
       return { text: `${KZT_FORMATS[locale].format(value)} ₸`, align: "right" };
+    case "date":
+      return { text: formatDate(value, locale), align: "right" };
     case "number":
       return { text: NUMBER_FORMATS[locale].format(value), align: "right" };
     case "percent": {

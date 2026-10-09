@@ -1,6 +1,6 @@
 import { cellName, colToLetters, lettersToCol, parseCell, parseRange } from "../sheet/address";
 import { type CellState, isFormula, type SheetModel } from "../sheet/sheet-model";
-import { type Fits, type FunctionLocale, formatGeneral, formatValue, localizeFormula } from "../locale/format";
+import { type Fits, type FunctionLocale, formatDate, formatGeneral, formatValue, localizeFormula } from "../locale/format";
 
 export const DEFAULT_COLUMN_WIDTH = 64;
 export const ROW_HEADER_WIDTH = 40;
@@ -50,7 +50,7 @@ export function formulaBarText(cell: Readonly<CellState>, locale: FunctionLocale
   const { input } = cell;
   if (input === null) return "";
   if (isFormula(input)) return localizeFormula(input, locale);
-  if (typeof input === "number") return formatGeneral(input, locale);
+  if (typeof input === "number") return cell.fmt === "date" ? formatDate(input, locale) : formatGeneral(input, locale);
   return input;
 }
 
@@ -61,6 +61,8 @@ export class GridView {
   readonly rows: number;
   private cells = new Map<string, HTMLTableCellElement>();
   private headers = new Map<string, HTMLTableCellElement>();
+  private readonly colEls: HTMLTableColElement[] = [];
+  private hidden = new Set<string>();
 
   constructor(
     private readonly sheet: SheetModel,
@@ -94,7 +96,14 @@ export class GridView {
     const width = this.sheet.columns[colToLetters(parseCell(addr).col)] ?? DEFAULT_COLUMN_WIDTH;
     const display = formatValue(state.value, state.fmt, this.locale, fitsIn(width));
 
-    td.className = ["xl-cell", `xl-${display.align}`, state.style ? `xl-${state.style}` : ""].filter(Boolean).join(" ");
+    td.className = [
+      "xl-cell",
+      `xl-${display.align}`,
+      state.style ? `xl-${state.style}` : "",
+      this.hidden.has(colToLetters(parseCell(addr).col)) ? "xl-colhidden" : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
     if (display.currency && !display.text.startsWith("#")) {
       td.replaceChildren(span("xl-acc", [span("", display.currency), span("", display.text)]));
     } else {
@@ -125,13 +134,39 @@ export class GridView {
     return this.table.querySelector("th") as HTMLTableCellElement;
   }
 
+  /** Скрытые столбцы (Главная → Формат → Скрыть столбцы): ширина 0, содержимое не видно. */
+  setHidden(letters: readonly string[]): void {
+    const hidden = new Set(letters);
+    if ([...hidden].join() === [...this.hidden].join()) return;
+    this.hidden = hidden;
+    let width = ROW_HEADER_WIDTH;
+    for (let col = 1; col <= this.cols; col++) {
+      const letter = colToLetters(col);
+      const px = hidden.has(letter) ? 0 : this.columnWidth(letter);
+      const el = this.colEls[col - 1];
+      if (el) el.style.width = `${px}px`;
+      width += px;
+      this.headers.get(letter)?.classList.toggle("xl-colhidden", hidden.has(letter));
+      for (let row = 1; row <= this.rows; row++) {
+        this.cells.get(cellName({ col, row }))?.classList.toggle("xl-colhidden", hidden.has(letter));
+      }
+    }
+    this.table.style.width = `${width}px`;
+  }
+
+  private columnWidth(letter: string): number {
+    return this.sheet.columns[letter] ?? DEFAULT_COLUMN_WIDTH;
+  }
+
   private build(): void {
     const colgroup = document.createElement("colgroup");
     colgroup.append(colWidth(ROW_HEADER_WIDTH));
     let width = ROW_HEADER_WIDTH;
     for (let col = 1; col <= this.cols; col++) {
-      const px = this.sheet.columns[colToLetters(col)] ?? DEFAULT_COLUMN_WIDTH;
-      colgroup.append(colWidth(px));
+      const px = this.columnWidth(colToLetters(col));
+      const el = colWidth(px);
+      this.colEls.push(el);
+      colgroup.append(el);
       width += px;
     }
     // Явная ширина: длинный текст (=СУММ(C4:C11)) выходит на соседние ячейки, как в Excel,

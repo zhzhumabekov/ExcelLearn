@@ -107,3 +107,12 @@ def test_initial_names_are_written(tmp_path):
 
     assert wb.defined_names["ставка"].attr_text == "'Лист 1'!$B$2"
     assert wb["Свод"].defined_names["итог"].attr_text == "Свод!$A$1:$A$3"
+
+
+def test_dates_are_real_excel_dates():
+    from datetime import date
+
+    ws = build_workbook(Sheet.model_validate({"cells": {"A1": {"v": "2025-05-01", "fmt": "date"}}})).active
+
+    assert ws["A1"].value == date(2025, 5, 1)
+    assert ws["A1"].number_format == "dd.mm.yyyy"

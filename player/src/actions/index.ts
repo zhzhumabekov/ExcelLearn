@@ -3,7 +3,17 @@ import { clickRef, dragRef, type } from "./editing";
 import { keys } from "./keys";
 import { dragSelect, fill } from "./mouse";
 import { dialogButton, dialogCheck, dialogChoose, dialogPick, dialogRange, dialogType } from "./dialogs";
-import { addSelect, autocomplete, nameBox, nameList, selectAll, selectColumn, selectRow, sheetTab } from "./names";
+import {
+  addSelect,
+  autocomplete,
+  hideColumnsAction,
+  nameBox,
+  nameList,
+  selectAll,
+  selectColumn,
+  selectRow,
+  sheetTab,
+} from "./names";
 import { clickRibbon, ribbonTab } from "./ribbon";
 import { type Action, type ActionSpec, UnsupportedAction } from "./types";
 
@@ -30,6 +40,7 @@ export function createAction(spec: ActionSpec): Action {
   if ("selectRow" in spec) return selectRow(spec.selectRow);
   if ("selectColumn" in spec) return selectColumn(spec.selectColumn);
   if ("selectAll" in spec) return selectAll();
+  if ("hideColumns" in spec) return hideColumnsAction(spec.hideColumns);
   if ("autocomplete" in spec) return autocomplete(spec.autocomplete);
   if ("dialogType" in spec) return dialogType(spec.dialogType.field, spec.dialogType.text);
   if ("dialogRange" in spec) return dialogRange(spec.dialogRange.field, spec.dialogRange.range);

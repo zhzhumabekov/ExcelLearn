@@ -73,7 +73,10 @@ export interface CellSpec {
    * Формула, уже записанная в ячейке шаблона
    */
   f?: string | null;
-  fmt?: "general" | "number" | "usd" | "kzt" | "percent";
+  /**
+   * date: v — дата «2025-05-01» (в листе — серийный номер Excel)
+   */
+  fmt?: "general" | "number" | "usd" | "kzt" | "percent" | "date";
   style?: ("head" | "label" | "total") | null;
 }
 /**
@@ -132,6 +135,7 @@ export interface Step {
       | SelectRow
       | SelectColumn
       | SelectAll
+      | HideColumns
       | Autocomplete
       | DialogType
       | DialogRange
@@ -160,6 +164,7 @@ export interface Step {
       | SelectRow
       | SelectColumn
       | SelectAll
+      | HideColumns
       | Autocomplete
       | DialogType
       | DialogRange
@@ -279,6 +284,12 @@ export interface SelectColumn {
  */
 export interface SelectAll {
   selectAll: true;
+}
+/**
+ * Протянуть по заголовкам столбцов и скрыть их: Главная → Формат → Скрыть или отобразить → Скрыть столбцы.
+ */
+export interface HideColumns {
+  hideColumns: string;
 }
 /**
  * Двойной щелчок по имени (функции или диапазона) в списке автозавершения формулы.

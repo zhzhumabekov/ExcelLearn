@@ -54,6 +54,7 @@ const comparable = (state: LessonState) => ({
   ribbonTab: state.ribbonTab,
   menu: state.menu,
   nameListOpen: state.nameListOpen,
+  hiddenColumns: state.hiddenColumns,
 });
 
 const SCENARIO: ActionSpec[] = [
@@ -113,6 +114,8 @@ const SCENARIO: ActionSpec[] = [
   { click: "A17" },
   { keys: ["F3"] },
   { dialogButton: "Все имена" },
+  // Скрыть вспомогательные столбцы (Главная → Формат → Скрыть или отобразить)
+  { hideColumns: "C:D" },
 ];
 
 describe("действия с именами: просмотр ≡ перемотка", () => {
@@ -152,6 +155,11 @@ describe("результат сценария", () => {
     expect(s1.formula("D1")).toBe("=AVERAGE(данные)");
     expect(s1.formula("C12")).toBe("=Цена*Количество"); // имена применены до того, как «Количество» удалили
     expect(s2.value("A1")).toBe(12);
+  });
+
+  it("столбцы скрыты, выделены, лента — «Главная»", () => {
+    expect(state.hiddenColumns).toEqual({ Лист1: ["C", "D"] });
+    expect([state.selection, state.ribbonTab, state.menu]).toEqual(["C:D", "home", null]);
   });
 
   it("после удаления имени формула с ним даёт #ИМЯ?", () => {

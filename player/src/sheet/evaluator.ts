@@ -2,6 +2,7 @@ import FormulaParser, { type CellRef, type FunctionArg, type RangeRef } from "fa
 
 import { cellName, MAX_COL, MAX_ROW } from "./address";
 import { installFormulajs, PARSER_ERRORS } from "./formulajs-bridge";
+import { LOOKUP_FUNCTIONS } from "./lookup";
 
 /** Ошибка Excel (#DIV/0!, #REF!, #NAME? …) — отдельный тип, чтобы не путать с текстом. */
 export class ExcelError {
@@ -73,7 +74,9 @@ function createParser(source: CellSource): FormulaParser {
     },
   });
   parser.funsPreserveRef.push(...PRESERVE_REF);
-  installFormulajs(parser, PRESERVE_REF);
+  // ВПР/ГПР/ПОИСКПОЗ — свои, с двоичным поиском Excel (см. lookup.ts); formulajs их не перекрывает
+  Object.assign(parser.functions, LOOKUP_FUNCTIONS);
+  installFormulajs(parser, [...PRESERVE_REF, ...Object.keys(LOOKUP_FUNCTIONS)]);
   return parser;
 }
 

@@ -37,7 +37,9 @@ class Model(BaseModel):
 class CellSpec(Model):
     v: Scalar | None = None
     f: str | None = Field(default=None, pattern=r"^=", description="Формула, уже записанная в ячейке шаблона")
-    fmt: Literal["general", "number", "usd", "kzt", "percent"] = "general"
+    fmt: Literal["general", "number", "usd", "kzt", "percent", "date"] = Field(
+        default="general", description="date: v — дата «2025-05-01» (в листе — серийный номер Excel)"
+    )
     style: Literal["head", "label", "total"] | None = None
 
 
@@ -169,6 +171,12 @@ class SelectColumn(Model):
     selectColumn: ColumnLetter
 
 
+class HideColumns(Model):
+    """Протянуть по заголовкам столбцов и скрыть их: Главная → Формат → Скрыть или отобразить → Скрыть столбцы."""
+
+    hideColumns: Annotated[str, StringConstraints(pattern=r"^[A-Z]{1,3}(:[A-Z]{1,3})?$")]
+
+
 class SelectAll(Model):
     """Кнопка «Выделить всё» на пересечении заголовков."""
 
@@ -257,6 +265,7 @@ ACTION_MODELS: dict[str, type[Model]] = {
     "selectRow": SelectRow,
     "selectColumn": SelectColumn,
     "selectAll": SelectAll,
+    "hideColumns": HideColumns,
     "autocomplete": Autocomplete,
     "dialogType": DialogType,
     "dialogRange": DialogRange,
@@ -295,6 +304,7 @@ Action = Annotated[
     | Annotated[SelectRow, Tag("selectRow")]
     | Annotated[SelectColumn, Tag("selectColumn")]
     | Annotated[SelectAll, Tag("selectAll")]
+    | Annotated[HideColumns, Tag("hideColumns")]
     | Annotated[Autocomplete, Tag("autocomplete")]
     | Annotated[DialogType, Tag("dialogType")]
     | Annotated[DialogRange, Tag("dialogRange")]
