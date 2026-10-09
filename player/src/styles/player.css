@@ -91,7 +91,7 @@
   display: flex;
   gap: 6px;
   align-items: center;
-  height: 30px;
+  height: 58px; /* одна высота на всех вкладках: лента не «прыгает» при переключении */
 }
 
 .xl-player .xl-rbtn {
@@ -1210,4 +1210,34 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Большая кнопка ленты (иконка над подписью) и столбик маленьких */
+.xl-player .xl-rbtn.xl-rbig {
+  flex-direction: column;
+  gap: 2px;
+  max-width: 82px;
+  text-align: center;
+  line-height: 1.15;
+  font-size: 11px;
+}
+
+.xl-player .xl-rbtn.xl-rbig b {
+  font-size: 22px;
+}
+
+.xl-player .xl-rstack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+
+.xl-player .xl-rstack .xl-rbtn {
+  padding: 1px 6px;
+  font-size: 11px;
+}
+
+.xl-player .xl-rstack .xl-rbtn b {
+  font-size: 12px;
 }

@@ -62,12 +62,25 @@ export class CursorView {
 
   /** Плавно переместить курсор; onT(t) — прогресс пути (для протягивания выделения). */
   async moveTo(target: Point, ms = 750, onT?: (t: number) => void): Promise<void> {
+    this.warnIfHidden(target);
     const from = this.position;
     await this.clock.tween(ms, (t) => {
       const e = easeInOutCubic(t);
       this.jump({ x: from.x + (target.x - from.x) * e, y: from.y + (target.y - from.y) * e });
       onT?.(e);
     });
+  }
+
+  /**
+   * Курсор не должен целиться туда, чего ученик не видит (кнопка за краем окна, ячейка вне сцены).
+   * В браузере это предупреждение в консоли — его ловят e2e-тесты всех уроков.
+   */
+  private warnIfHidden(target: Point): void {
+    const { clientWidth, clientHeight } = this.stage;
+    if (clientWidth === 0) return; // тестовая среда без раскладки
+    if (target.x < 0 || target.y < 0 || target.x > clientWidth || target.y > clientHeight) {
+      console.warn(`ExcelLearn: курсор за краем сцены (${Math.round(target.x)}, ${Math.round(target.y)})`);
+    }
   }
 
   async press(): Promise<void> {

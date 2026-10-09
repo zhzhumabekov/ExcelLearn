@@ -41,10 +41,15 @@ def page(browser: Browser, live_server, settings) -> Page:
     page = context.new_page()
     errors = PageErrors()
     page.on("pageerror", lambda e: errors.append(f"pageerror: {e}"))
-    page.on(
-        "console",
-        lambda m: m.type == "error" and "favicon" not in m.location.get("url", "") and errors.append(m.text),
-    )
+
+    def on_console(message) -> None:
+        # Ошибки консоли, кроме 404 на favicon, и предупреждения плеера («курсор за краем сцены»)
+        if message.type == "error" and "favicon" not in message.location.get("url", ""):
+            errors.append(message.text)
+        elif message.type == "warning" and message.text.startswith("ExcelLearn:"):
+            errors.append(message.text)
+
+    page.on("console", on_console)
     page.errors = errors
     page.base_url = live_server.url
     yield page

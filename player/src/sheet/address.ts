@@ -108,17 +108,23 @@ export function shiftFormula(formula: string, dRow: number, dCol: number): strin
     .join("");
 }
 
-// Ссылка или диапазон в формуле: $A$1, B2:D2, $C$4 (части $ не важны для подсветки)
+// Ссылка или диапазон в формуле: $A$1, B2:D2, $C$4, целый столбец C:C или строка 1:1 (части $ не важны для подсветки)
 const REF_OR_RANGE_RE =
-  /(?<![A-Za-z0-9_.])\$?([A-Z]{1,3})\$?([1-9][0-9]*)(?::\$?([A-Z]{1,3})\$?([1-9][0-9]*))?(?![A-Za-z0-9_(])/g;
+  /(?<![\p{L}\p{N}_.!$:])(?:\$?([A-Z]{1,3})\$?([1-9][0-9]*)(?::\$?([A-Z]{1,3})\$?([1-9][0-9]*))?|\$?([A-Z]{1,3}):\$?([A-Z]{1,3})|\$?([1-9][0-9]*):\$?([1-9][0-9]*))(?![\p{L}\p{N}_(:])/gu;
 
-/** Ссылки формулы по порядку появления, без $ и без повторов: «=C4*D4» → ["C4", "D4"]. */
+/** Ссылки формулы по порядку появления, без $ и без повторов: «=C4*D4» → ["C4", "D4"], «=СРЗНАЧ(C:C)» → ["C:C"]. */
 export function formulaRefs(formula: string): string[] {
   const refs: string[] = [];
   const outsideStrings = formula.split(/"(?:[^"]|"")*"/).join(" ");
   for (const m of outsideStrings.matchAll(REF_OR_RANGE_RE)) {
-    const [, c1, r1, c2, r2] = m;
-    const ref = c2 && r2 ? `${c1}${r1}:${c2}${r2}` : `${c1}${r1}`;
+    const [, c1, r1, c2, r2, colA, colB, rowA, rowB] = m;
+    const ref = colA
+      ? `${colA}:${colB}`
+      : rowA
+        ? `${rowA}:${rowB}`
+        : c2 && r2
+          ? `${c1}${r1}:${c2}${r2}`
+          : `${c1}${r1}`;
     if (!refs.includes(ref)) refs.push(ref);
   }
   return refs;

@@ -11,3 +11,6 @@ chapters:
   - id: ch01
     number: 1
     title: Основы моделирования в электронных таблицах
+  - id: ch02
+    number: 2
+    title: Имена диапазонов

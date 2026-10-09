@@ -5,8 +5,9 @@ import { signatureAt } from "../locale/signatures";
 import { relativeRect, type Rect } from "./geometry";
 import type { GridView } from "./grid";
 
+// Ссылка в тексте формулы: A1, $B$2:D9, целый столбец C:C или строка 1:1
 const REF_RE =
-  /(?<![A-Za-z0-9_.Ѐ-ӿ])\$?[A-Z]{1,3}\$?[1-9][0-9]*(?::\$?[A-Z]{1,3}\$?[1-9][0-9]*)?(?![A-Za-z0-9_(Ѐ-ӿ])/g;
+  /(?<![\p{L}\p{N}_.!$:])(?:\$?[A-Z]{1,3}\$?[1-9][0-9]*(?::\$?[A-Z]{1,3}\$?[1-9][0-9]*)?|\$?[A-Z]{1,3}:\$?[A-Z]{1,3}|\$?[1-9][0-9]*:\$?[1-9][0-9]*)(?![\p{L}\p{N}_(:])/gu;
 
 export function escapeHtml(text: string): string {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

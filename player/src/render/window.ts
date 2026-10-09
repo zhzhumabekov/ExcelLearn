@@ -106,23 +106,15 @@ export class WindowView {
       this.menu.append(item);
     }
     define.append(this.menu);
+    // Как в Excel: большая кнопка «Диспетчер имён» и столбик из трёх маленьких
+    const manager = ribbonButton("nameManager", "📇", "Диспетчер имён");
+    manager.classList.add("xl-rbig");
+    const stack = el("div", "xl-rstack");
+    stack.append(define, ribbonButton(null, "ƒ", "Использовать в формуле ▾"), ribbonButton("createFromSelection", "▦", "Создать из выделенного"));
+    const insertFunction = ribbonButton(null, "fx", "Вставить функцию");
+    insertFunction.classList.add("xl-rbig");
     const formulas = el("div", "xl-ribbon");
-    formulas.append(
-      ribbonGroup(
-        "Библиотека функций",
-        ribbonButton(null, "fx", "Вставить функцию"),
-        ribbonButton(null, "Σ", "Автосумма"),
-        ribbonButton(null, "📒", "Финансовые"),
-        ribbonButton(null, "?", "Логические"),
-      ),
-      ribbonGroup(
-        "Определённые имена",
-        ribbonButton("nameManager", "📇", "Диспетчер имён"),
-        define,
-        ribbonButton(null, "ƒ", "Использовать в формуле"),
-        ribbonButton("createFromSelection", "▦", "Создать из выделенного"),
-      ),
-    );
+    formulas.append(ribbonGroup("Библиотека функций", insertFunction), ribbonGroup("Определённые имена", manager, stack));
     this.ribbons.set("home", home);
     this.ribbons.set("formulas", formulas);
 

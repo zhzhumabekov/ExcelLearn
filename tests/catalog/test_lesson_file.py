@@ -75,3 +75,35 @@ def test_formulas_percent_and_text_like_formula():
     assert ws["A4"].data_type == "s"
     assert ws["A5"].border.top.style == "double"
     assert ws.title == "Лист1"
+
+
+def test_multi_sheet_lesson_file_has_all_sheets(client):
+    wb = openpyxl.load_workbook(BytesIO(download(client, "name-scope").content))
+
+    assert wb.sheetnames == ["Алматы", "Астана", "Свод"]
+    assert wb["Свод"]["E6"].value == 15
+
+
+def test_initial_names_are_written(tmp_path):
+    from lessons.schema import Lesson
+    from lessons.xlsx_export import lesson_xlsx
+
+    lesson = Lesson.model_validate(
+        {
+            "id": "x",
+            "chapter": "ch02",
+            "order": 1,
+            "title": "X",
+            "sheet": {"name": "Лист 1", "cells": {"B2": 5}},
+            "sheets": [{"name": "Свод"}],
+            "names": [
+                {"name": "ставка", "ref": "B2"},
+                {"name": "итог", "ref": "Свод!A1:A3", "scope": "Свод"},
+            ],
+            "steps": [{"title": "t", "text": "t", "actions": [{"wait": 1}]}],
+        }
+    )
+    wb = openpyxl.load_workbook(BytesIO(lesson_xlsx(lesson)))
+
+    assert wb.defined_names["ставка"].attr_text == "'Лист 1'!$B$2"
+    assert wb["Свод"].defined_names["итог"].attr_text == "Свод!$A$1:$A$3"

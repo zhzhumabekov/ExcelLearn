@@ -10,6 +10,7 @@ from typing import Literal
 
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.workbook.defined_name import DefinedName
 
 from .exercises import answer_addresses, solution_sheet
 from .schema import CellSpec, Exercise, Lesson, Sheet
@@ -45,7 +46,44 @@ def lesson_filename(lesson: Lesson) -> str:
 def build_workbook(sheet: Sheet, *, answers: frozenset[str] = frozenset()) -> Workbook:
     """answers — ячейки, которые заполняет ученик: подсвечены жёлтым (в задании и в решении)."""
     wb = Workbook()
-    ws = wb.active
+    fill_worksheet(wb.active, sheet, answers)
+    return wb
+
+
+def _quote_sheet(name: str) -> str:
+    return name if re.fullmatch(r"[^\W\d][\w.]*", name) else "'" + name.replace("'", "''") + "'"
+
+
+def _absolute(ref: str) -> str:
+    def part(p: str) -> str:
+        clean = p.replace("$", "")
+        m = re.fullmatch(r"([A-Z]{1,3})?([0-9]+)?", clean)
+        if not m:
+            return p
+        col, row = m.groups()
+        return (f"${col}" if col else "") + (f"${row}" if row else "")
+
+    return ":".join(part(p) for p in ref.split(":"))
+
+
+def add_names(wb: Workbook, lesson: Lesson) -> None:
+    """Имена, определённые к началу урока (абсолютные ссылки; относительные Excel хранит иначе — их нет в файлах)."""
+    first = lesson.sheet.name
+    for spec in lesson.names:
+        if spec.relativeTo:
+            continue
+        areas = []
+        for part in spec.ref.split(","):
+            sheet, _, ref = part.strip().rpartition("!")
+            areas.append(f"{_quote_sheet(sheet.strip(chr(39)) or spec.scope or first)}!{_absolute(ref)}")
+        defined = DefinedName(spec.name, attr_text=",".join(areas), comment=spec.comment)
+        if spec.scope:
+            wb[spec.scope].defined_names[spec.name] = defined
+        else:
+            wb.defined_names[spec.name] = defined
+
+
+def fill_worksheet(ws, sheet: Sheet, answers: frozenset[str] = frozenset()) -> None:
     ws.title = sheet.name[:31]  # предел Excel на длину имени листа
     for addr in answers:
         ws[addr].fill = ANSWER_FILL
@@ -78,7 +116,6 @@ def build_workbook(sheet: Sheet, *, answers: frozenset[str] = frozenset()) -> Wo
     # Курсор в A1, как при открытии урока
     ws.sheet_view.selection[0].activeCell = "A1"
     ws.sheet_view.selection[0].sqref = "A1"
-    return wb
 
 
 def _save(wb: Workbook) -> bytes:
@@ -88,7 +125,12 @@ def _save(wb: Workbook) -> bytes:
 
 
 def lesson_xlsx(lesson: Lesson) -> bytes:
-    return _save(build_workbook(lesson.sheet))
+    """Все листы урока (ярлыки в том же порядке) и имена, определённые к началу урока."""
+    wb = build_workbook(lesson.sheet)
+    for sheet in lesson.sheets:
+        fill_worksheet(wb.create_sheet(), sheet)
+    add_names(wb, lesson)
+    return _save(wb)
 
 
 # ---------- Задания: файл задания и файл решения ----------

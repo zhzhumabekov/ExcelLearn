@@ -18,7 +18,7 @@ def test_home_links_to_first_lesson_and_course(client):
 
     assert reverse("catalog:lesson", args=["sum-and-autofill"]) in html
     assert reverse("catalog:course") in html
-    assert "2 главы · 7 уроков" in html
+    assert "3 главы · 15 уроков" in html
 
 
 def test_course_lists_chapters_and_lessons_in_book_order(client):
@@ -43,7 +43,7 @@ def test_lesson_neighbors_across_chapters(client):
     def page(lesson_id):
         return client.get(reverse("catalog:lesson", args=[lesson_id])).content.decode()
 
-    first, second, last = page("sum-and-autofill"), page("wages-weekly-salary"), page("coffee-price-cost")
+    first, second, last = page("sum-and-autofill"), page("wages-weekly-salary"), page("row-names")
 
     assert 'rel="prev"' not in first
     assert 'rel="next"' in first and reverse("catalog:lesson", args=["wages-weekly-salary"]) in first  # 0.1 → 1.1

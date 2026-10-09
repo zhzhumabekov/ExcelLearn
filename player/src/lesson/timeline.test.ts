@@ -7,8 +7,8 @@ import { describe, expect, it, vi } from "vitest";
 import { type ActionSpec, createAction } from "../actions";
 import type { Lesson } from "../generated/lesson";
 import { Stage } from "../render/stage";
-import { SheetModel } from "../sheet/sheet-model";
 import { fakeClock, finish } from "../test/fake-clock";
+import { createBook } from "./book";
 import { createState, type LessonState } from "./state";
 import { Timeline } from "./timeline";
 
@@ -21,23 +21,27 @@ if (!sumLesson) throw new Error("нет урока sum-and-autofill");
 
 function setup(lesson: Lesson, events = {}) {
   const { clock, advance } = fakeClock();
-  const stage = new Stage(new SheetModel(lesson.sheet), "ru", clock);
+  const stage = new Stage(createBook(lesson), "ru", clock);
   return { timeline: new Timeline(lesson, stage, events), advance };
 }
 
 /** Эталон: состояние после мгновенного применения шагов 0…n−1. */
 function appliedUpTo(lesson: Lesson, n: number): LessonState {
-  const state = createState(new SheetModel(lesson.sheet));
+  const state = createState(createBook(lesson));
   for (const step of lesson.steps.slice(0, n)) for (const spec of step.actions) createAction(spec as ActionSpec).apply(state);
   return state;
 }
 
 const comparable = (state: LessonState) => ({
-  cells: [...state.sheet.snapshot()],
+  book: state.sheet.book.snapshot(),
+  sheet: state.sheet.name,
   active: state.active,
   selection: state.selection,
+  areas: state.areas,
   editor: state.editor,
   clipboard: state.clipboard,
+  dialogs: state.dialogs,
+  ribbonTab: state.ribbonTab,
 });
 
 describe("перемотка", () => {
