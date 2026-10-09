@@ -35,3 +35,14 @@
     accent-color: var(--color-brand-600);
   }
 }
+
+/* Тексты заданий (HTML из content/exercises): формулы и клавиши */
+@layer components {
+  .exercise-text code {
+    @apply rounded bg-brand-50 px-1 py-0.5 font-mono text-[0.9em] text-brand-900 dark:bg-stone-800 dark:text-brand-100;
+  }
+
+  .exercise-text kbd {
+    @apply rounded border border-stone-300 bg-white px-1.5 py-0.5 font-mono text-[0.85em] shadow-sm dark:border-stone-600 dark:bg-stone-800;
+  }
+}

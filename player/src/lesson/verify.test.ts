@@ -59,7 +59,7 @@ describe("verifyLesson", () => {
   });
 
   it("урок без expect — предупреждение", () => {
-    expect(verifyLesson(lesson({})).problems).toEqual(["нет блока expect — значения урока не с чем сверить"]);
+    expect(verifyLesson(lesson({})).problems).toEqual(["нет блока expect — значения не с чем сверить"]);
   });
 });
 

@@ -36,6 +36,18 @@
     </a>
   </section>
 
+  {% if show_exercises %}
+    <a href="{% url 'catalog:exercises' chapter.id %}" data-testid="chapter-exercises"
+       class="mt-4 flex items-center gap-4 rounded-2xl border border-brand-600/40 bg-brand-50 p-5 hover:border-brand-600 dark:bg-stone-900">
+      <span class="text-3xl" aria-hidden="true">✍️</span>
+      <span class="flex-1">
+        <span class="block font-semibold">Глава пройдена — закрепите на заданиях</span>
+        <span class="text-sm text-stone-600 dark:text-stone-400">Задачи на своих данных: файл задания и решение для проверки.</span>
+      </span>
+      <span class="font-semibold text-brand-700 dark:text-brand-100">Задания к главе {{ chapter.number }} →</span>
+    </a>
+  {% endif %}
+
   <nav class="mt-8 flex flex-wrap justify-between gap-3" aria-label="Соседние уроки" id="lesson-nav">
     {% if prev_lesson %}
       <a href="{% url 'catalog:lesson' prev_lesson.id %}" rel="prev"

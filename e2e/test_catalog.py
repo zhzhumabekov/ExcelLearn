@@ -35,3 +35,21 @@ def test_lesson_file_downloads(page: Page):
 
     assert download.value.suggested_filename == "Табель_кафе.xlsx"
     assert page.errors == []
+
+
+def test_chapter_exercises_from_course_with_task_and_solution(page: Page):
+    page.goto(f"{page.base_url}/course/")
+    page.locator("#ch01 [data-exercises]").click()
+    expect(page.get_by_role("heading", level=1)).to_have_text("Задания к главе 1")
+
+    exercise = page.locator('[data-exercise="fish-quota"]')
+    exercise.get_by_text("Как решать — подсказка").click()
+    expect(exercise.get_by_text("Частая ошибка.")).to_be_visible()
+
+    with page.expect_download() as task:
+        exercise.get_by_test_id("exercise-task").click()
+    with page.expect_download() as solution:
+        exercise.get_by_test_id("exercise-solution").click()
+    assert task.value.suggested_filename == "Рыба_Алаколь_задание.xlsx"
+    assert solution.value.suggested_filename == "Рыба_Алаколь_решение.xlsx"
+    assert page.errors == []

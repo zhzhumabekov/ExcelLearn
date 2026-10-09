@@ -46,7 +46,7 @@ def test_lessons_check_reports_summary_and_missing_say(content_dir):
 
     assert "01-01-wages.yaml: steps.1: нет say" in out
     assert "steps.0" not in out
-    assert "OK: уроков — 1, глав — 1" in out
+    assert "OK: уроков — 1, заданий — 0, глав — 1" in out
 
 
 def test_lessons_check_fails_with_file_names(content_dir):

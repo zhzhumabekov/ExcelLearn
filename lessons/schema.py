@@ -3,7 +3,16 @@
 import re
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Discriminator, Field, StringConstraints, Tag, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Discriminator,
+    Field,
+    StringConstraints,
+    Tag,
+    field_validator,
+    model_validator,
+)
 
 CELL_RE = r"[A-Z]{1,3}[1-9][0-9]*"
 
@@ -203,6 +212,58 @@ class Lesson(Model):
     sheet: Sheet
     expect: dict[CellAddr, Scalar] = Field(default_factory=dict, description="Значения из исходника для сверки")
     steps: list[Step] = Field(min_length=1)
+
+
+# ---------- Задания к главе ----------
+# Ученик решает их сам в своём Excel: на сайте — условие и объяснение, к скачиванию — файл задания
+# (лист без ответов) и файл решения (тот же лист с формулами).
+
+
+class SolutionFill(Model):
+    """Протянуть формулу ячейки source на диапазон to — ссылки сдвигаются, как маркером заполнения."""
+
+    source: CellAddr
+    to: RangeAddr
+
+
+class Solution(Model):
+    cells: dict[CellAddr, Cell] = Field(default_factory=dict, description="Формулы ответа (и их форматы)")
+    fill: list[SolutionFill] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def fill_sources_are_formulas(self) -> "Solution":
+        for item in self.fill:
+            cell = self.cells.get(item.source)
+            if not (isinstance(cell, CellSpec) and cell.f):
+                raise ValueError(f"fill: в solution.cells нет формулы {item.source}")
+        return self
+
+
+class Exercise(Model):
+    id: Slug
+    number: int = Field(ge=1)
+    title: str = Field(min_length=1)
+    task: str = Field(min_length=1, description="Условие (HTML: <b>, <code>, <i>, <br>)")
+    explain: str = Field(min_length=1, description="Как решать: нужный навык, подсказки")
+    mistake: str | None = Field(default=None, description="Частая ошибка")
+    sheet: Sheet
+    solution: Solution
+    expect: dict[CellAddr, Scalar] = Field(min_length=1, description="Ответы для сверки решения")
+
+
+class ExerciseSet(Model):
+    chapter: Slug
+    exercises: list[Exercise] = Field(min_length=1)
+
+    @field_validator("exercises")
+    @classmethod
+    def ids_and_numbers_are_unique(cls, exercises: list[Exercise]) -> list[Exercise]:
+        for attr in ("id", "number"):
+            values = [getattr(e, attr) for e in exercises]
+            duplicates = sorted({str(v) for v in values if values.count(v) > 1})
+            if duplicates:
+                raise ValueError(f"повторяются {attr} заданий: {', '.join(duplicates)}")
+        return exercises
 
 
 # ---------- Курс ----------

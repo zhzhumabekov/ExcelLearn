@@ -1,5 +1,5 @@
 import { type ActionSpec, createAction } from "../actions";
-import type { Lesson } from "../generated/lesson";
+import type { Lesson, Sheet } from "../generated/lesson";
 import { type CellValue, ExcelError } from "../sheet/evaluator";
 import { SheetModel } from "../sheet/sheet-model";
 import { createState } from "./state";
@@ -44,14 +44,25 @@ export function verifyLesson(lesson: Lesson): VerifyResult {
     }
   }
 
-  const expect = Object.entries(lesson.expect ?? {});
-  for (const [addr, expected] of expect) {
-    const actual = state.sheet.value(addr);
-    if (!matches(actual, expected)) {
-      const formula = state.sheet.formula(addr);
-      problems.push(`${addr}: ожидалось ${show(expected)}, получено ${show(actual)}${formula ? ` (${formula})` : ""}`);
+  return checkExpect(state.sheet, lesson.expect ?? {});
+}
+
+/** Сверяет значения листа с ожидаемыми. Общая часть для уроков и заданий. */
+export function checkExpect(sheet: SheetModel, expected: Record<string, string | number>): VerifyResult {
+  const problems: string[] = [];
+  const entries = Object.entries(expected);
+  for (const [addr, value] of entries) {
+    const actual = sheet.value(addr);
+    if (!matches(actual, value)) {
+      const formula = sheet.formula(addr);
+      problems.push(`${addr}: ожидалось ${show(value)}, получено ${show(actual)}${formula ? ` (${formula})` : ""}`);
     }
   }
-  if (expect.length === 0) problems.push("нет блока expect — значения урока не с чем сверить");
-  return { checked: expect.length, problems };
+  if (entries.length === 0) problems.push("нет блока expect — значения не с чем сверить");
+  return { checked: entries.length, problems };
+}
+
+/** Задание: лист решения уже содержит формулы ответа — достаточно посчитать его и сверить. */
+export function verifySolutionSheet(sheet: Sheet, expected: Record<string, string | number>): VerifyResult {
+  return checkExpect(new SheetModel(sheet), expected);
 }

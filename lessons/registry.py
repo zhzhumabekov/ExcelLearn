@@ -4,8 +4,9 @@ from pathlib import Path
 
 from django.conf import settings
 
+from .exercises import load_exercises
 from .loader import ContentError, load_course, load_lessons
-from .schema import Chapter, Course, Lesson
+from .schema import Chapter, Course, Exercise, ExerciseSet, Lesson
 
 
 @dataclass(frozen=True)
@@ -17,9 +18,19 @@ class ChapterEntry:
 class Registry:
     """Курс, главы и уроки в порядке книги. Строится один раз и не меняется."""
 
-    def __init__(self, course: Course, lessons: list[tuple[Path, Lesson]]):
+    def __init__(
+        self,
+        course: Course,
+        lessons: list[tuple[Path, Lesson]],
+        exercise_sets: list[tuple[Path, ExerciseSet]] = (),  # type: ignore[assignment]
+    ):
         self.course = course
         self._check(course, lessons)
+        self._check_exercises(course, exercise_sets)
+        # Задания по главам, по номеру
+        self.exercises: dict[str, tuple[Exercise, ...]] = {
+            s.chapter: tuple(sorted(s.exercises, key=lambda e: e.number)) for _, s in exercise_sets
+        }
 
         by_chapter: dict[str, list[Lesson]] = {c.id: [] for c in course.chapters}
         for _, lesson in lessons:
@@ -53,6 +64,28 @@ class Registry:
         if errors:
             raise ContentError(errors)
 
+    @staticmethod
+    def _check_exercises(course: Course, exercise_sets) -> None:
+        errors = []
+        chapter_ids = {c.id for c in course.chapters}
+        seen: dict[str, Path] = {}
+        for path, exercise_set in exercise_sets:
+            if exercise_set.chapter not in chapter_ids:
+                errors.append(f"{path.name}: chapter: главы «{exercise_set.chapter}» нет в course.yaml")
+            if exercise_set.chapter in seen:
+                errors.append(
+                    f"{path.name}: задания главы {exercise_set.chapter} уже в {seen[exercise_set.chapter].name}"
+                )
+            seen.setdefault(exercise_set.chapter, path)
+        if errors:
+            raise ContentError(errors)
+
+    def chapter(self, chapter_id: str) -> Chapter | None:
+        return next((entry.chapter for entry in self.chapters if entry.chapter.id == chapter_id), None)
+
+    def exercise(self, chapter_id: str, exercise_id: str) -> Exercise | None:
+        return next((e for e in self.exercises.get(chapter_id, ()) if e.id == exercise_id), None)
+
     def get(self, lesson_id: str) -> Lesson | None:
         index = self._index.get(lesson_id)
         return None if index is None else self.lessons[index]
@@ -66,7 +99,7 @@ class Registry:
 
 
 def build_registry(content_dir: Path) -> Registry:
-    return Registry(load_course(content_dir), load_lessons(content_dir))
+    return Registry(load_course(content_dir), load_lessons(content_dir), load_exercises(content_dir))
 
 
 @cache

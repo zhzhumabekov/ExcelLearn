@@ -7,7 +7,7 @@ from django.utils.http import content_disposition_header
 from apps.preferences.services import get_preferences
 from apps.progress.services import progress_by_lesson, start_step
 from lessons.registry import get_registry
-from lessons.xlsx_export import XLSX_CONTENT_TYPE, lesson_filename, lesson_xlsx
+from lessons.xlsx_export import XLSX_CONTENT_TYPE, exercise_filename, exercise_xlsx, lesson_filename, lesson_xlsx
 from narration.builder import narration_urls
 
 
@@ -33,7 +33,15 @@ def course(request):
         lessons = [{"lesson": lesson, "progress": progress.get(lesson.id)} for lesson in entry.lessons]
         done = sum(1 for item in lessons if item["progress"] and item["progress"].completed)
         percent = round(100 * done / len(lessons)) if lessons else 0
-        chapters.append({"chapter": entry.chapter, "lessons": lessons, "done": done, "percent": percent})
+        chapters.append(
+            {
+                "chapter": entry.chapter,
+                "lessons": lessons,
+                "done": done,
+                "percent": percent,
+                "exercise_count": len(registry.exercises.get(entry.chapter.id, ())),
+            }
+        )
     return render(request, "catalog/course.html", {"course": registry.course, "chapters": chapters})
 
 
@@ -43,7 +51,10 @@ def lesson(request, lesson_id: str):
     if current is None:
         raise Http404(f"Нет урока {lesson_id}")
     prev_lesson, next_lesson = registry.neighbors(lesson_id)
-    chapter = next(entry.chapter for entry in registry.chapters if entry.chapter.id == current.chapter)
+    entry = next(entry for entry in registry.chapters if entry.chapter.id == current.chapter)
+    chapter = entry.chapter
+    # После последнего урока главы — приглашение к заданиям
+    show_exercises = entry.lessons[-1].id == current.id and bool(registry.exercises.get(chapter.id))
     return render(
         request,
         "catalog/lesson.html",
@@ -60,6 +71,7 @@ def lesson(request, lesson_id: str):
                 "settings": get_preferences(request.user).player_settings() if request.user.is_authenticated else None,
             },
             "chapter": chapter,
+            "show_exercises": show_exercises,
             "prev_lesson": prev_lesson,
             "next_lesson": next_lesson,
         },
@@ -71,6 +83,42 @@ def lesson_file(request, lesson_id: str):
     current = get_registry().get(lesson_id)
     if current is None:
         raise Http404(f"Нет урока {lesson_id}")
-    response = HttpResponse(lesson_xlsx(current), content_type=XLSX_CONTENT_TYPE)
-    response["Content-Disposition"] = content_disposition_header(as_attachment=True, filename=lesson_filename(current))
+    return xlsx_response(lesson_xlsx(current), lesson_filename(current))
+
+
+def xlsx_response(content: bytes, filename: str) -> HttpResponse:
+    response = HttpResponse(content, content_type=XLSX_CONTENT_TYPE)
+    response["Content-Disposition"] = content_disposition_header(as_attachment=True, filename=filename)
     return response
+
+
+def exercises(request, chapter_id: str):
+    registry = get_registry()
+    chapter = registry.chapter(chapter_id)
+    items = registry.exercises.get(chapter_id)
+    if chapter is None or not items:
+        raise Http404(f"Нет заданий к главе {chapter_id}")
+    entry = next(e for e in registry.chapters if e.chapter.id == chapter_id)
+    return render(
+        request,
+        "catalog/exercises.html",
+        {
+            "chapter": chapter,
+            "exercises": [
+                {
+                    "exercise": exercise,
+                    "task_name": exercise_filename(exercise, "task"),
+                    "solution_name": exercise_filename(exercise, "solution"),
+                }
+                for exercise in items
+            ],
+            "last_lesson": entry.lessons[-1] if entry.lessons else None,
+        },
+    )
+
+
+def exercise_file(request, chapter_id: str, exercise_id: str, kind: str):
+    exercise = get_registry().exercise(chapter_id, exercise_id)
+    if exercise is None:
+        raise Http404(f"Нет задания {chapter_id}/{exercise_id}")
+    return xlsx_response(exercise_xlsx(exercise, kind), exercise_filename(exercise, kind))  # type: ignore[arg-type]
