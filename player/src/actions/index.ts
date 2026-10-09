@@ -2,7 +2,9 @@ import { click, select, showRefs, wait } from "./basic";
 import { clickRef, dragRef, type } from "./editing";
 import { keys } from "./keys";
 import { dragSelect, fill } from "./mouse";
-import { clickRibbon } from "./ribbon";
+import { dialogButton, dialogCheck, dialogChoose, dialogPick, dialogRange, dialogType } from "./dialogs";
+import { addSelect, autocomplete, nameBox, nameList, selectAll, selectColumn, selectRow, sheetTab } from "./names";
+import { clickRibbon, ribbonTab } from "./ribbon";
 import { type Action, type ActionSpec, UnsupportedAction } from "./types";
 
 export { type Action, type ActionContext, type ActionSpec, UnsupportedAction } from "./types";
@@ -20,5 +22,23 @@ export function createAction(spec: ActionSpec): Action {
   if ("showRefs" in spec) return showRefs(spec.showRefs);
   if ("wait" in spec) return wait(spec.wait);
   if ("clickRibbon" in spec) return clickRibbon(spec.clickRibbon);
+  if ("ribbonTab" in spec) return ribbonTab(spec.ribbonTab);
+  if ("nameBox" in spec) return nameBox(spec.nameBox);
+  if ("nameList" in spec) return nameList(spec.nameList);
+  if ("sheetTab" in spec) return sheetTab(spec.sheetTab);
+  if ("addSelect" in spec) return addSelect(spec.addSelect);
+  if ("selectRow" in spec) return selectRow(spec.selectRow);
+  if ("selectColumn" in spec) return selectColumn(spec.selectColumn);
+  if ("selectAll" in spec) return selectAll();
+  if ("autocomplete" in spec) return autocomplete(spec.autocomplete);
+  if ("dialogType" in spec) return dialogType(spec.dialogType.field, spec.dialogType.text);
+  if ("dialogRange" in spec) return dialogRange(spec.dialogRange.field, spec.dialogRange.range);
+  if ("dialogCheck" in spec) return dialogCheck(spec.dialogCheck);
+  if ("dialogChoose" in spec) return dialogChoose(spec.dialogChoose.field, spec.dialogChoose.option);
+  if ("dialogPick" in spec) {
+    const pick = spec.dialogPick;
+    return typeof pick === "string" ? dialogPick(pick) : dialogPick(pick.item, pick.add ?? null);
+  }
+  if ("dialogButton" in spec) return dialogButton(spec.dialogButton);
   throw new UnsupportedAction(spec);
 }

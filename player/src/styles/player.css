@@ -149,7 +149,8 @@
 
 /* Поле «Имя»: белое поле в рамке со стрелкой списка — как в Excel */
 .xl-player .xl-namebox {
-  width: 92px;
+  position: relative;
+  width: 132px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -851,4 +852,362 @@
     opacity: 0;
     transform: translateY(3px);
   }
+}
+
+/* ---------- Глава 2: имена, вкладка «Формулы», окна ---------- */
+.xl-player [hidden] {
+  display: none !important;
+}
+
+.xl-player .xl-tabs [data-tab] {
+  cursor: default;
+}
+
+/* «Присвоить имя ▾»: кнопка и стрелка меню */
+.xl-player .xl-split {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.xl-player .xl-split [data-ribbon="defineNameMenu"] {
+  padding: 3px 4px;
+}
+
+.xl-player .xl-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 15;
+  min-width: 170px;
+  background: #fff;
+  border: 1px solid #c8c8c8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 3px 0;
+  font-size: 12px;
+}
+
+.xl-player .xl-menu-item {
+  padding: 5px 14px;
+  white-space: nowrap;
+}
+
+.xl-player .xl-menu-item.xl-glow,
+.xl-player .xl-namelist-item.xl-glow,
+.xl-player [data-suggestion].xl-glow {
+  background: #d6efe0;
+}
+
+/* Поле «Имя»: ввод имени и раскрывающийся список имён */
+.xl-player .xl-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.xl-player .xl-name.xl-editing {
+  font-weight: 400;
+  border-right: 1px solid #111;
+  animation: xl-blink 1s steps(1) infinite;
+}
+
+@keyframes xl-blink {
+  50% {
+    border-right-color: transparent;
+  }
+}
+
+.xl-player .xl-namelist {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: -1px;
+  z-index: 15;
+  min-width: calc(100% + 2px);
+  max-height: 240px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #c8c8c8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-weight: 400;
+}
+
+.xl-player .xl-namelist-item {
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+/* Кнопка «Выделить всё» */
+.xl-player .xl-grid th.xl-corner {
+  position: relative;
+}
+
+.xl-player .xl-grid th.xl-corner::after {
+  content: "";
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  border-left: 9px solid transparent;
+  border-bottom: 9px solid #b5b5b5;
+}
+
+/* Несмежное выделение (Ctrl) */
+.xl-player .xl-areabox {
+  z-index: 3;
+  background: rgba(33, 115, 70, 0.1);
+  border: 1px solid var(--xl-green);
+}
+
+/* Ярлыки листов */
+.xl-player .xl-sheets [data-sheet] {
+  cursor: default;
+}
+
+/* Автозавершение формулы */
+.xl-player .xl-autocomplete {
+  position: absolute;
+  z-index: 8;
+  min-width: 190px;
+  background: #fff;
+  border: 1px solid #c8c8c8;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+  font-size: 12px;
+  padding: 2px 0;
+}
+
+.xl-player .xl-autocomplete div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+.xl-player .xl-autocomplete i {
+  width: 14px;
+  height: 12px;
+  border-radius: 2px;
+  font-style: normal;
+}
+
+.xl-player .xl-ac-function {
+  background: linear-gradient(135deg, #c79ae0, #8b4fb3);
+}
+
+.xl-player .xl-ac-name {
+  background: linear-gradient(135deg, #9ccbf2, #1a6fe0);
+}
+
+/* Окна Excel */
+.xl-player .xl-dialogs {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.xl-player .xl-dialog {
+  position: absolute;
+  left: 50%;
+  top: calc(30% + var(--depth) * 26px);
+  transform: translate(-50%, -30%) translateX(calc(var(--depth) * 26px));
+  min-width: 330px;
+  max-width: 92%;
+  background: #fff;
+  border: 1px solid #9aa59f;
+  border-radius: 6px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+  font-size: 12px;
+  color: #222;
+  animation: xl-dialog-in 0.18s ease-out;
+}
+
+@keyframes xl-dialog-in {
+  from {
+    opacity: 0;
+    margin-top: 8px;
+  }
+}
+
+.xl-player .xl-dtitle {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 10px;
+  border-bottom: 1px solid #e3e3e3;
+  font-weight: 600;
+}
+
+.xl-player .xl-dtitle span {
+  color: #888;
+  font-weight: 400;
+}
+
+.xl-player .xl-dbody {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.xl-player .xl-dbody p {
+  margin: 0;
+}
+
+.xl-player .xl-dbtns {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 8px 14px 12px;
+}
+
+.xl-player .xl-dbtn {
+  min-width: 76px;
+  padding: 4px 12px;
+  font: inherit;
+  background: #f6f6f6;
+  border: 1px solid #b9b9b9;
+  border-radius: 3px;
+  color: #222;
+}
+
+.xl-player .xl-dbtn[data-button="OK"] {
+  border-color: var(--xl-green);
+}
+
+.xl-player .xl-dbtn.xl-glow {
+  background: #d6efe0;
+  border-color: var(--xl-green);
+}
+
+.xl-player .xl-dfield {
+  position: relative;
+  display: grid;
+  grid-template-columns: 82px 1fr;
+  align-items: center;
+  gap: 6px;
+}
+
+.xl-player .xl-dinput {
+  min-height: 22px;
+  padding: 2px 6px;
+  border: 1px solid #b9b9b9;
+  background: #fff;
+  font-family: Consolas, "Cascadia Mono", monospace;
+  white-space: pre;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.xl-player .xl-focus .xl-dinput {
+  border-color: var(--xl-green);
+  box-shadow: 0 0 0 1px var(--xl-green);
+}
+
+.xl-player .xl-dmemo {
+  min-height: 34px;
+}
+
+.xl-player .xl-dselect {
+  font-family: inherit;
+}
+
+.xl-player .xl-dselect b {
+  color: #666;
+  font-weight: 400;
+}
+
+.xl-player .xl-doptions {
+  position: absolute;
+  top: 100%;
+  left: 88px;
+  right: 0;
+  z-index: 2;
+  background: #fff;
+  border: 1px solid #b9b9b9;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.xl-player .xl-doptions div {
+  padding: 3px 6px;
+}
+
+.xl-player .xl-dcheck {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.xl-player .xl-box-check {
+  width: 13px;
+  height: 13px;
+  border: 1px solid #777;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.xl-player .xl-box-check.xl-on::after {
+  content: "✓";
+  color: var(--xl-green-dark);
+  font-weight: 700;
+}
+
+.xl-player .xl-dtable {
+  border-collapse: collapse;
+  min-width: 520px;
+}
+
+.xl-player .xl-dtable th,
+.xl-player .xl-dtable td {
+  text-align: left;
+  padding: 3px 8px;
+  border-bottom: 1px solid #eee;
+  white-space: nowrap;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.xl-player .xl-dtable th {
+  font-weight: 600;
+  background: #f4f4f4;
+}
+
+.xl-player .xl-dtable tr.xl-on td,
+.xl-player .xl-dlist .xl-on {
+  background: #cfe3f7;
+}
+
+.xl-player .xl-dlist {
+  border: 1px solid #b9b9b9;
+  min-height: 120px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.xl-player .xl-dlist div {
+  padding: 2px 6px;
+}
+
+.xl-player .xl-dalert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.xl-player .xl-dicon {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #1a6fe0;
+  color: #fff;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

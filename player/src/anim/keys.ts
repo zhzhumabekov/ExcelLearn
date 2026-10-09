@@ -13,12 +13,14 @@ export class KeysView {
     stage.append(this.el);
   }
 
+  /** Клавиши, которые держат нажатыми, пока идёт другое действие (Ctrl при выделении). Снять — hide(). */
+  hold(keys: readonly string[]): void {
+    this.el.replaceChildren(...this.parts(keys));
+    this.el.classList.add("xl-show");
+  }
+
   async show(keys: readonly string[], ms = 1000): Promise<void> {
-    const parts: Node[] = [];
-    keys.forEach((key, i) => {
-      if (i > 0) parts.push(Object.assign(document.createElement("span"), { className: "xl-plus-sign", textContent: "+" }));
-      parts.push(Object.assign(document.createElement("span"), { className: "xl-kbd", textContent: key }));
-    });
+    const parts = this.parts(keys);
     this.el.replaceChildren(...parts);
     // Перезапуск CSS-анимации нажатия при повторном показе
     this.el.classList.remove("xl-show");
@@ -29,6 +31,15 @@ export class KeysView {
     } finally {
       this.hide();
     }
+  }
+
+  private parts(keys: readonly string[]): Node[] {
+    const parts: Node[] = [];
+    keys.forEach((key, i) => {
+      if (i > 0) parts.push(Object.assign(document.createElement("span"), { className: "xl-plus-sign", textContent: "+" }));
+      parts.push(Object.assign(document.createElement("span"), { className: "xl-kbd", textContent: key }));
+    });
+    return parts;
   }
 
   hide(): void {

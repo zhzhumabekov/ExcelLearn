@@ -9,7 +9,9 @@ import {
   rangeName,
   shiftFormula,
 } from "../sheet/address";
-import { isFormula, type SheetModel, type SheetSnapshot } from "../sheet/sheet-model";
+import { isFormula, type SheetModel } from "../sheet/sheet-model";
+import type { Workbook, WorkbookSnapshot } from "../sheet/workbook";
+import type { Dialog } from "./dialogs";
 
 /** Кусок текста в редакторе формулы: обычный текст или ссылка, вставленная мышью (цветная). */
 export interface EditorPart {
@@ -27,22 +29,64 @@ export interface EditorState {
  * Состояние урока, которое меняют действия. Всё, что видит ученик, рисуется из него, поэтому
  * перемотка (apply всех действий подряд) даёт ту же картинку, что и анимация.
  */
+export type RibbonTabId = "home" | "formulas";
+
 export interface LessonState {
+  /** Активный лист (ярлык которого выбран). Книга — sheet.book. */
   sheet: SheetModel;
   /** Активная ячейка — в поле «Имя»; selection — выделенный диапазон (может совпадать). */
   active: string;
   selection: string;
+  /** Части выделения, добавленные с Ctrl (несмежный диапазон), кроме selection. */
+  areas: string[];
   editor: EditorState | null;
   /** Ссылки формулы, подсвеченные действием showRefs (без редактора). */
   shownRefs: string[];
   /** Скопированный диапазон (Ctrl+C) — вокруг него «бегущая» рамка. */
   clipboard: string | null;
-  /** Снимки листа до каждого изменения — для Ctrl+Z. */
-  undo: SheetSnapshot[];
+  /** Снимки книги (ячейки всех листов и имена) до каждого изменения — для Ctrl+Z. */
+  undo: WorkbookSnapshot[];
+  ribbonTab: RibbonTabId;
+  /** Открытое меню кнопки ленты («Присвоить имя ▾»). */
+  menu: "defineName" | null;
+  /** Раскрыт список поля «Имя». */
+  nameListOpen: boolean;
+  /** Открытые окна: последнее — сверху (из «Диспетчера имён» открывается «Создание имени»). */
+  dialogs: Dialog[];
 }
 
 export function createState(sheet: SheetModel): LessonState {
-  return { sheet, active: "A1", selection: "A1", editor: null, shownRefs: [], clipboard: null, undo: [] };
+  return {
+    sheet,
+    active: "A1",
+    selection: "A1",
+    areas: [],
+    editor: null,
+    shownRefs: [],
+    clipboard: null,
+    undo: [],
+    ribbonTab: "home",
+    menu: null,
+    nameListOpen: false,
+    dialogs: [],
+  };
+}
+
+export function bookOf(state: LessonState): Workbook {
+  return state.sheet.book;
+}
+
+/** Все части выделения: основная и добавленные с Ctrl (в порядке выделения). */
+export function selectionAreas(state: LessonState): string[] {
+  return [...state.areas, state.selection];
+}
+
+/** Перейти на другой лист (щелчок по ярлыку): выделение — A1, как при первом открытии листа. */
+export function switchSheet(state: LessonState, name: string): void {
+  if (state.editor) commitEditor(state);
+  state.sheet = bookOf(state).sheet(name);
+  selectRange(state, "A1");
+  state.clipboard = null;
 }
 
 export function editorText(editor: EditorState): string {
@@ -60,7 +104,15 @@ export function selectRange(state: LessonState, range: string): void {
   const { start } = parseRange(range);
   state.selection = rangeName(parseRange(range));
   state.active = rangeName({ start, end: start });
+  state.areas = [];
   state.shownRefs = [];
+}
+
+/** С нажатым Ctrl выделить ещё диапазон: прежнее выделение остаётся частью несмежного диапазона. */
+export function addArea(state: LessonState, range: string): void {
+  const areas = [...state.areas, state.selection];
+  selectRange(state, range);
+  state.areas = areas;
 }
 
 /** Начать ввод в активную ячейку, если он ещё не начат (как при наборе первого символа в Excel). */
@@ -105,13 +157,13 @@ export function commitEditor(state: LessonState): void {
 }
 
 export function rememberForUndo(state: LessonState): void {
-  state.undo.push(state.sheet.snapshot());
+  state.undo.push(bookOf(state).snapshot());
 }
 
 /** Ctrl+Z: вернуть лист к состоянию до последнего изменения. Выделение остаётся. */
 export function undo(state: LessonState): void {
   const snapshot = state.undo.pop();
-  if (snapshot) state.sheet.restore(snapshot);
+  if (snapshot) bookOf(state).restore(snapshot);
 }
 
 /** Скопировать ячейку целиком (ввод + формат), сдвинув относительные ссылки формулы. */

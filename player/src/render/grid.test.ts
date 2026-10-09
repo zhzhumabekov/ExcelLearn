@@ -102,9 +102,10 @@ describe("строка формул", () => {
 
 describe("WindowView", () => {
   it("собирает окно: файл, лист, поле «Имя», строка формул", () => {
-    const view = new WindowView(wages(), "ru");
+    const sheet = wages();
+    const view = new WindowView(sheet.book, "ru");
 
-    view.showActive("C5");
+    view.showActive(sheet, "C5");
 
     expect(view.el.querySelector(".xl-title")?.textContent).toContain("Wagestemp.xlsx — Excel");
     expect(view.el.querySelector(".xl-sheets .xl-on")?.textContent).toBe("Wages");

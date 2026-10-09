@@ -6,7 +6,7 @@ import type { FunctionLocale } from "./locale/format";
 import { type NarrationManifest, NarrationTrack } from "./narration/track";
 import { PanelView } from "./render/panel";
 import { Stage } from "./render/stage";
-import { SheetModel } from "./sheet/sheet-model";
+import { createBook } from "./lesson/book";
 
 export type { FunctionLocale, Lesson, NarrationManifest, TimelineStatus };
 
@@ -55,7 +55,7 @@ export function mount(el: HTMLElement, options: MountOptions): PlayerHandle {
   const layout = document.createElement("div");
   layout.className = "xl-layout";
 
-  const stage = new Stage(new SheetModel(lesson.sheet), settings.functionLocale);
+  const stage = new Stage(createBook(lesson), settings.functionLocale);
   stage.clock.setSpeed(settings.speed);
   const hasNarration = Object.keys(options.narration ?? {}).length > 0;
   const narration = new NarrationTrack(options.narration ?? {}, settings.functionLocale, {

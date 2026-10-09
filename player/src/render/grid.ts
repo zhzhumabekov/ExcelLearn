@@ -107,8 +107,22 @@ export class GridView {
     for (const th of this.headers.values()) th.classList.remove("xl-hl");
     if (!range) return;
     const { start, end } = parseRange(range);
-    for (let col = start.col; col <= end.col; col++) this.headers.get(colToLetters(col))?.classList.add("xl-hl");
-    for (let row = start.row; row <= end.row; row++) this.headers.get(String(row))?.classList.add("xl-hl");
+    for (let col = start.col; col <= Math.min(end.col, this.cols); col++) {
+      this.headers.get(colToLetters(col))?.classList.add("xl-hl");
+    }
+    for (let row = start.row; row <= Math.min(end.row, this.rows); row++) this.headers.get(String(row))?.classList.add("xl-hl");
+  }
+
+  /** Заголовок строки («12») или столбца («A») — по нему щёлкают, чтобы выделить строку целиком. */
+  header(label: string): HTMLTableCellElement {
+    const th = this.headers.get(label);
+    if (!th) throw new Error(`Нет заголовка «${label}» в видимой сетке`);
+    return th;
+  }
+
+  /** Кнопка «Выделить всё» — угол на пересечении заголовков. */
+  get corner(): HTMLTableCellElement {
+    return this.table.querySelector("th") as HTMLTableCellElement;
   }
 
   private build(): void {
@@ -125,17 +139,19 @@ export class GridView {
     this.table.style.width = `${width}px`;
 
     const head = document.createElement("tr");
-    head.append(document.createElement("th"));
+    const corner = document.createElement("th");
+    corner.className = "xl-corner"; // кнопка «Выделить всё»
+    head.append(corner);
     for (let col = 1; col <= this.cols; col++) {
       const letters = colToLetters(col);
-      head.append(this.header(letters, "xl-colh"));
+      head.append(this.makeHeader(letters, "xl-colh"));
     }
 
     const body = document.createElement("tbody");
     body.append(head);
     for (let row = 1; row <= this.rows; row++) {
       const tr = document.createElement("tr");
-      tr.append(this.header(String(row), "xl-rowh"));
+      tr.append(this.makeHeader(String(row), "xl-rowh"));
       for (let col = 1; col <= this.cols; col++) {
         const addr = cellName({ col, row });
         const td = document.createElement("td");
@@ -148,7 +164,7 @@ export class GridView {
     this.table.replaceChildren(colgroup, body);
   }
 
-  private header(label: string, className: string): HTMLTableCellElement {
+  private makeHeader(label: string, className: string): HTMLTableCellElement {
     const th = document.createElement("th");
     th.className = className;
     th.textContent = label;

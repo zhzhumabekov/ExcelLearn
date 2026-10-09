@@ -3,7 +3,7 @@ import { Aborted } from "../anim/clock";
 import type { Lesson } from "../generated/lesson";
 import type { NarrationTrack } from "../narration/track";
 import type { Stage } from "../render/stage";
-import type { SheetSnapshot } from "../sheet/sheet-model";
+import type { WorkbookSnapshot } from "../sheet/workbook";
 import { createState, type LessonState } from "./state";
 
 export type TimelineStatus = "ready" | "playing" | "paused" | "done";
@@ -28,7 +28,7 @@ export const BETWEEN_STEPS_MS = 2500;
 export class Timeline {
   state: LessonState;
   private readonly steps: Action[][];
-  private readonly initial: SheetSnapshot;
+  private readonly initial: WorkbookSnapshot;
   private stepIndex = 0;
   private currentStatus: TimelineStatus = "ready";
   private run = 0;
@@ -41,7 +41,7 @@ export class Timeline {
     private readonly narration?: NarrationTrack,
   ) {
     this.steps = lesson.steps.map((step) => step.actions.map((spec) => createAction(spec as ActionSpec)));
-    this.initial = stage.sheet.snapshot();
+    this.initial = stage.sheet.book.snapshot();
     this.state = createState(stage.sheet);
     stage.render(this.state);
   }
@@ -134,7 +134,7 @@ export class Timeline {
     cursor.release();
     cursor.setShape("arrow");
 
-    this.stage.sheet.restore(this.initial);
+    this.stage.sheet.book.restore(this.initial);
     this.state = createState(this.stage.sheet);
     for (const actions of this.steps.slice(0, target)) for (const action of actions) action.apply(this.state);
     this.stage.render(this.state);

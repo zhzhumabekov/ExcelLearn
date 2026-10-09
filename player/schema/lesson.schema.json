@@ -1,5 +1,35 @@
 {
   "$defs": {
+    "AddSelect": {
+      "additionalProperties": false,
+      "description": "С нажатым Ctrl протянуть ещё один диапазон — выделение из нескольких частей.",
+      "properties": {
+        "addSelect": {
+          "pattern": "^[A-Z]{1,3}[1-9][0-9]*(:[A-Z]{1,3}[1-9][0-9]*)?$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "addSelect"
+      ],
+      "title": "AddSelect",
+      "type": "object"
+    },
+    "Autocomplete": {
+      "additionalProperties": false,
+      "description": "Двойной щелчок по имени (функции или диапазона) в списке автозавершения формулы.",
+      "properties": {
+        "autocomplete": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "autocomplete"
+      ],
+      "title": "Autocomplete",
+      "type": "object"
+    },
     "CellSpec": {
       "additionalProperties": false,
       "properties": {
@@ -94,13 +124,17 @@
     },
     "ClickRibbon": {
       "additionalProperties": false,
-      "description": "Щелчок по кнопке ленты: «Σ Автосумма» (на выделенный диапазон), «Копировать», «Вставить».",
+      "description": "Щелчок по кнопке ленты. Главная: «Σ Автосумма», «Копировать», «Вставить». Формулы → Определённые имена:\n«Диспетчер имён», «Присвоить имя», «Создать из выделенного», «Применить имена…» (из меню «Присвоить имя»).",
       "properties": {
         "clickRibbon": {
           "enum": [
             "autosum",
             "copy",
-            "paste"
+            "paste",
+            "nameManager",
+            "defineName",
+            "createFromSelection",
+            "applyNames"
           ],
           "type": "string"
         }
@@ -109,6 +143,186 @@
         "clickRibbon"
       ],
       "title": "ClickRibbon",
+      "type": "object"
+    },
+    "DialogButton": {
+      "additionalProperties": false,
+      "description": "Кнопка окна: «OK», «Отмена», «Закрыть», «Создать…», «Изменить…», «Удалить», «Все имена».",
+      "properties": {
+        "dialogButton": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "dialogButton"
+      ],
+      "title": "DialogButton",
+      "type": "object"
+    },
+    "DialogCheck": {
+      "additionalProperties": false,
+      "description": "Флажок в окне («в столбце слева»): щелчок меняет его состояние.",
+      "properties": {
+        "dialogCheck": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "dialogCheck"
+      ],
+      "title": "DialogCheck",
+      "type": "object"
+    },
+    "DialogChoose": {
+      "additionalProperties": false,
+      "description": "Раскрывающийся список в окне («Область» → «Лист1»).",
+      "properties": {
+        "dialogChoose": {
+          "$ref": "#/$defs/DialogChooseSpec"
+        }
+      },
+      "required": [
+        "dialogChoose"
+      ],
+      "title": "DialogChoose",
+      "type": "object"
+    },
+    "DialogChooseSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "option": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "option"
+      ],
+      "title": "DialogChooseSpec",
+      "type": "object"
+    },
+    "DialogPick": {
+      "additionalProperties": false,
+      "description": "Щелчок по строке списка в окне (имя в диспетчере, в «Вставке имени», в «Применении имён»).",
+      "properties": {
+        "dialogPick": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/DialogPickSpec"
+            }
+          ]
+        }
+      },
+      "required": [
+        "dialogPick"
+      ],
+      "title": "DialogPick",
+      "type": "object"
+    },
+    "DialogPickSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "item": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "add": {
+          "anyOf": [
+            {
+              "enum": [
+                "ctrl",
+                "shift"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Добавить к выбору с Ctrl или Shift"
+        }
+      },
+      "required": [
+        "item"
+      ],
+      "title": "DialogPickSpec",
+      "type": "object"
+    },
+    "DialogRange": {
+      "additionalProperties": false,
+      "description": "Выделить диапазон мышью на листе, пока в окне активно поле ссылки (=Лист1!$A$2:$B$7).",
+      "properties": {
+        "dialogRange": {
+          "$ref": "#/$defs/DialogRangeSpec"
+        }
+      },
+      "required": [
+        "dialogRange"
+      ],
+      "title": "DialogRange",
+      "type": "object"
+    },
+    "DialogRangeSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "range": {
+          "pattern": "^[A-Z]{1,3}[1-9][0-9]*(:[A-Z]{1,3}[1-9][0-9]*)?$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "range"
+      ],
+      "title": "DialogRangeSpec",
+      "type": "object"
+    },
+    "DialogType": {
+      "additionalProperties": false,
+      "description": "Набор текста в поле открытого окна (поле очищается).",
+      "properties": {
+        "dialogType": {
+          "$ref": "#/$defs/DialogTypeSpec"
+        }
+      },
+      "required": [
+        "dialogType"
+      ],
+      "title": "DialogType",
+      "type": "object"
+    },
+    "DialogTypeSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "description": "Подпись поля окна: «Имя», «Диапазон», «Примечание»",
+          "minLength": 1,
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "text"
+      ],
+      "title": "DialogTypeSpec",
       "type": "object"
     },
     "DragRef": {
@@ -164,6 +378,7 @@
               "Tab",
               "Delete",
               "F2",
+              "F3",
               "F4",
               "Ctrl",
               "Alt",
@@ -186,6 +401,111 @@
       "title": "Keys",
       "type": "object"
     },
+    "NameBox": {
+      "additionalProperties": false,
+      "description": "Щелчок в поле «Имя», набор имени и Enter: имя выделенному диапазону (или переход к существующему).",
+      "properties": {
+        "nameBox": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "nameBox"
+      ],
+      "title": "NameBox",
+      "type": "object"
+    },
+    "NameList": {
+      "additionalProperties": false,
+      "description": "Стрелка поля «Имя» → список имён → щелчок по имени: Excel выделяет его диапазон.",
+      "properties": {
+        "nameList": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "nameList"
+      ],
+      "title": "NameList",
+      "type": "object"
+    },
+    "NameSpec": {
+      "additionalProperties": false,
+      "description": "Имя, уже определённое в книге к началу урока.",
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "ref": {
+          "description": "Диапазон: B6, B6:B55, 12:12, A:A, Лист2!E4:E6; несколько частей — через запятую",
+          "minLength": 1,
+          "type": "string"
+        },
+        "scope": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Лист для области «лист»; по умолчанию — книга"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "relativeTo": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z]{1,3}[1-9][0-9]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Ячейка, от которой отсчитана относительная ссылка (B7 для «предыдущий_год» = B6)"
+        }
+      },
+      "required": [
+        "name",
+        "ref"
+      ],
+      "title": "NameSpec",
+      "type": "object"
+    },
+    "RibbonTab": {
+      "additionalProperties": false,
+      "description": "Переключить вкладку ленты.",
+      "properties": {
+        "ribbonTab": {
+          "enum": [
+            "home",
+            "formulas"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "ribbonTab"
+      ],
+      "title": "RibbonTab",
+      "type": "object"
+    },
     "Select": {
       "additionalProperties": false,
       "properties": {
@@ -198,6 +518,52 @@
         "select"
       ],
       "title": "Select",
+      "type": "object"
+    },
+    "SelectAll": {
+      "additionalProperties": false,
+      "description": "Кнопка «Выделить всё» на пересечении заголовков.",
+      "properties": {
+        "selectAll": {
+          "const": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "selectAll"
+      ],
+      "title": "SelectAll",
+      "type": "object"
+    },
+    "SelectColumn": {
+      "additionalProperties": false,
+      "description": "Щелчок по букве столбца — выделение всего столбца.",
+      "properties": {
+        "selectColumn": {
+          "pattern": "^[A-Z]{1,3}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "selectColumn"
+      ],
+      "title": "SelectColumn",
+      "type": "object"
+    },
+    "SelectRow": {
+      "additionalProperties": false,
+      "description": "Щелчок по номеру строки — выделение всей строки.",
+      "properties": {
+        "selectRow": {
+          "maximum": 1048576,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "selectRow"
+      ],
+      "title": "SelectRow",
       "type": "object"
     },
     "Sheet": {
@@ -265,6 +631,21 @@
         }
       },
       "title": "Sheet",
+      "type": "object"
+    },
+    "SheetTab": {
+      "additionalProperties": false,
+      "description": "Щелчок по ярлыку листа.",
+      "properties": {
+        "sheetTab": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "sheetTab"
+      ],
+      "title": "SheetTab",
       "type": "object"
     },
     "ShowRefs": {
@@ -341,6 +722,51 @@
               },
               {
                 "$ref": "#/$defs/ClickRibbon"
+              },
+              {
+                "$ref": "#/$defs/RibbonTab"
+              },
+              {
+                "$ref": "#/$defs/NameBox"
+              },
+              {
+                "$ref": "#/$defs/NameList"
+              },
+              {
+                "$ref": "#/$defs/SheetTab"
+              },
+              {
+                "$ref": "#/$defs/AddSelect"
+              },
+              {
+                "$ref": "#/$defs/SelectRow"
+              },
+              {
+                "$ref": "#/$defs/SelectColumn"
+              },
+              {
+                "$ref": "#/$defs/SelectAll"
+              },
+              {
+                "$ref": "#/$defs/Autocomplete"
+              },
+              {
+                "$ref": "#/$defs/DialogType"
+              },
+              {
+                "$ref": "#/$defs/DialogRange"
+              },
+              {
+                "$ref": "#/$defs/DialogCheck"
+              },
+              {
+                "$ref": "#/$defs/DialogChoose"
+              },
+              {
+                "$ref": "#/$defs/DialogPick"
+              },
+              {
+                "$ref": "#/$defs/DialogButton"
               }
             ]
           },
@@ -422,10 +848,24 @@
     "sheet": {
       "$ref": "#/$defs/Sheet"
     },
+    "sheets": {
+      "description": "Другие листы книги (ярлыки справа от первого)",
+      "items": {
+        "$ref": "#/$defs/Sheet"
+      },
+      "type": "array"
+    },
+    "names": {
+      "description": "Имена, определённые к началу урока",
+      "items": {
+        "$ref": "#/$defs/NameSpec"
+      },
+      "type": "array"
+    },
     "expect": {
       "description": "Значения из исходника для сверки",
       "patternProperties": {
-        "^[A-Z]{1,3}[1-9][0-9]*$": {
+        "^(?:[^!]+!)?[A-Z]{1,3}[1-9][0-9]*$": {
           "anyOf": [
             {
               "type": "string"

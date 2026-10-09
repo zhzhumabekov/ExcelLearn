@@ -9,6 +9,7 @@ import {
   typeChars,
   undo,
 } from "../lesson/state";
+import { openPasteName } from "../lesson/dialogs";
 import type { RibbonButton } from "../render/window";
 import type { Key } from "./key-types";
 import { type Action, type ActionSpec, UnsupportedAction } from "./types";
@@ -49,6 +50,12 @@ const HANDLERS: Record<string, KeyHandler> = {
   "Ctrl+Z": {
     apply(state) {
       undo(state);
+      return undefined;
+    },
+  },
+  F3: {
+    apply(state) {
+      openPasteName(state);
       return undefined;
     },
   },

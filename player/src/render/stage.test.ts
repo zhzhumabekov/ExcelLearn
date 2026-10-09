@@ -27,7 +27,7 @@ describe("Overlays", () => {
     expect([...wrap.querySelectorAll(".xl-refbox")].map(visible)).toEqual([true, true, false, false]);
     expect(visible(wrap.querySelector(".xl-fillbox"))).toBe(true);
     expect(visible(wrap.querySelector(".xl-ants"))).toBe(true);
-    expect(s.overlays.current).toEqual({ selection: "E4", refs: ["C4", "D4"], fill: "E4:E11", ants: "E4" });
+    expect(s.overlays.current).toEqual({ selection: "E4", areas: [], refs: ["C4", "D4"], fill: "E4:E11", ants: "E4" });
 
     s.overlays.showRefs([]);
     s.overlays.showAnts(null);

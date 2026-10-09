@@ -17,6 +17,8 @@ from pydantic import (
 CELL_RE = r"[A-Z]{1,3}[1-9][0-9]*"
 
 CellAddr = Annotated[str, StringConstraints(pattern=rf"^{CELL_RE}$")]
+# Ячейка в expect: на первом листе — E4, на другом — Астана!E4
+ExpectAddr = Annotated[str, StringConstraints(pattern=rf"^(?:[^!]+!)?{CELL_RE}$")]
 RangeAddr = Annotated[str, StringConstraints(pattern=rf"^{CELL_RE}(:{CELL_RE})?$")]
 ColumnLetter = Annotated[str, StringConstraints(pattern=r"^[A-Z]{1,3}$")]
 Slug = Annotated[str, StringConstraints(pattern=r"^[a-z0-9]+(-[a-z0-9]+)*$")]
@@ -103,7 +105,7 @@ class Fill(Model):
         return value
 
 
-Key = Literal["Enter", "Escape", "Tab", "Delete", "F2", "F4", "Ctrl", "Alt", "Shift", "C", "V", "X", "Z", "="]
+Key = Literal["Enter", "Escape", "Tab", "Delete", "F2", "F3", "F4", "Ctrl", "Alt", "Shift", "C", "V", "X", "Z", "="]
 
 
 class Keys(Model):
@@ -119,9 +121,120 @@ class Wait(Model):
 
 
 class ClickRibbon(Model):
-    """Щелчок по кнопке ленты: «Σ Автосумма» (на выделенный диапазон), «Копировать», «Вставить»."""
+    """Щелчок по кнопке ленты. Главная: «Σ Автосумма», «Копировать», «Вставить». Формулы → Определённые имена:
+    «Диспетчер имён», «Присвоить имя», «Создать из выделенного», «Применить имена…» (из меню «Присвоить имя»)."""
 
-    clickRibbon: Literal["autosum", "copy", "paste"]
+    clickRibbon: Literal["autosum", "copy", "paste", "nameManager", "defineName", "createFromSelection", "applyNames"]
+
+
+class RibbonTab(Model):
+    """Переключить вкладку ленты."""
+
+    ribbonTab: Literal["home", "formulas"]
+
+
+class NameBox(Model):
+    """Щелчок в поле «Имя», набор имени и Enter: имя выделенному диапазону (или переход к существующему)."""
+
+    nameBox: str = Field(min_length=1)
+
+
+class NameList(Model):
+    """Стрелка поля «Имя» → список имён → щелчок по имени: Excel выделяет его диапазон."""
+
+    nameList: str = Field(min_length=1)
+
+
+class SheetTab(Model):
+    """Щелчок по ярлыку листа."""
+
+    sheetTab: str = Field(min_length=1)
+
+
+class AddSelect(Model):
+    """С нажатым Ctrl протянуть ещё один диапазон — выделение из нескольких частей."""
+
+    addSelect: RangeAddr
+
+
+class SelectRow(Model):
+    """Щелчок по номеру строки — выделение всей строки."""
+
+    selectRow: int = Field(ge=1, le=1048576)
+
+
+class SelectColumn(Model):
+    """Щелчок по букве столбца — выделение всего столбца."""
+
+    selectColumn: ColumnLetter
+
+
+class SelectAll(Model):
+    """Кнопка «Выделить всё» на пересечении заголовков."""
+
+    selectAll: Literal[True]
+
+
+class Autocomplete(Model):
+    """Двойной щелчок по имени (функции или диапазона) в списке автозавершения формулы."""
+
+    autocomplete: str = Field(min_length=1)
+
+
+class DialogTypeSpec(Model):
+    field: str = Field(min_length=1, description="Подпись поля окна: «Имя», «Диапазон», «Примечание»")
+    text: str
+
+
+class DialogType(Model):
+    """Набор текста в поле открытого окна (поле очищается)."""
+
+    dialogType: DialogTypeSpec
+
+
+class DialogRangeSpec(Model):
+    field: str = Field(min_length=1)
+    range: RangeAddr
+
+
+class DialogRange(Model):
+    """Выделить диапазон мышью на листе, пока в окне активно поле ссылки (=Лист1!$A$2:$B$7)."""
+
+    dialogRange: DialogRangeSpec
+
+
+class DialogCheck(Model):
+    """Флажок в окне («в столбце слева»): щелчок меняет его состояние."""
+
+    dialogCheck: str = Field(min_length=1)
+
+
+class DialogChooseSpec(Model):
+    field: str = Field(min_length=1)
+    option: str = Field(min_length=1)
+
+
+class DialogChoose(Model):
+    """Раскрывающийся список в окне («Область» → «Лист1»)."""
+
+    dialogChoose: DialogChooseSpec
+
+
+class DialogPickSpec(Model):
+    item: str = Field(min_length=1)
+    add: Literal["ctrl", "shift"] | None = Field(default=None, description="Добавить к выбору с Ctrl или Shift")
+
+
+class DialogPick(Model):
+    """Щелчок по строке списка в окне (имя в диспетчере, в «Вставке имени», в «Применении имён»)."""
+
+    dialogPick: str | DialogPickSpec
+
+
+class DialogButton(Model):
+    """Кнопка окна: «OK», «Отмена», «Закрыть», «Создать…», «Изменить…», «Удалить», «Все имена»."""
+
+    dialogButton: str = Field(min_length=1)
 
 
 ACTION_MODELS: dict[str, type[Model]] = {
@@ -136,6 +249,21 @@ ACTION_MODELS: dict[str, type[Model]] = {
     "showRefs": ShowRefs,
     "wait": Wait,
     "clickRibbon": ClickRibbon,
+    "ribbonTab": RibbonTab,
+    "nameBox": NameBox,
+    "nameList": NameList,
+    "sheetTab": SheetTab,
+    "addSelect": AddSelect,
+    "selectRow": SelectRow,
+    "selectColumn": SelectColumn,
+    "selectAll": SelectAll,
+    "autocomplete": Autocomplete,
+    "dialogType": DialogType,
+    "dialogRange": DialogRange,
+    "dialogCheck": DialogCheck,
+    "dialogChoose": DialogChoose,
+    "dialogPick": DialogPick,
+    "dialogButton": DialogButton,
 }
 
 
@@ -158,7 +286,22 @@ Action = Annotated[
     | Annotated[Keys, Tag("keys")]
     | Annotated[ShowRefs, Tag("showRefs")]
     | Annotated[Wait, Tag("wait")]
-    | Annotated[ClickRibbon, Tag("clickRibbon")],
+    | Annotated[ClickRibbon, Tag("clickRibbon")]
+    | Annotated[RibbonTab, Tag("ribbonTab")]
+    | Annotated[NameBox, Tag("nameBox")]
+    | Annotated[NameList, Tag("nameList")]
+    | Annotated[SheetTab, Tag("sheetTab")]
+    | Annotated[AddSelect, Tag("addSelect")]
+    | Annotated[SelectRow, Tag("selectRow")]
+    | Annotated[SelectColumn, Tag("selectColumn")]
+    | Annotated[SelectAll, Tag("selectAll")]
+    | Annotated[Autocomplete, Tag("autocomplete")]
+    | Annotated[DialogType, Tag("dialogType")]
+    | Annotated[DialogRange, Tag("dialogRange")]
+    | Annotated[DialogCheck, Tag("dialogCheck")]
+    | Annotated[DialogChoose, Tag("dialogChoose")]
+    | Annotated[DialogPick, Tag("dialogPick")]
+    | Annotated[DialogButton, Tag("dialogButton")],
     Discriminator(
         _action_kind,
         custom_error_type="unknown_action",
@@ -203,6 +346,21 @@ class Step(Model):
         return value if value is None else _check_placeholders(value, allow_formula=False)
 
 
+class NameSpec(Model):
+    """Имя, уже определённое в книге к началу урока."""
+
+    name: str = Field(min_length=1)
+    ref: str = Field(
+        min_length=1,
+        description="Диапазон: B6, B6:B55, 12:12, A:A, Лист2!E4:E6; несколько частей — через запятую",
+    )
+    scope: str | None = Field(default=None, description="Лист для области «лист»; по умолчанию — книга")
+    comment: str | None = None
+    relativeTo: CellAddr | None = Field(
+        default=None, description="Ячейка, от которой отсчитана относительная ссылка (B7 для «предыдущий_год» = B6)"
+    )
+
+
 class Lesson(Model):
     id: Slug = Field(description="Стабильный id: хранится в БД прогресса, не переименовывать")
     chapter: Slug
@@ -210,8 +368,18 @@ class Lesson(Model):
     title: str = Field(min_length=1)
     source: str | None = Field(default=None, description="Откуда сценарий, например «Рис. 1.1»")
     sheet: Sheet
-    expect: dict[CellAddr, Scalar] = Field(default_factory=dict, description="Значения из исходника для сверки")
+    sheets: list[Sheet] = Field(default_factory=list, description="Другие листы книги (ярлыки справа от первого)")
+    names: list[NameSpec] = Field(default_factory=list, description="Имена, определённые к началу урока")
+    expect: dict[ExpectAddr, Scalar] = Field(default_factory=dict, description="Значения из исходника для сверки")
     steps: list[Step] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def sheet_names_are_unique(self) -> "Lesson":
+        names = [self.sheet.name, *(s.name for s in self.sheets)]
+        duplicates = sorted({n for n in names if names.count(n) > 1})
+        if duplicates:
+            raise ValueError(f"повторяются имена листов: {', '.join(duplicates)}")
+        return self
 
 
 # ---------- Задания к главе ----------

@@ -3,7 +3,7 @@ import { cellName, parseRange, type RangePos } from "../sheet/address";
 import type { Action } from "./types";
 
 /** Ячейка на пути от start к end при прогрессе t (0…1) — для протягивания мышью. */
-function along({ start, end }: RangePos, t: number): string {
+export function along({ start, end }: RangePos, t: number): string {
   const steps = Math.max(end.row - start.row, end.col - start.col);
   const k = Math.round(t * steps) / (steps || 1);
   return cellName({
@@ -12,7 +12,7 @@ function along({ start, end }: RangePos, t: number): string {
   });
 }
 
-function dragMs(range: RangePos): number {
+export function dragMs(range: RangePos): number {
   return 260 * Math.max(range.end.row - range.start.row, range.end.col - range.start.col) + 500;
 }
 

@@ -3,6 +3,8 @@ import type { GridView } from "./grid";
 
 export interface OverlayState {
   selection: string | null;
+  /** Части выделения, добавленные с Ctrl. */
+  areas: string[];
   refs: string[];
   fill: string | null;
   ants: string | null;
@@ -26,8 +28,10 @@ export class Overlays {
   private readonly fill = box("xl-fillbox");
   private readonly ants = box("xl-ants");
   private readonly refs: HTMLElement[] = [];
+  private readonly areaBoxes: HTMLElement[] = [];
   private state: OverlayState = {
     selection: null,
+    areas: [],
     refs: [],
     fill: null,
     ants: null,
@@ -35,7 +39,8 @@ export class Overlays {
 
   constructor(
     private readonly container: HTMLElement,
-    private readonly grid: GridView,
+    /** Откуда брать сетку: при переключении листа она меняется. */
+    private readonly view: { readonly grid: GridView },
   ) {
     const handle = document.createElement("div");
     handle.className = "xl-handle";
@@ -52,6 +57,17 @@ export class Overlays {
     this.state.selection = range;
     this.selection.classList.toggle("xl-range", range !== null && range.includes(":"));
     this.draw(this.selection, range);
+  }
+
+  /** Несмежное выделение (Ctrl): каждая часть — серая заливка в рамке, как в Excel. */
+  showAreas(ranges: readonly string[]): void {
+    this.state.areas = [...ranges];
+    while (this.areaBoxes.length < ranges.length) {
+      const el = box("xl-areabox");
+      this.areaBoxes.push(el);
+      this.container.append(el);
+    }
+    this.areaBoxes.forEach((el, i) => this.draw(el, ranges[i] ?? null));
   }
 
   /** Ссылки формулы по порядку: первая — синяя, вторая — красная… */
@@ -72,8 +88,9 @@ export class Overlays {
 
   /** Перерисовать всё, например после смены языка (ширина текста) или размера окна. */
   refresh(): void {
-    const { selection, refs, fill, ants } = this.state;
+    const { selection, areas, refs, fill, ants } = this.state;
     this.showSelection(selection);
+    this.showAreas(areas);
     this.showRefs(refs);
     this.showFill(fill);
     this.showAnts(ants);
@@ -81,6 +98,6 @@ export class Overlays {
 
   private draw(el: HTMLElement, range: string | null): void {
     if (range === null) el.style.display = "none";
-    else place(el, rangeRect(this.grid, range, this.container));
+    else place(el, rangeRect(this.view.grid, range, this.container));
   }
 }

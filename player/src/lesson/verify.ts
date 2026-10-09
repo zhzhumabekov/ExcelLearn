@@ -2,6 +2,7 @@ import { type ActionSpec, createAction } from "../actions";
 import type { Lesson, Sheet } from "../generated/lesson";
 import { type CellValue, ExcelError } from "../sheet/evaluator";
 import { SheetModel } from "../sheet/sheet-model";
+import { createBook } from "./book";
 import { createState } from "./state";
 
 /** Допуск для чисел: в книге значения округлены до центов (449.63 при 449.625). */
@@ -31,7 +32,7 @@ function matches(actual: CellValue, expected: string | number): boolean {
  */
 export function verifyLesson(lesson: Lesson): VerifyResult {
   const problems: string[] = [];
-  const state = createState(new SheetModel(lesson.sheet));
+  const state = createState(createBook(lesson));
 
   for (const [i, step] of lesson.steps.entries()) {
     for (const [j, spec] of step.actions.entries()) {
@@ -44,18 +45,27 @@ export function verifyLesson(lesson: Lesson): VerifyResult {
     }
   }
 
-  return checkExpect(state.sheet, lesson.expect ?? {});
+  // Адреса без листа — на первом листе, даже если урок закончился на другом
+  return checkExpect(state.sheet.book.sheets[0] ?? state.sheet, lesson.expect ?? {});
+}
+
+/** «Астана!E7» → лист «Астана» той же книги и E7; просто «E7» — первый лист. */
+function splitAddress(key: string, sheet: SheetModel): [SheetModel, string] {
+  const bang = key.lastIndexOf("!");
+  if (bang < 0) return [sheet, key];
+  return [sheet.book.sheet(key.slice(0, bang)), key.slice(bang + 1)];
 }
 
 /** Сверяет значения листа с ожидаемыми. Общая часть для уроков и заданий. */
 export function checkExpect(sheet: SheetModel, expected: Record<string, string | number>): VerifyResult {
   const problems: string[] = [];
   const entries = Object.entries(expected);
-  for (const [addr, value] of entries) {
-    const actual = sheet.value(addr);
+  for (const [key, value] of entries) {
+    const [where, addr] = splitAddress(key, sheet);
+    const actual = where.value(addr);
     if (!matches(actual, value)) {
-      const formula = sheet.formula(addr);
-      problems.push(`${addr}: ожидалось ${show(value)}, получено ${show(actual)}${formula ? ` (${formula})` : ""}`);
+      const formula = where.formula(addr);
+      problems.push(`${key}: ожидалось ${show(value)}, получено ${show(actual)}${formula ? ` (${formula})` : ""}`);
     }
   }
   if (entries.length === 0) problems.push("нет блока expect — значения не с чем сверить");

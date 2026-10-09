@@ -1,3 +1,4 @@
+import { partialName, type Suggestion } from "../lesson/dialogs";
 import { editorRefs, editorText, type EditorState } from "../lesson/state";
 import { type FunctionLocale, localizeFormula } from "../locale/format";
 import { signatureAt } from "../locale/signatures";
@@ -46,14 +47,18 @@ export function coloredFormulaHtml(formula: string, refs: readonly string[], loc
   return colorRefsHtml(localizeFormula(formula, locale), refs);
 }
 
-/** Редактор ячейки поверх сетки (как при вводе в Excel) и подсказка синтаксиса функции под ним. */
+/**
+ * Редактор ячейки поверх сетки (как при вводе в Excel), подсказка синтаксиса функции под ним и список
+ * автозавершения: пока набирается имя (=СРЗНАЧ(В), Excel предлагает функции и имена диапазонов.
+ */
 export class EditorView {
   readonly el: HTMLElement;
   readonly hint: HTMLElement;
+  readonly list: HTMLElement;
 
   constructor(
     private readonly container: HTMLElement,
-    private readonly grid: GridView,
+    private readonly view: { readonly grid: GridView },
   ) {
     this.el = document.createElement("div");
     this.el.className = "xl-editor";
@@ -61,11 +66,29 @@ export class EditorView {
     this.hint = document.createElement("div");
     this.hint.className = "xl-hint";
     this.hint.style.display = "none";
-    container.append(this.el, this.hint);
+    this.list = document.createElement("div");
+    this.list.className = "xl-autocomplete";
+    this.list.style.display = "none";
+    container.append(this.el, this.hint, this.list);
+  }
+
+  /** Строка списка автозавершения (для наведения курсора). */
+  suggestion(label: string): HTMLElement {
+    const item = [...this.list.querySelectorAll<HTMLElement>("[data-suggestion]")].find(
+      (i) => i.dataset.suggestion?.toLocaleLowerCase("ru") === label.toLocaleLowerCase("ru"),
+    );
+    if (!item) throw new Error(`В списке автозавершения нет «${label}»`);
+    return item;
   }
 
   /** Возвращает HTML набранного текста — его же показывает строка формул. */
-  render(editor: EditorState | null, locale: FunctionLocale, limit = Infinity): string {
+  render(
+    editor: EditorState | null,
+    locale: FunctionLocale,
+    limit = Infinity,
+    suggest?: (partial: string) => Suggestion[],
+  ): string {
+    this.list.style.display = "none";
     if (!editor) {
       this.el.style.display = "none";
       this.hint.style.display = "none";
@@ -74,7 +97,7 @@ export class EditorView {
     const html = editorHtml(editor, locale, limit);
     this.el.innerHTML = `${html}<span class="xl-caret"></span>`;
 
-    const rect = relativeRect(this.grid.cell(editor.cell), this.container);
+    const rect = relativeRect(this.view.grid.cell(editor.cell), this.container);
     Object.assign(this.el.style, {
       display: "flex",
       left: `${rect.x - 1}px`,
@@ -83,7 +106,22 @@ export class EditorView {
       height: `${rect.h + 1}px`,
     });
     this.renderHint(limit === Infinity ? editorText(editor) : "", locale, rect);
+    if (limit === Infinity && suggest) this.renderList(editorText(editor), suggest, rect);
     return html;
+  }
+
+  private renderList(text: string, suggest: (partial: string) => Suggestion[], cell: Rect): void {
+    const partial = partialName(text);
+    const items = partial ? suggest(partial) : [];
+    if (!items.length) return;
+    this.list.innerHTML = items
+      .map(
+        (s) =>
+          `<div data-suggestion="${escapeHtml(s.label).replaceAll('"', "&quot;")}"><i class="xl-ac-${s.kind}"></i>${escapeHtml(s.label)}</div>`,
+      )
+      .join("");
+    this.hint.style.display = "none"; // список заменяет подсказку синтаксиса, как в Excel
+    Object.assign(this.list.style, { display: "block", left: `${cell.x}px`, top: `${cell.y + cell.h + 3}px` });
   }
 
   private renderHint(text: string, locale: FunctionLocale, cell: Rect): void {

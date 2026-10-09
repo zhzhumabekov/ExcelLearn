@@ -20,11 +20,15 @@ export function relativeRect(el: Element, container: HTMLElement): Rect {
   return { x: a.left - b.left + container.scrollLeft, y: a.top - b.top + container.scrollTop, w: a.width, h: a.height };
 }
 
-/** Прямоугольник диапазона ячеек — объединение левой верхней и правой нижней ячеек. */
+/**
+ * Прямоугольник диапазона ячеек — объединение левой верхней и правой нижней ячеек. Целая строка или
+ * столбец (12:12, A:A) обрезаются по видимой сетке.
+ */
 export function rangeRect(grid: GridView, range: string, container: HTMLElement): Rect {
   const { start, end } = parseRange(range);
+  const last = { col: Math.min(end.col, grid.cols), row: Math.min(end.row, grid.rows) };
   const a = relativeRect(grid.cell(cellName(start)), container);
-  const b = relativeRect(grid.cell(cellName(end)), container);
+  const b = relativeRect(grid.cell(cellName(last)), container);
   return { x: a.x, y: a.y, w: b.x + b.w - a.x, h: b.y + b.h - a.y };
 }
 

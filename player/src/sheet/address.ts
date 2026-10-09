@@ -38,18 +38,33 @@ export function cellName({ col, row }: CellPos): string {
   return colToLetters(col) + row;
 }
 
-/** "B2:D2" или "B2". Углы нормализуются: start — левый верхний, end — правый нижний. */
+/** Часть диапазона: ячейка B2, номер строки 12 (вся строка) или буквы столбца A (весь столбец). */
+function parsePart(part: string, edge: "start" | "end"): CellPos {
+  if (/^[1-9][0-9]*$/.test(part)) return { col: edge === "start" ? 1 : MAX_COL, row: Number(part) };
+  if (/^[A-Z]{1,3}$/.test(part)) return { col: lettersToCol(part), row: edge === "start" ? 1 : MAX_ROW };
+  return parseCell(part);
+}
+
+/**
+ * "B2:D2", "B2", целые строки "12:12" и столбцы "A:A". Углы нормализуются: start — левый верхний,
+ * end — правый нижний.
+ */
 export function parseRange(range: string): RangePos {
-  const [a, b = a] = range.split(":") as [string, string?];
-  const p = parseCell(a);
-  const q = parseCell(b);
+  const [a, b = a] = range.replaceAll("$", "").split(":") as [string, string?];
+  const p = parsePart(a, "start");
+  const q = parsePart(b, "end");
+  const p2 = parsePart(b, "start");
+  const q2 = parsePart(a, "end");
   return {
-    start: { col: Math.min(p.col, q.col), row: Math.min(p.row, q.row) },
-    end: { col: Math.max(p.col, q.col), row: Math.max(p.row, q.row) },
+    start: { col: Math.min(p.col, p2.col), row: Math.min(p.row, p2.row) },
+    end: { col: Math.max(q.col, q2.col), row: Math.max(q.row, q2.row) },
   };
 }
 
+/** Обратно к тексту: целые строки — "12:12", целые столбцы — "A:A", иначе "B2:D2" / "B2". */
 export function rangeName({ start, end }: RangePos): string {
+  if (start.col === 1 && end.col === MAX_COL) return `${start.row}:${end.row}`;
+  if (start.row === 1 && end.row === MAX_ROW) return `${colToLetters(start.col)}:${colToLetters(end.col)}`;
   const a = cellName(start);
   const b = cellName(end);
   return a === b ? a : `${a}:${b}`;
