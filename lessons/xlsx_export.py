@@ -10,10 +10,11 @@ from typing import Literal
 
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.utils import column_index_from_string, get_column_letter
 from openpyxl.workbook.defined_name import DefinedName
 
 from .exercises import answer_addresses, solution_sheet
-from .schema import CellSpec, Exercise, Lesson, Sheet
+from .schema import CellSpec, Exercise, Lesson, NameSpec, Sheet
 
 XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -66,16 +67,43 @@ def _absolute(ref: str) -> str:
     return ":".join(part(p) for p in ref.split(":"))
 
 
-def add_names(wb: Workbook, lesson: Lesson) -> None:
-    """Имена, определённые к началу урока (абсолютные ссылки; относительные Excel хранит иначе — их нет в файлах)."""
-    first = lesson.sheet.name
-    for spec in lesson.names:
-        if spec.relativeTo:
-            continue
+MAX_ROW, MAX_COL = 1_048_576, 16_384
+
+
+def _relative_to_a1(ref: str, base: str) -> str:
+    """Относительную ссылку Excel хранит так, будто имя создано в A1, с переходом через край листа:
+    «строка выше», созданная в B7 (=B6), записывается как A1048576 — сдвиг от A1. $-части не сдвигаются."""
+    m = re.fullmatch(r"([A-Z]{1,3})([0-9]+)", base)
+    if not m:
+        raise ValueError(f"Некорректная ячейка relativeTo: {base}")
+    d_col, d_row = column_index_from_string(m[1]) - 1, int(m[2]) - 1
+
+    def part(p: str) -> str:
+        cm = re.fullmatch(r"(\$?)([A-Z]{1,3})?(\$?)([0-9]+)?", p)
+        if not cm:
+            return p
+        col_abs, col, row_abs, row = cm.groups()
+        out = ""
+        if col:
+            n = column_index_from_string(col)
+            out += f"{col_abs}{get_column_letter(n if col_abs else (n - 1 - d_col) % MAX_COL + 1)}"
+        if row:
+            n = int(row)
+            out += f"{row_abs}{n if row_abs else (n - 1 - d_row) % MAX_ROW + 1}"
+        return out
+
+    return ":".join(part(p) for p in ref.split(":"))
+
+
+def add_names(wb: Workbook, names: list[NameSpec], first_sheet: str) -> None:
+    """Имена книги (урока к началу или решения задания) в файле Excel; относительные — от A1, как хранит Excel."""
+    for spec in names:
         areas = []
         for part in spec.ref.split(","):
             sheet, _, ref = part.strip().rpartition("!")
-            areas.append(f"{_quote_sheet(sheet.strip(chr(39)) or spec.scope or first)}!{_absolute(ref)}")
+            sheet_name = _quote_sheet(sheet.strip(chr(39)) or spec.scope or first_sheet)
+            ref = _relative_to_a1(ref, spec.relativeTo) if spec.relativeTo else _absolute(ref)
+            areas.append(f"{sheet_name}!{ref}")
         defined = DefinedName(spec.name, attr_text=",".join(areas), comment=spec.comment)
         if spec.scope:
             wb[spec.scope].defined_names[spec.name] = defined
@@ -129,7 +157,7 @@ def lesson_xlsx(lesson: Lesson) -> bytes:
     wb = build_workbook(lesson.sheet)
     for sheet in lesson.sheets:
         fill_worksheet(wb.create_sheet(), sheet)
-    add_names(wb, lesson)
+    add_names(wb, lesson.names, lesson.sheet.name)
     return _save(wb)
 
 
@@ -177,5 +205,7 @@ def _add_info_sheet(wb: Workbook, exercise: Exercise, kind: Literal["task", "sol
 def exercise_xlsx(exercise: Exercise, kind: Literal["task", "solution"]) -> bytes:
     sheet = exercise.sheet if kind == "task" else solution_sheet(exercise)
     wb = build_workbook(sheet, answers=frozenset(answer_addresses(exercise)))
+    if kind == "solution":
+        add_names(wb, exercise.solution.names, sheet.name)
     _add_info_sheet(wb, exercise, kind)
     return _save(wb)

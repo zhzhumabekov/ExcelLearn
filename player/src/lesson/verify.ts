@@ -1,5 +1,5 @@
 import { type ActionSpec, createAction } from "../actions";
-import type { Lesson, Sheet } from "../generated/lesson";
+import type { Lesson, NameSpec, Sheet } from "../generated/lesson";
 import { type CellValue, ExcelError } from "../sheet/evaluator";
 import { SheetModel } from "../sheet/sheet-model";
 import { createBook } from "./book";
@@ -72,7 +72,11 @@ export function checkExpect(sheet: SheetModel, expected: Record<string, string |
   return { checked: entries.length, problems };
 }
 
-/** Задание: лист решения уже содержит формулы ответа — достаточно посчитать его и сверить. */
-export function verifySolutionSheet(sheet: Sheet, expected: Record<string, string | number>): VerifyResult {
-  return checkExpect(new SheetModel(sheet), expected);
+/** Задание: лист решения уже содержит формулы ответа и имена — достаточно посчитать его и сверить. */
+export function verifySolutionSheet(
+  sheet: Sheet,
+  expected: Record<string, string | number>,
+  names: NameSpec[] = [],
+): VerifyResult {
+  return checkExpect(createBook({ sheet, names }), expected);
 }

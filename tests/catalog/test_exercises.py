@@ -113,3 +113,26 @@ def test_course_page_links_exercises_and_last_lesson_invites(client):
     first = client.get(reverse("catalog:lesson", args=["wages-weekly-salary"])).content.decode()
     assert 'data-testid="chapter-exercises"' in last
     assert 'data-testid="chapter-exercises"' not in first
+
+
+def test_chapter2_solution_files_contain_names(client):
+    def solution(exercise_id):
+        response = client.get(reverse("catalog:exercise-solution", args=["ch02", exercise_id]))
+        return openpyxl.load_workbook(BytesIO(response.content))
+
+    def task(exercise_id):
+        response = client.get(reverse("catalog:exercise-task", args=["ch02", exercise_id]))
+        return openpyxl.load_workbook(BytesIO(response.content))
+
+    assert solution("two-warehouses").defined_names["остатки"].attr_text == "Склады!$A$1:$B$3,Склады!$A$6:$B$8"
+    assert len(task("two-warehouses").defined_names) == 0  # имена создаёт ученик
+    # Относительное имя Excel хранит от A1 с переходом через край: «пять ячеек над B12»
+    assert solution("last-five-years").defined_names["последние_5"].attr_text == "Продажи!A1048572:A1048576"
+
+
+def test_relative_name_stored_like_excel():
+    from lessons.xlsx_export import _relative_to_a1
+
+    assert _relative_to_a1("B6", "B7") == "A1048576"  # строка выше
+    assert _relative_to_a1("C7", "B7") == "B1"  # ячейка справа
+    assert _relative_to_a1("$B$3", "B7") == "$B$3"  # абсолютная часть не сдвигается

@@ -2,12 +2,13 @@
 // и сверяет с ответами. Листы приходят из Django уже с протянутыми формулами — те же, что в «…_решение.xlsx».
 import { readFileSync } from "node:fs";
 
-import type { Sheet } from "../src/generated/lesson";
+import type { NameSpec, Sheet } from "../src/generated/lesson";
 import { verifySolutionSheet } from "../src/lesson/verify";
 
 interface DumpedExercise {
   name: string;
   sheet: Sheet;
+  names: NameSpec[];
   expect: Record<string, string | number>;
 }
 
@@ -15,7 +16,7 @@ const exercises = JSON.parse(readFileSync(0, "utf8")) as DumpedExercise[];
 
 let failed = 0;
 for (const exercise of exercises) {
-  const { checked, problems } = verifySolutionSheet(exercise.sheet, exercise.expect);
+  const { checked, problems } = verifySolutionSheet(exercise.sheet, exercise.expect, exercise.names);
   if (problems.length === 0) {
     console.log(`✓ ${exercise.name}: значений сверено — ${checked}`);
   } else {

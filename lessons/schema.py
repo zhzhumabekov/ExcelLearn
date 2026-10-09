@@ -397,6 +397,7 @@ class SolutionFill(Model):
 class Solution(Model):
     cells: dict[CellAddr, Cell] = Field(default_factory=dict, description="Формулы ответа (и их форматы)")
     fill: list[SolutionFill] = Field(default_factory=list)
+    names: list["NameSpec"] = Field(default_factory=list, description="Имена, которые создаёт ученик (глава 2)")
 
     @model_validator(mode="after")
     def fill_sources_are_formulas(self) -> "Solution":
@@ -457,3 +458,6 @@ class Course(Model):
         if duplicates:
             raise ValueError(f"повторяются id глав: {', '.join(duplicates)}")
         return chapters
+
+
+Solution.model_rebuild()
