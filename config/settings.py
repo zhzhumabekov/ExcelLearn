@@ -86,6 +86,10 @@ CACHES = {
 
 # SQLite локально; в проде DATABASE_URL=postgres://...
 DATABASES = {"default": env.db_url_config(env("DATABASE_URL", default="") or f"sqlite:///{BASE_DIR / 'db.sqlite3'}")}
+# Постоянные соединения с базой: без них Django открывает новое соединение на каждый запрос, и страницы
+# вошедшего ученика в PostgreSQL шли втрое медленнее гостевых (замер нагрузки, 2026-10-10)
+DATABASES["default"]["CONN_MAX_AGE"] = env.int("DB_CONN_MAX_AGE", default=60)
+DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
