@@ -8,4 +8,5 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("course/", views.course, name="course"),
     path("lessons/<slug:lesson_id>/", views.lesson, name="lesson"),
+    path("lessons/<slug:lesson_id>/file.xlsx", views.lesson_file, name="lesson-file"),
 ]

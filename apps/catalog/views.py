@@ -1,11 +1,13 @@
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.http import content_disposition_header
 
 from apps.preferences.services import get_preferences
 from apps.progress.services import progress_by_lesson, start_step
 from lessons.registry import get_registry
+from lessons.xlsx_export import XLSX_CONTENT_TYPE, lesson_filename, lesson_xlsx
 from narration.builder import narration_urls
 
 
@@ -48,6 +50,7 @@ def lesson(request, lesson_id: str):
         {
             "lesson": current,
             "lesson_data": current.model_dump(mode="json"),
+            "lesson_file_name": lesson_filename(current),
             "narration": narration_urls(current.id),
             "page_config": {
                 "progressUrl": reverse("progress:save", args=[current.id]) if request.user.is_authenticated else None,
@@ -61,3 +64,13 @@ def lesson(request, lesson_id: str):
             "next_lesson": next_lesson,
         },
     )
+
+
+def lesson_file(request, lesson_id: str):
+    """Файл урока: лист в начальном состоянии — открыть в своём Excel и повторить шаги."""
+    current = get_registry().get(lesson_id)
+    if current is None:
+        raise Http404(f"Нет урока {lesson_id}")
+    response = HttpResponse(lesson_xlsx(current), content_type=XLSX_CONTENT_TYPE)
+    response["Content-Disposition"] = content_disposition_header(as_attachment=True, filename=lesson_filename(current))
+    return response

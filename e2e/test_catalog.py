@@ -25,3 +25,13 @@ def test_lesson_page_plays(page: Page):
     # Шаги ждут озвучку (если собрана) — набор формулы начинается позже
     expect(page.locator(".xl-editor")).to_contain_text("=СУММ(", timeout=60_000)
     assert page.errors == []
+
+
+def test_lesson_file_downloads(page: Page):
+    page.goto(f"{page.base_url}/lessons/wages-weekly-salary/")
+
+    with page.expect_download() as download:
+        page.get_by_test_id("lesson-file").click()
+
+    assert download.value.suggested_filename == "Табель_кафе.xlsx"
+    assert page.errors == []
