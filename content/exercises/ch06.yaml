@@ -1,0 +1,770 @@
+# Глава 6 (текстовые функции). Собрано генератором; ответы expect посчитаны независимо.
+chapter: ch06
+exercises:
+- id: name-address
+  number: 1
+  title: Имя и адрес из одной строки
+  task: 'В анкетах имя и адрес записаны в одну ячейку через запятую. Разложите их: имя — в столбец B, адрес — в столбец
+    C (без пробела в начале).'
+  explain: 'Граница — первая запятая: <code>{f:=FIND(",",A2)}</code>. Имя — всё до неё: <code>{f:=LEFT(A2,FIND(",",A2)-1)}</code>.
+    Адрес — всё после, без пробела: <code>{f:=TRIM(MID(A2,FIND(",",A2)+1,200))}</code>. Протяните вниз.'
+  mistake: Забыть «−1» в {fn:LEFT} — в имя попадёт запятая; забыть {fn:TRIM} — адрес начнётся с пробела.
+  sheet:
+    file: Анкеты.xlsx
+    name: Анкеты
+    columns:
+      A: 330
+      B: 150
+      C: 250
+    cells:
+      A1:
+        v: Запись из анкеты
+        style: head
+      B1:
+        v: Имя
+        style: head
+      C1:
+        v: Адрес
+        style: head
+      A2: Асель Нурланова, Алматы, пр. Абая 15
+      A3: Данияр Ахметов, Астана, ул. Кенесары 40
+      A4: Ольга Пак, Караганда, ул. Ерубаева 3
+      A5: Ержан Тулеуов, Шымкент, ул. Байтурсынова 7
+  solution:
+    cells:
+      B2:
+        f: =LEFT(A2,FIND(",",A2)-1)
+      C2:
+        f: =TRIM(MID(A2,FIND(",",A2)+1,200))
+    fill:
+    - source: B2
+      to: B2:B5
+    - source: C2
+      to: C2:C5
+  expect:
+    B2: Асель Нурланова
+    C2: Алматы, пр. Абая 15
+    B3: Данияр Ахметов
+    C3: Астана, ул. Кенесары 40
+    B4: Ольга Пак
+    C4: Караганда, ул. Ерубаева 3
+    B5: Ержан Тулеуов
+    C5: Шымкент, ул. Байтурсынова 7
+- id: sku-price
+  number: 2
+  title: Артикул и цена разной длины
+  task: В прайсе артикул и цена — в одной ячейке через пробел, длина артикула разная. Извлеките артикул в B и цену <b>числом</b>
+    в C. Затем попробуйте то же <b>Данные → Текст по столбцам</b> (разделитель — пробел).
+  explain: 'Граница — пробел: <code>{f:=LEFT(A2,FIND(" ",A2)-1)}</code> — артикул, <code>{f:=VALUE(MID(A2,FIND(" ",A2)+1,20))}</code>
+    — цена.'
+  mistake: Взять «первые 5 символов» — у артикулов разная длина. И без {fn:VALUE} цена останется текстом.
+  sheet:
+    file: Прайс_строкой.xlsx
+    name: Прайс
+    columns:
+      A: 200
+      B: 140
+      C: 130
+    cells:
+      A1:
+        v: Строка прайса
+        style: head
+      B1:
+        v: Артикул
+        style: head
+      C1:
+        v: Цена, ₸
+        style: head
+      A2: АРТ-1024 15990
+      C2:
+        fmt: kzt
+      A3: Б-7 450
+      C3:
+        fmt: kzt
+      A4: ПРЕМ-55821 1250000
+      C4:
+        fmt: kzt
+      A5: К-310 8990
+      C5:
+        fmt: kzt
+      A6: ТВ-4K-55 289000
+      C6:
+        fmt: kzt
+  solution:
+    cells:
+      B2:
+        f: =LEFT(A2,FIND(" ",A2)-1)
+      C2:
+        f: =VALUE(MID(A2,FIND(" ",A2)+1,20))
+    fill:
+    - source: B2
+      to: B2:B6
+    - source: C2
+      to: C2:C6
+  expect:
+    B2: АРТ-1024
+    C2: 15990
+    B3: Б-7
+    C3: 450
+    B4: ПРЕМ-55821
+    C4: 1250000
+    B5: К-310
+    C5: 8990
+    B6: ТВ-4K-55
+    C6: 289000
+- id: quarter-split
+  number: 3
+  title: Год, квартал и выпуск из одной строки
+  task: 'Статистика выгружена строками вида «2023-К1 28450» (условный выпуск, млрд ₸). Разложите в три столбца <b>числами</b>:
+    год, номер квартала и выпуск.'
+  explain: 'Части стоят на одних и тех же местах: год — <code>{f:=VALUE(LEFT(A2,4))}</code>, квартал — 7-й символ <code>{f:=VALUE(MID(A2,7,1))}</code>,
+    выпуск — с 9-го: <code>{f:=VALUE(MID(A2,9,20))}</code>.'
+  mistake: 'Считать позиции «на глаз»: «2023-К1» — это 7 символов, выпуск начинается с 9-го (после пробела).'
+  sheet:
+    file: Выпуск_кварталы.xlsx
+    name: Кварталы
+    columns:
+      A: 160
+      B: 80
+      C: 90
+      D: 140
+    cells:
+      A1:
+        v: Запись
+        style: head
+      B1:
+        v: Год
+        style: head
+      C1:
+        v: Квартал
+        style: head
+      D1:
+        v: Выпуск, млрд ₸
+        style: head
+      A2: 2023-К1 28450
+      A3: 2023-К2 31720
+      A4: 2023-К3 35980
+      A5: 2023-К4 38110
+      A6: 2024-К1 30260
+      A7: 2024-К2 34410
+  solution:
+    cells:
+      B2:
+        f: =VALUE(LEFT(A2,4))
+      C2:
+        f: =VALUE(MID(A2,7,1))
+      D2:
+        f: =VALUE(MID(A2,9,20))
+    fill:
+    - source: B2
+      to: B2:B7
+    - source: C2
+      to: C2:C7
+    - source: D2
+      to: D2:D7
+  expect:
+    B2: 2023
+    C2: 1
+    D2: 28450
+    B3: 2023
+    C3: 2
+    D3: 31720
+    B4: 2023
+    C4: 3
+    D4: 35980
+    B5: 2023
+    C5: 4
+    D5: 38110
+    B6: 2024
+    C6: 1
+    D6: 30260
+    B7: 2024
+    C7: 2
+    D7: 34410
+- id: clothing-code
+  number: 4
+  title: Модель, цвет и размер из кода товара
+  task: 'Код одежды «Модель:100-65-L»: номер модели — между двоеточием и первым дефисом, цвет — между дефисами, размер —
+    после второго дефиса. Длина частей разная. Извлеките модель и цвет <b>числами</b>, размер — текстом.'
+  explain: 'Найдите позиции: двоеточие {fn:FIND}, первый дефис, второй — <code>{f:=FIND("-",A2,FIND("-",A2)+1)}</code>.
+    Модель: <code>{f:=VALUE(MID(A2,FIND(":",A2)+1,FIND("-",A2)-FIND(":",A2)-1))}</code>; цвет и размер — так же, между найденными
+    позициями.'
+  mistake: Искать второй дефис без третьего аргумента {fn:FIND} — она снова найдёт первый.
+  sheet:
+    file: Коды_одежды.xlsx
+    name: Коды
+    columns:
+      A: 170
+      B: 90
+      C: 80
+      D: 90
+    cells:
+      A1:
+        v: Код товара
+        style: head
+      B1:
+        v: Модель
+        style: head
+      C1:
+        v: Цвет
+        style: head
+      D1:
+        v: Размер
+        style: head
+      A2: Модель:100-65-L
+      A3: Модель:7-120-XL
+      A4: Модель:2510-3-M
+      A5: Модель:48-17-XXL
+      A6: Модель:333-9-S
+  solution:
+    cells:
+      B2:
+        f: =VALUE(MID(A2,FIND(":",A2)+1,FIND("-",A2)-FIND(":",A2)-1))
+      C2:
+        f: =VALUE(MID(A2,FIND("-",A2)+1,FIND("-",A2,FIND("-",A2)+1)-FIND("-",A2)-1))
+      D2:
+        f: =MID(A2,FIND("-",A2,FIND("-",A2)+1)+1,10)
+    fill:
+    - source: B2
+      to: B2:B6
+    - source: C2
+      to: C2:C6
+    - source: D2
+      to: D2:D6
+  expect:
+    B2: 100
+    C2: 65
+    D2: L
+    B3: 7
+    C3: 120
+    D3: XL
+    B4: 2510
+    C4: 3
+    D4: M
+    B5: 48
+    C5: 17
+    D5: XXL
+    B6: 333
+    C6: 9
+    D6: S
+- id: email-login
+  number: 5
+  title: 'Почта: первая буква имени и фамилия'
+  task: 'Новым сотрудникам нужна почта: первая буква имени, фамилия и <b>@company.kz</b>, всё строчными. Например, Aigerim
+    Saparova → asaparova@company.kz.'
+  explain: 'Буква имени — <code>{f:=LEFT(A2,1)}</code>, фамилия — всё после пробела: <code>{f:=MID(A2,FIND(" ",A2)+1,100)}</code>.
+    Склейте, сделайте строчными и добавьте домен: <code>{f:=LOWER(LEFT(A2,1)&MID(A2,FIND(" ",A2)+1,100))&"@company.kz"}</code>.'
+  mistake: 'Забыть {fn:LOWER}: почта не чувствительна к регистру, но в списке рассылки появятся «разные» адреса.'
+  sheet:
+    file: Почта_сотрудников.xlsx
+    name: Почта
+    columns:
+      A: 190
+      B: 240
+    cells:
+      A1:
+        v: Сотрудник
+        style: head
+      B1:
+        v: Почта
+        style: head
+      A2: Aigerim Saparova
+      A3: Daniyar Akhmetov
+      A4: Olga Pak
+      A5: Yerzhan Tuleuov
+      A6: Madina Zhumatova
+      A7: Timur Kim
+  solution:
+    cells:
+      B2:
+        f: =LOWER(LEFT(A2,1)&MID(A2,FIND(" ",A2)+1,100))&"@company.kz"
+    fill:
+    - source: B2
+      to: B2:B7
+  expect:
+    B2: asaparova@company.kz
+    B3: dakhmetov@company.kz
+    B4: opak@company.kz
+    B5: ytuleuov@company.kz
+    B6: mzhumatova@company.kz
+    B7: tkim@company.kz
+- id: surname-first
+  number: 6
+  title: «Фамилия, Имя Отчество»
+  task: В анкетах ФИО записаны «Имя Отчество Фамилия» (у некоторых без отчества). Для списка нужна форма «Фамилия, Имя Отчество».
+    В B найдите позицию <b>последнего</b> пробела, в C соберите строку.
+  explain: 'Сколько пробелов: <code>{f:=LEN(A2)-LEN(SUBSTITUTE(A2," ",""))}</code>. Заменим последний пробел звёздочкой
+    и найдём её: <code>{f:=FIND("*",SUBSTITUTE(A2," ","*",LEN(A2)-LEN(SUBSTITUTE(A2," ",""))))}</code>. Фамилия — <code>{f:=MID(A2,B2+1,100)}</code>,
+    остальное — <code>{f:=LEFT(A2,B2-1)}</code>.'
+  mistake: 'Искать первый пробел: у ФИО с отчеством фамилией окажется «Маратовна Нурланова».'
+  sheet:
+    file: Список_ФИО.xlsx
+    name: ФИО
+    columns:
+      A: 230
+      B: 140
+      C: 250
+    cells:
+      A1:
+        v: Как в анкете
+        style: head
+      B1:
+        v: Последний пробел
+        style: head
+      C1:
+        v: Для списка
+        style: head
+      A2: Асель Маратовна Нурланова
+      A3: Тимур Ким
+      A4: Данияр Серикович Ахметов
+      A5: Ольга Пак
+      A6: Мадина Ерлановна Жуматова
+  solution:
+    cells:
+      B2:
+        f: =FIND("*",SUBSTITUTE(A2," ","*",LEN(A2)-LEN(SUBSTITUTE(A2," ",""))))
+      C2:
+        f: =MID(A2,B2+1,100)&", "&LEFT(A2,B2-1)
+    fill:
+    - source: B2
+      to: B2:B6
+    - source: C2
+      to: C2:C6
+  expect:
+    B2: 16
+    C2: Нурланова, Асель Маратовна
+    B3: 6
+    C3: Ким, Тимур
+    B4: 17
+    C4: Ахметов, Данияр Серикович
+    B5: 6
+    C5: Пак, Ольга
+    B6: 17
+    C6: Жуматова, Мадина Ерлановна
+- id: salary-chart
+  number: 7
+  title: 'Стартовые зарплаты выпускников: график символами'
+  task: 'Вуз опросил выпускников о стартовой зарплате. Постройте в столбце C график: столько символов «■», сколько выпускников
+    в группе.'
+  explain: <code>{f:=REPT("■",B2)}</code> и протянуть вниз.
+  mistake: 'Взять ссылку на текст подписи вместо числа: {fn:REPT} нужен номер, сколько раз повторить.'
+  sheet:
+    file: Зарплаты_выпускников.xlsx
+    name: Зарплаты
+    columns:
+      A: 150
+      B: 110
+      C: 200
+    cells:
+      A1:
+        v: Зарплата, тыс. ₸
+        style: head
+      B1:
+        v: Выпускников
+        style: head
+      C1:
+        v: График
+        style: head
+      A2: до 200
+      B2: 4
+      A3: 200–300
+      B3: 11
+      A4: 300–400
+      B4: 18
+      A5: 400–500
+      B5: 13
+      A6: 500–700
+      B6: 7
+      A7: 700 и выше
+      B7: 3
+  solution:
+    cells:
+      C2:
+        f: =REPT("■",B2)
+    fill:
+    - source: C2
+      to: C2:C7
+  expect:
+    C2: ■■■■
+    C3: ■■■■■■■■■■■
+    C4: ■■■■■■■■■■■■■■■■■■
+    C5: ■■■■■■■■■■■■■
+    C6: ■■■■■■■
+    C7: ■■■
+- id: alphabet
+  number: 8
+  title: Латинский алфавит одной формулой
+  task: '{fn:CHAR}(65) — буква A, {fn:CHAR}(66) — B и так далее. Заполните <code>A1:A26</code> буквами от A до Z одной формулой,
+    протянутой вниз.'
+  explain: 'Номер строки даёт {fn:ROW}: <code>{f:=CHAR(64+ROW())}</code> — в первой строке 65 (A), во второй 66 (B)…'
+  mistake: 'Брать русские буквы через {fn:CHAR}: в русском Excel {fn:CHAR} берёт кодовую страницу Windows — для кириллицы
+    и казахских букв надёжнее {fn:UNICHAR}.'
+  sheet:
+    file: Алфавит.xlsx
+    name: Алфавит
+    columns:
+      A: 70
+      B: 30
+      C: 220
+    cells:
+      C1:
+        v: Буквы A–Z одной формулой
+        style: label
+  solution:
+    cells:
+      A1:
+        f: =CHAR(64+ROW())
+    fill:
+    - source: A1
+      to: A1:A26
+  expect:
+    A1: A
+    A2: B
+    A3: C
+    A4: D
+    A5: E
+    A6: F
+    A7: G
+    A8: H
+    A9: I
+    A10: J
+    A11: K
+    A12: L
+    A13: M
+    A14: N
+    A15: O
+    A16: P
+    A17: Q
+    A18: R
+    A19: S
+    A20: T
+    A21: U
+    A22: V
+    A23: W
+    A24: X
+    A25: Y
+    A26: Z
+- id: capital-first
+  number: 9
+  title: Заглавная буква в начале фразы
+  task: Слоганы для презентации записаны строчными. Сделайте заглавной <b>только первую</b> букву каждой фразы.
+  explain: 'Первая буква заглавная плюс остальное как есть: <code>{f:=UPPER(LEFT(A2,1))&MID(A2,2,1000)}</code>.'
+  mistake: 'Взять {fn:PROPER}: он сделает заглавной первую букву <b>каждого</b> слова — «Клиент Всегда Прав».'
+  sheet:
+    file: Слоганы.xlsx
+    name: Слоганы
+    columns:
+      A: 280
+      B: 280
+    cells:
+      A1:
+        v: Фраза
+        style: head
+      B1:
+        v: С заглавной
+        style: head
+      A2: бизнес любит цифры
+      A3: клиент всегда прав
+      A4: время — деньги
+      A5: семь раз отмерь, один раз отрежь
+  solution:
+    cells:
+      B2:
+        f: =UPPER(LEFT(A2,1))&MID(A2,2,1000)
+    fill:
+    - source: B2
+      to: B2:B5
+  expect:
+    B2: Бизнес любит цифры
+    B3: Клиент всегда прав
+    B4: Время — деньги
+    B5: Семь раз отмерь, один раз отрежь
+- id: two-key-lookup
+  number: 10
+  title: Цена по модели и году
+  task: 'В автосалоне цена зависит от модели и года выпуска. Напишите формулу в <code>G3</code>: по модели в <code>G1</code>
+    и году в <code>G2</code> — цена.'
+  explain: 'Склейте два признака в один ключ: в D <code>{f:=A2&B2}</code> («Hyundai Tucson2022»), протяните. Дальше — поиск
+    по ключу: <code>{f:=INDEX(C2:C9,MATCH(G1&G2,D2:D9,0))}</code>.'
+  mistake: 'Искать только по модели: {fn:MATCH} найдёт первую строку с этой моделью, а год окажется любой.'
+  sheet:
+    file: Цены_авто.xlsx
+    name: Авто
+    columns:
+      A: 150
+      B: 60
+      C: 120
+      D: 170
+      E: 20
+      F: 70
+      G: 140
+    cells:
+      A1:
+        v: Модель
+        style: head
+      B1:
+        v: Год
+        style: head
+      C1:
+        v: Цена, ₸
+        style: head
+      D1:
+        v: Ключ
+        style: head
+      F1:
+        v: Модель
+        style: label
+      G1: Hyundai Tucson
+      F2:
+        v: Год
+        style: label
+      G2: 2022
+      F3:
+        v: Цена
+        style: label
+      G3:
+        fmt: kzt
+      A2: Toyota Camry
+      B2: 2019
+      C2:
+        v: 13500000
+        fmt: kzt
+      A3: Toyota Camry
+      B3: 2021
+      C3:
+        v: 16200000
+        fmt: kzt
+      A4: Hyundai Tucson
+      B4: 2019
+      C4:
+        v: 11900000
+        fmt: kzt
+      A5: Hyundai Tucson
+      B5: 2022
+      C5:
+        v: 15400000
+        fmt: kzt
+      A6: Kia Rio
+      B6: 2021
+      C6:
+        v: 7300000
+        fmt: kzt
+      A7: Kia Rio
+      B7: 2023
+      C7:
+        v: 8900000
+        fmt: kzt
+      A8: Lada Granta
+      B8: 2022
+      C8:
+        v: 4600000
+        fmt: kzt
+      A9: Toyota Camry
+      B9: 2023
+      C9:
+        v: 19800000
+        fmt: kzt
+  solution:
+    cells:
+      D2:
+        f: =A2&B2
+      G3:
+        f: =INDEX(C2:C9,MATCH(G1&G2,D2:D9,0))
+    fill:
+    - source: D2
+      to: D2:D9
+  expect:
+    D2: Toyota Camry2019
+    D3: Toyota Camry2021
+    D4: Hyundai Tucson2019
+    D5: Hyundai Tucson2022
+    D6: Kia Rio2021
+    D7: Kia Rio2023
+    D8: Lada Granta2022
+    D9: Toyota Camry2023
+    G3: 15400000
+- id: movie-copies
+  number: 11
+  title: Название фильма и число копий
+  task: Кинопрокатчик прислал строки «название и число проданных копий». В названии бывают цифры и несколько слов. Найдите
+    позицию последнего пробела, затем разделите название и число копий (числом).
+  explain: 'Последний пробел — как в задании 6: <code>{f:=FIND("*",SUBSTITUTE(A2," ","*",LEN(A2)-LEN(SUBSTITUTE(A2," ",""))))}</code>.
+    Название — <code>{f:=LEFT(A2,B2-1)}</code>, копии — <code>{f:=VALUE(MID(A2,B2+1,10))}</code>.'
+  mistake: 'Искать первый пробел: «Брат 2 1250» разрежется на «Брат» и «2 1250».'
+  sheet:
+    file: Прокат.xlsx
+    name: Прокат
+    columns:
+      A: 230
+      B: 140
+      C: 180
+      D: 80
+    cells:
+      A1:
+        v: Фильм и копии
+        style: head
+      B1:
+        v: Последний пробел
+        style: head
+      C1:
+        v: Фильм
+        style: head
+      D1:
+        v: Копий
+        style: head
+      A2: Келин 340
+      A3: Қыз Жібек 1200
+      A4: Брат 2 1250
+      A5: Аманат 870
+      A6: Бауыржан Момышұлы 515
+      A7: Номад 2 Кочевник 95
+  solution:
+    cells:
+      B2:
+        f: =FIND("*",SUBSTITUTE(A2," ","*",LEN(A2)-LEN(SUBSTITUTE(A2," ",""))))
+      C2:
+        f: =LEFT(A2,B2-1)
+      D2:
+        f: =VALUE(MID(A2,B2+1,10))
+    fill:
+    - source: B2
+      to: B2:B7
+    - source: C2
+      to: C2:C7
+    - source: D2
+      to: D2:D7
+  expect:
+    B2: 6
+    C2: Келин
+    D2: 340
+    B3: 10
+    C3: Қыз Жібек
+    D3: 1200
+    B4: 7
+    C4: Брат 2
+    D4: 1250
+    B5: 7
+    C5: Аманат
+    D5: 870
+    B6: 18
+    C6: Бауыржан Момышұлы
+    D6: 515
+    B7: 17
+    C7: Номад 2 Кочевник
+    D7: 95
+- id: nbsp-sum
+  number: 12
+  title: Почему СУММ даёт ноль
+  task: Суммы скопированы с сайта поставщика, и <code>{f:=SUM(A2:A5)}</code> даёт 0. Перед каждым числом спрятан невидимый
+    символ. Найдите его и получите в B числа, а в <code>B6</code> — правильную сумму.
+  explain: 'Проверьте: <code>{f:=FIND(CHAR(160),A2)}</code> = 1 — это неразрывный пробел. Уберите его: <code>{f:=VALUE(SUBSTITUTE(A2,CHAR(160),""))}</code>,
+    протяните, и <code>{f:=SUM(B2:B5)}</code>.'
+  mistake: 'Взять {fn:TRIM} или {fn:CLEAN}: ни одна из них не убирает символ 160.'
+  sheet:
+    file: Суммы_с_сайта.xlsx
+    name: Суммы
+    columns:
+      A: 130
+      B: 130
+    cells:
+      A1:
+        v: С сайта
+        style: head
+      B1:
+        v: Число
+        style: head
+      A6:
+        f: =SUM(A2:A5)
+        style: total
+      B6:
+        style: total
+      A2:  1250
+      A3:  880
+      A4:  2310
+      A5:  4075
+  solution:
+    cells:
+      B2:
+        f: =VALUE(SUBSTITUTE(A2,CHAR(160),""))
+      B6:
+        f: =SUM(B2:B5)
+    fill:
+    - source: B2
+      to: B2:B5
+  expect:
+    B2: 1250
+    B3: 880
+    B4: 2310
+    B5: 4075
+    B6: 8515
+- id: share-phrase
+  number: 13
+  title: 'Фраза с долей рынка: ТЕКСТ'
+  task: 'Для отчёта нужна фраза по месту компании (условные данные): в <code>F1</code> — место, в <code>F2</code> — «Компания
+    № 3 — Freedom, доля рынка 12%». Доля должна выглядеть процентом, а не «0,123».'
+  explain: 'Название — <code>{f:=INDEX(B2:B7,F1)}</code>, доля — <code>{f:=TEXT(INDEX(C2:C7,F1),"0%")}</code>. Всё вместе:
+    <code>{f:="Компания № "&F1&" — "&INDEX(B2:B7,F1)&", доля рынка "&TEXT(INDEX(C2:C7,F1),"0%")}</code>.'
+  mistake: 'Склеить без {fn:TEXT}: формат процента потеряется, и во фразе будет «0,123».'
+  sheet:
+    file: Доли_рынка.xlsx
+    name: Рынок
+    columns:
+      A: 70
+      B: 110
+      C: 110
+      D: 20
+      E: 70
+      F: 330
+    cells:
+      A1:
+        v: Место
+        style: head
+      B1:
+        v: Компания
+        style: head
+      C1:
+        v: Доля рынка
+        style: head
+      E1:
+        v: Место
+        style: label
+      F1: 3
+      E2:
+        v: Фраза
+        style: label
+      A2: 1
+      B2: Kaspi
+      C2:
+        v: 0.312
+        fmt: percent
+      A3: 2
+      B3: Halyk
+      C3:
+        v: 0.218
+        fmt: percent
+      A4: 3
+      B4: Freedom
+      C4:
+        v: 0.123
+        fmt: percent
+      A5: 4
+      B5: Forte
+      C5:
+        v: 0.087
+        fmt: percent
+      A6: 5
+      B6: Jusan
+      C6:
+        v: 0.064
+        fmt: percent
+      A7: 6
+      B7: Bereke
+      C7:
+        v: 0.041
+        fmt: percent
+  solution:
+    cells:
+      F2:
+        f: ="Компания № "&F1&" — "&INDEX(B2:B7,F1)&", доля рынка "&TEXT(INDEX(C2:C7,F1),"0%")
+  expect:
+    F2: Компания № 3 — Freedom, доля рынка 12%

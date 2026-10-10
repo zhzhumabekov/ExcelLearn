@@ -51,8 +51,8 @@ describe("verifyLesson", () => {
   });
 
   it("неподдерживаемое или невозможное действие — ошибка с номером шага", () => {
-    const unsupported = verifyLesson(lesson({ E4: 490 }, [{ keys: ["F2"] }]));
-    expect(unsupported.problems[0]).toMatch(/^шаг 2 «Ещё», действие 1 \{"keys":\["F2"\]\}: Действие пока не поддерживается/);
+    const unsupported = verifyLesson(lesson({ E4: 490 }, [{ keys: ["Delete"] }]));
+    expect(unsupported.problems[0]).toMatch(/^шаг 2 «Ещё», действие 1 \{"keys":\["Delete"\]\}: Действие пока не поддерживается/);
 
     const impossible = verifyLesson(lesson({ E4: 490 }, [{ clickRef: "C4" }]));
     expect(impossible.problems[0]).toContain('сначала type: "="');
@@ -74,5 +74,21 @@ describe("уроки из content/lessons", () => {
 
     expect(problems).toEqual([]);
     expect(checked).toBeGreaterThan(0);
+  });
+});
+
+describe("ожидаемая ошибка в expect", () => {
+  it("записывается кодом ошибки и сверяется", () => {
+    const lesson = {
+      id: "e",
+      chapter: "ch06",
+      order: 1,
+      title: "t",
+      sheet: { cells: { A1: " 33", B1: { f: "=VALUE(A1)" } } },
+      expect: { B1: "#VALUE!" },
+      steps: [{ title: "t", text: "t", actions: [{ wait: 1 }] }],
+    };
+    expect(verifyLesson(lesson as never).problems).toEqual([]);
+    expect(verifyLesson({ ...lesson, expect: { B1: 33 } } as never).problems).not.toEqual([]);
   });
 });

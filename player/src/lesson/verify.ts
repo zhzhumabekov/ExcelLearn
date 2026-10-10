@@ -21,7 +21,8 @@ function show(value: CellValue | string | number): string {
 }
 
 function matches(actual: CellValue, expected: string | number): boolean {
-  if (actual instanceof ExcelError) return false;
+  // Ожидаемая ошибка записывается её кодом: «#VALUE!»
+  if (actual instanceof ExcelError) return actual.code === expected;
   if (typeof expected === "number") return typeof actual === "number" && Math.abs(actual - expected) <= TOLERANCE;
   return actual === expected;
 }

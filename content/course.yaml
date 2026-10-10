@@ -21,3 +21,6 @@ chapters:
   - id: ch05
     number: 5
     title: Функция ПОИСКПОЗ
+  - id: ch06
+    number: 6
+    title: Текстовые функции и мгновенное заполнение

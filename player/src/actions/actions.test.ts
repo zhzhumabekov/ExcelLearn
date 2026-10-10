@@ -109,7 +109,7 @@ describe("apply", () => {
   });
 
   it("неподдерживаемые пока действия — UnsupportedAction", () => {
-    expect(() => createAction({ keys: ["F2"] })).toThrow(UnsupportedAction);
+    expect(() => createAction({ keys: ["Delete"] })).toThrow(UnsupportedAction);
     expect(() => createAction({ keys: ["Ctrl", "X"] })).toThrow(UnsupportedAction);
   });
 });

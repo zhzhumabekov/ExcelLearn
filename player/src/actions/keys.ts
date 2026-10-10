@@ -2,6 +2,8 @@ import {
   addRef,
   autosumRange,
   commitEditor,
+  commitEditorRight,
+  editActiveCell,
   ensureEditor,
   type LessonState,
   pasteClipboard,
@@ -34,6 +36,19 @@ const HANDLERS: Record<string, KeyHandler> = {
       }
       if (state.clipboard) return pasteClipboard(state, false);
       commitEditor(state);
+      return undefined;
+    },
+  },
+  Tab: {
+    apply(state) {
+      const cell = commitEditorRight(state);
+      return cell ? [cell] : undefined;
+    },
+  },
+  // F2: войти в ячейку и править её содержимое (видны пробелы в конце строки)
+  F2: {
+    apply(state) {
+      editActiveCell(state);
       return undefined;
     },
   },

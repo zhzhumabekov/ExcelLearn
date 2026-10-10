@@ -1,0 +1,164 @@
+# Глава 6 (текстовые функции). Собрано генератором; ответы expect посчитаны независимо.
+id: flash-fill
+chapter: ch06
+order: 7
+title: 'Мгновенное заполнение: имена, почта и суммы без формул'
+source: Свой пример (список сотрудников для IT-отдела)
+sheet:
+  file: Сотрудники_почта.xlsx
+  name: Сотрудники
+  columns:
+    A: 170
+    B: 100
+    C: 110
+    D: 210
+  rows: 9
+  cells:
+    A1:
+      v: Сотрудник
+      style: head
+    B1:
+      v: Имя
+      style: head
+    C1:
+      v: Фамилия
+      style: head
+    D1:
+      v: Почта
+      style: head
+    A2: Aigerim Saparova
+    A3: Daniyar Akhmetov
+    A4: Olga Pak
+    A5: Yerzhan Tuleuov
+    A6: Madina Zhumatova
+    A7: Timur Kim
+expect:
+  B2: Aigerim
+  C2: Saparova
+  D2: saparova@company.kz
+  B3: Daniyar
+  C3: Akhmetov
+  D3: akhmetov@company.kz
+  B4: Olga
+  C4: Pak
+  D4: pak@company.kz
+  B5: Yerzhan
+  C5: Tuleuov
+  D5: tuleuov@company.kz
+  B6: Madina
+  C6: Zhumatova
+  D6: zhumatova@company.kz
+  B7: Timur
+  C7: Kim
+  D7: kim@company.kz
+  Цены!B2: 845
+  Цены!C2: 50
+  Цены!B3: 1299
+  Цены!C3: 90
+  Цены!B4: 56
+  Цены!C4: 5
+  Цены!B5: 18400
+  Цены!C5: 0
+  Цены!B6: 310
+  Цены!C6: 75
+steps:
+- title: Ситуация
+  text: 'IT-отделу нужны имена, фамилии и адреса почты сотрудников, а в списке — «Имя Фамилия» в одной ячейке. Вместо формул
+    возьмём <b>Мгновенное заполнение</b>: Excel сам поймёт закономерность по примеру.'
+  say: 'Нужно разложить имена и составить адреса почты. Возьмём мгновенное заполнение: Excel сам поймёт закономерность по
+    примеру.'
+  actions:
+  - wait: 3000
+- title: Имя — по одному примеру
+  text: В <code>B2</code> напечатайте <b>Aigerim</b>, нажмите <kbd>Enter</kbd>, затем <kbd>Ctrl</kbd>+<kbd>E</kbd>. Excel
+    заполнил имена остальных сотрудников.
+  say: Печатаем первое имя, Enter и Control E — Excel заполняет остальные имена.
+  actions:
+  - click: B2
+  - type: Aigerim
+  - keys:
+    - Enter
+  - keys:
+    - Ctrl
+    - E
+  - wait: 600
+- title: Фамилия
+  text: 'Так же: <b>Saparova</b> в <code>C2</code>, <kbd>Enter</kbd>, <kbd>Ctrl</kbd>+<kbd>E</kbd>.'
+  say: 'Так же с фамилией: пример, Enter и Control E.'
+  actions:
+  - click: C2
+  - type: Saparova
+  - keys:
+    - Enter
+  - keys:
+    - Ctrl
+    - E
+  - wait: 600
+- title: Адрес почты
+  text: 'Пример <b>saparova@company.kz</b>: фамилия строчными плюс домен. <b>Данные → Мгновенное заполнение</b> делает то
+    же, что <kbd>Ctrl</kbd>+<kbd>E</kbd>.'
+  say: Почта — фамилия строчными и домен компании. Кнопка на вкладке «Данные» делает то же, что Control E.
+  actions:
+  - click: D2
+  - type: saparova@company.kz
+  - keys:
+    - Enter
+  - clickRibbon: flashFill
+  - wait: 600
+- title: Тенге и тиыны
+  text: На листе «Цены» — цены вида «845,50 ₸». Пример <b>845</b> в <code>B2</code> → <kbd>Ctrl</kbd>+<kbd>E</kbd> даёт
+    тенге, пример <b>50</b> в <code>C2</code> — тиыны.
+  say: На листе «Цены» по одному примеру получаем тенге и тиыны.
+  actions:
+  - sheetTab: Цены
+  - click: B2
+  - type: '845'
+  - keys:
+    - Enter
+  - keys:
+    - Ctrl
+    - E
+  - click: C2
+  - type: '50'
+  - keys:
+    - Enter
+  - keys:
+    - Ctrl
+    - E
+  - wait: 600
+- title: Частая ошибка
+  text: 'Мгновенное заполнение записывает <b>значения</b>, а не формулы: поменяете исходную строку — результат не обновится.
+    На неоднородных данных проверяйте результат: если ошибся, дайте ещё один пример.'
+  say: 'Мгновенное заполнение записывает значения, а не формулы: при изменении данных результат не обновится. Проверяйте
+    результат.'
+  actions:
+  - wait: 3000
+- title: Что запомнить
+  text: Пример в первой ячейке → <kbd>Enter</kbd> → <kbd>Ctrl</kbd>+<kbd>E</kbd> (или <b>Данные → Мгновенное заполнение</b>).
+    Работает для частей текста, смены регистра и склейки с постоянным текстом. <b>На работе пригодится</b>, когда нужно
+    быстро и один раз.
+  say: Готово! Пример, Enter, Control E — и Excel заполняет столбец сам.
+  actions:
+  - click: C2
+sheets:
+- name: Цены
+  columns:
+    A: 140
+    B: 100
+    C: 100
+  rows: 8
+  cells:
+    A1:
+      v: Цена
+      style: head
+    B1:
+      v: Тенге
+      style: head
+    C1:
+      v: Тиыны
+      style: head
+    A2: 845,50 ₸
+    A3: 1299,90 ₸
+    A4: 56,05 ₸
+    A5: 18400,00 ₸
+    A6: 310,75 ₸

@@ -176,3 +176,24 @@ describe("Формат ячеек (Ctrl+1)", () => {
     expect(stage.dialogs.target('[data-field="Тип"]').textContent).toBe("ДД.ММ.ГГГГ");
   });
 });
+
+describe("Tab, F2 и ожидаемые ошибки в expect", () => {
+  const sheet: Sheet = { columns: { A: 200, B: 64, C: 64 }, cells: { A1: "Артикул цена  " } };
+
+  it("Tab вводит и переходит вправо, F2 открывает ячейку с её содержимым, Escape — без изменений", async () => {
+    const state = await expectSame(sheet, [
+      { click: "B1" },
+      { type: "=LEN(A1)" },
+      { keys: ["Tab"] },
+      { click: "A1" },
+      { keys: ["F2"] },
+      { keys: ["Escape"] },
+    ]);
+    expect(state.sheet.value("B1")).toBe(14);
+    expect(state.sheet.value("A1")).toBe("Артикул цена  ");
+
+    const editing = applyAll(sheet, [{ click: "A1" }, { keys: ["F2"] }]);
+    expect(editing.editor).toEqual({ cell: "A1", parts: [{ text: "Артикул цена  " }] });
+    expect(applyAll(sheet, [{ click: "B1" }, { type: "1" }, { keys: ["Tab"] }]).active).toBe("C1");
+  });
+});

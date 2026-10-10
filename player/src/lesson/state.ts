@@ -158,6 +158,26 @@ export function setRef(part: EditorPart, range: string): void {
   part.text = rangeName(parseRange(range));
 }
 
+/** Tab: записать введённое и перейти на ячейку правее. → ячейка, получившая значение (или null). */
+export function commitEditorRight(state: LessonState): string | null {
+  const editor = state.editor;
+  if (editor) {
+    rememberForUndo(state);
+    state.sheet.setInput(editor.cell, editorText(editor));
+    state.editor = null;
+  }
+  selectRange(state, offsetCell(state.active, 0, 1));
+  return editor?.cell ?? null;
+}
+
+/** F2: правка активной ячейки — в редакторе её содержимое (формула или текст), курсор в конце. */
+export function editActiveCell(state: LessonState): void {
+  if (state.editor) return;
+  const { input } = state.sheet.get(state.active);
+  state.editor = { cell: state.active, parts: input === null ? [] : [{ text: String(input) }] };
+  state.clipboard = null;
+}
+
 /** Enter: записать введённое в ячейку и перейти на строку ниже. */
 export function commitEditor(state: LessonState): void {
   const editor = state.editor;
