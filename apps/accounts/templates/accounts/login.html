@@ -17,7 +17,7 @@
 {% endblock %}
 
 {% block after %}
-  <p class="mt-4 text-center text-sm text-slate-600 dark:text-slate-300 [&_a]:text-brand-700 [&_a]:underline dark:[&_a]:text-brand-100">
+  <p class="mt-4 text-center text-sm text-slate-600 [&_a]:text-brand-700 [&_a]:underline">
     Нет аккаунта? <a href="{% url 'accounts:signup' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Зарегистрируйтесь</a>
   </p>
 {% endblock %}

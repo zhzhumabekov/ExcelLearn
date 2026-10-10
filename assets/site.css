@@ -7,9 +7,6 @@
 @source "../apps/**/templates/**/*.html";
 @source "../static/js/*.js";
 
-/* Тёмная тема — по атрибуту data-theme на <html> (его ставит скрипт в base.html) */
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
-
 @theme {
   --font-sans: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
   --font-display: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
@@ -26,7 +23,7 @@
   --color-brand-800: #065f46;
   --color-brand-900: #064e3b;
 
-  /* Мягкие пастельные пары «фон + текст»; значения меняются в тёмной теме (переменные ниже) */
+  /* Мягкие пастельные пары «фон + текст» (значения — переменные на html ниже) */
   --color-mint: var(--soft-mint);
   --color-mint-ink: var(--soft-mint-ink);
   --color-sky: var(--soft-sky);
@@ -55,20 +52,6 @@
     --soft-butter-ink: #87620d;
     --soft-peach: #fbe9e1;
     --soft-peach-ink: #a4502c;
-  }
-
-  html[data-theme="dark"] {
-    color-scheme: dark;
-    --soft-mint: #163a2e;
-    --soft-mint-ink: #9ee0c2;
-    --soft-sky: #15333f;
-    --soft-sky-ink: #9fd5e8;
-    --soft-lavender: #27254a;
-    --soft-lavender-ink: #c4bdf5;
-    --soft-butter: #3a3219;
-    --soft-butter-ink: #f0d791;
-    --soft-peach: #3d271f;
-    --soft-peach-ink: #f2bba3;
   }
 
   h1,
@@ -102,18 +85,16 @@
   }
 
   .btn-secondary {
-    @apply border border-slate-200 bg-white text-slate-800 shadow-soft hover:border-brand-200 hover:bg-mint
-      dark:border-white/10 dark:bg-white/5 dark:text-slate-100;
+    @apply border border-slate-200 bg-white text-slate-800 shadow-soft hover:border-brand-200 hover:bg-mint;
   }
 
   /* Карточки */
   .card {
-    @apply rounded-3xl border border-slate-200/80 bg-white shadow-soft dark:border-white/10 dark:bg-slate-900;
+    @apply rounded-3xl border border-slate-200/80 bg-white shadow-soft;
   }
 
   .card-hover {
-    @apply transition duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-lift
-      dark:hover:border-brand-500/50;
+    @apply transition duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-lift;
   }
 
   /* Надзаголовок-«таблетка» */
@@ -124,21 +105,20 @@
 
   .link {
     @apply font-medium text-brand-700 underline decoration-brand-300 decoration-2 underline-offset-4
-      hover:decoration-brand-600 dark:text-brand-300 dark:decoration-brand-700;
+      hover:decoration-brand-600;
   }
 
   .nav-link {
-    @apply rounded-full px-3 py-1.5 font-medium text-slate-600 transition hover:bg-slate-900/5 hover:text-slate-900
-      dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white;
+    @apply rounded-full px-3 py-1.5 font-medium text-slate-600 transition hover:bg-slate-900/5 hover:text-slate-900;
   }
 
   .nav-link[aria-current="page"] {
-    @apply bg-brand-500/10 text-brand-700 dark:bg-brand-400/15 dark:text-brand-300;
+    @apply bg-brand-500/10 text-brand-700;
   }
 
   .input {
     @apply mt-1 w-full rounded-xl border bg-white px-3.5 py-2.5 transition focus:border-brand-500 focus:ring-4
-      focus:ring-brand-500/15 focus:outline-none dark:bg-slate-950;
+      focus:ring-brand-500/15 focus:outline-none;
   }
 
   /* Тексты заданий (HTML из content/exercises): формулы и клавиши */
@@ -147,8 +127,7 @@
   }
 
   .exercise-text kbd {
-    @apply rounded-md border border-b-[3px] border-slate-300 bg-white px-1.5 py-0.5 font-mono text-[0.85em]
-      dark:border-slate-600 dark:bg-slate-800;
+    @apply rounded-md border border-b-[3px] border-slate-300 bg-white px-1.5 py-0.5 font-mono text-[0.85em];
   }
 }
 

@@ -4,15 +4,15 @@
 {% block title %}Задания к главе {{ chapter.number }} — ExcelLearn{% endblock %}
 
 {% block content %}
-  <nav class="flex flex-wrap items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400" aria-label="Хлебные крошки">
-    <a href="{% url 'catalog:course' %}" class="rounded-full px-2 py-0.5 hover:bg-slate-900/5 hover:text-brand-700 dark:hover:bg-white/10 dark:hover:text-brand-300">Оглавление</a>
+  <nav class="flex flex-wrap items-center gap-1.5 text-sm text-slate-500" aria-label="Хлебные крошки">
+    <a href="{% url 'catalog:course' %}" class="rounded-full px-2 py-0.5 hover:bg-slate-900/5 hover:text-brand-700">Оглавление</a>
     <span aria-hidden="true">›</span>
-    <a href="{% url 'catalog:course' %}#{{ chapter.id }}" class="rounded-full px-2 py-0.5 hover:bg-slate-900/5 hover:text-brand-700 dark:hover:bg-white/10 dark:hover:text-brand-300">
+    <a href="{% url 'catalog:course' %}#{{ chapter.id }}" class="rounded-full px-2 py-0.5 hover:bg-slate-900/5 hover:text-brand-700">
       Глава {{ chapter.number }}. {{ chapter.title }}
     </a>
   </nav>
   <h1 class="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">Задания к главе {{ chapter.number }}</h1>
-  <p class="mt-2 max-w-3xl text-slate-600 dark:text-slate-300">
+  <p class="mt-2 max-w-3xl text-slate-600">
     Решите их сами в своём Excel. Скачайте файл задания: <span class="rounded-md bg-[#fff4cc] px-1.5 py-0.5 font-medium text-slate-900 ring-1 ring-[#f0d77a]">жёлтые ячейки</span>
     — для ваших формул. Потом откройте файл решения и сверьте ответы: щёлкните по ячейке, и в строке формул будет видна
     формула.
@@ -31,11 +31,11 @@
           <div class="exercise-text mt-3 space-y-4 leading-relaxed">
             <p>{{ exercise.task|excel_text:preferences.function_locale|safe }}</p>
 
-            <details class="group rounded-2xl border border-slate-200 bg-slate-50/80 p-4 open:bg-white dark:border-white/10 dark:bg-white/5 dark:open:bg-white/5">
-              <summary class="cursor-pointer font-semibold text-brand-700 marker:text-brand-400 dark:text-brand-300">💡 Как решать — подсказка</summary>
+            <details class="group rounded-2xl border border-slate-200 bg-slate-50/80 p-4 open:bg-white">
+              <summary class="cursor-pointer font-semibold text-brand-700 marker:text-brand-400">💡 Как решать — подсказка</summary>
               <p class="mt-3">{{ exercise.explain|excel_text:preferences.function_locale|safe }}</p>
               {% if exercise.mistake %}
-                <p class="mt-3 rounded-xl border-l-4 border-butter-ink/40 bg-butter p-3 text-slate-800 dark:text-slate-200">
+                <p class="mt-3 rounded-xl border-l-4 border-butter-ink/40 bg-butter p-3 text-slate-800">
                   <b>Частая ошибка.</b> {{ exercise.mistake|excel_text:preferences.function_locale|safe }}
                 </p>
               {% endif %}

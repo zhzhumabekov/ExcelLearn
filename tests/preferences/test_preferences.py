@@ -36,7 +36,6 @@ FORM = {
     "narration_on": "on",
     "narration_volume": "40",
     "autoplay_next": "on",
-    "theme": "dark",
 }
 
 
@@ -62,11 +61,11 @@ def test_htmx_save_returns_status_and_persists(logged, user):
 
     assert "Сохранено ✓" in response.content.decode()
     prefs = Preferences.objects.get(user=user)
-    assert (prefs.speed, prefs.function_locale, prefs.narration_volume, prefs.theme) == (
+    assert (prefs.speed, prefs.function_locale, prefs.narration_volume, prefs.autoplay_next) == (
         Decimal("1.5"),
         "en",
         40,
-        "dark",
+        True,
     )
     assert prefs.narration_on and prefs.autoplay_next
 
@@ -103,16 +102,16 @@ def test_guest_page_has_no_htmx_and_cannot_post(client):
     assert client.post(PAGE, FORM).status_code == 401
 
 
-def test_partial_update_changes_only_theme(logged, user):
+def test_partial_update_changes_only_given_field(logged, user):
     logged.post(PAGE, FORM, HTTP_HX_REQUEST="true")
 
-    assert post_json(logged, UPDATE, {"theme": "light"}).json() == {"ok": True}
+    assert post_json(logged, UPDATE, {"function_locale": "ru"}).json() == {"ok": True}
 
     prefs = Preferences.objects.get(user=user)
-    assert prefs.theme == "light" and prefs.function_locale == "en" and prefs.autoplay_next
+    assert prefs.function_locale == "ru" and prefs.speed == Decimal("1.5") and prefs.autoplay_next
 
 
-@pytest.mark.parametrize("data", [{"theme": "purple"}, {"speed": "7"}])
+@pytest.mark.parametrize("data", [{"function_locale": "de"}, {"speed": "7"}])
 def test_partial_update_validates(logged, data):
     assert post_json(logged, UPDATE, data).status_code == 400
 
@@ -134,21 +133,18 @@ def test_merge_only_when_account_has_no_settings(logged, user):
 
 
 def test_endpoints_require_login_and_csrf(client, user):
-    assert post_json(client, UPDATE, {"theme": "dark"}).status_code == 401
+    assert post_json(client, UPDATE, {"function_locale": "en"}).status_code == 401
     assert post_json(client, MERGE, {}).status_code == 401
 
     strict = Client(enforce_csrf_checks=True)
     strict.force_login(user)
-    assert post_json(strict, UPDATE, {"theme": "dark"}).status_code == 403
+    assert post_json(strict, UPDATE, {"function_locale": "en"}).status_code == 403
 
 
-def test_theme_from_profile_is_on_html(logged):
-    post_json(logged, UPDATE, {"theme": "dark"})
+def test_settings_page_has_no_theme(logged):
+    html = logged.get(PAGE).content.decode()
 
-    html = logged.get("/").content.decode()
-
-    assert 'data-theme-pref="dark"' in html
-    assert f'data-settings-api="{UPDATE}"' in html
+    assert "Тема оформления" not in html and 'name="theme"' not in html
 
 
 def test_lesson_page_passes_player_settings(logged):

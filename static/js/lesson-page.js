@@ -28,10 +28,10 @@
 
   function goNext() {
     if (!next) return;
-    next.classList.add("border-brand-600", "bg-brand-50", "ring-2", "ring-brand-600/30", "dark:bg-slate-800");
+    next.classList.add("border-brand-600", "bg-brand-50", "ring-2", "ring-brand-600/30");
     if (!settings.autoplayNext) return;
     const label = document.createElement("span");
-    label.className = "mt-1 block text-xs text-brand-700 dark:text-brand-100";
+    label.className = "mt-1 block text-xs text-brand-700";
     label.dataset.autoplayCountdown = "";
     next.append(label);
     let left = AUTOPLAY_DELAY_S;

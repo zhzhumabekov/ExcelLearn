@@ -7,14 +7,14 @@
 
 {% block content %}
   <h1 class="text-2xl font-bold">Песочница плеера</h1>
-  <p class="mt-2 text-sm text-slate-600 dark:text-slate-300 [&_a]:text-brand-700 [&_a]:underline dark:[&_a]:text-brand-100">
+  <p class="mt-2 text-sm text-slate-600 [&_a]:text-brand-700 [&_a]:underline">
     Собрать плеер: <code>pnpm --dir player dev</code>.
     Язык функций:
     <a href="?lesson={{ lesson.id }}&amp;locale=ru">RU</a> ·
     <a href="?lesson={{ lesson.id }}&amp;locale=en">EN</a> ·
     <a href="?lesson={{ lesson.id }}&amp;locale={{ locale }}&amp;demo=1">автозапуск</a>
   </p>
-  <ul class="my-4 list-disc pl-6 text-sm [&_a]:text-brand-700 [&_a]:underline dark:[&_a]:text-brand-100">
+  <ul class="my-4 list-disc pl-6 text-sm [&_a]:text-brand-700 [&_a]:underline">
     {% for item in lessons %}
       <li>
         {% if item.id == lesson.id %}<b>{{ item.title }}</b>{% else %}<a href="?lesson={{ item.id }}&amp;locale={{ locale }}">{{ item.title }}</a>{% endif %}

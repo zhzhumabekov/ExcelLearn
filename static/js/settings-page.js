@@ -1,4 +1,4 @@
-// Страница настроек. Тема применяется сразу у всех. У вошедшего сохраняет htmx (hx-post на форме),
+// Страница настроек. У вошедшего сохраняет htmx (hx-post на форме),
 // у гостя — этот скрипт, в браузер.
 (() => {
   const form = document.getElementById("settings-form");
@@ -21,7 +21,6 @@
 
   form.addEventListener("change", (event) => {
     const input = event.target;
-    if (input.name === "theme") window.applyTheme(input.value, { persist: guest });
     if (!guest) return; // вошедший: сохраняет htmx
     const value =
       input.type === "checkbox" ? input.checked : input.name === "speed" || input.type === "range" ? Number(input.value) : input.value;

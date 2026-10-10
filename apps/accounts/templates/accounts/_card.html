@@ -7,9 +7,9 @@
       <svg viewBox="0 0 24 24" class="size-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 6l10 12M17 6L7 18"/></svg>
     </span>
     <h1 class="mt-5 text-center text-3xl font-extrabold tracking-tight">{% block heading %}{% endblock %}</h1>
-    <p class="mt-2 text-center text-slate-500 dark:text-slate-400">{% block subheading %}{% endblock %}</p>
+    <p class="mt-2 text-center text-slate-500">{% block subheading %}{% endblock %}</p>
     <div class="card mt-7 space-y-4 p-6 sm:p-8
-                [&_a]:font-medium [&_a]:text-brand-700 [&_a]:underline [&_a]:decoration-brand-300 [&_a]:underline-offset-4 dark:[&_a]:text-brand-300">
+                [&_a]:font-medium [&_a]:text-brand-700 [&_a]:underline [&_a]:decoration-brand-300 [&_a]:underline-offset-4">
       {% block card %}{% endblock %}
     </div>
     {% block after %}{% endblock %}

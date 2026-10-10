@@ -9,10 +9,10 @@
 {% block head %}<link rel="stylesheet" href="{% static 'player/player.css' %}">{% endblock %}
 
 {% block content %}
-  <nav class="flex flex-wrap items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400" aria-label="Хлебные крошки">
-    <a href="{% url 'catalog:course' %}" class="rounded-full px-2 py-0.5 hover:bg-slate-900/5 hover:text-brand-700 dark:hover:bg-white/10 dark:hover:text-brand-300">Оглавление</a>
+  <nav class="flex flex-wrap items-center gap-1.5 text-sm text-slate-500" aria-label="Хлебные крошки">
+    <a href="{% url 'catalog:course' %}" class="rounded-full px-2 py-0.5 hover:bg-slate-900/5 hover:text-brand-700">Оглавление</a>
     <span aria-hidden="true">›</span>
-    <a href="{% url 'catalog:course' %}#{{ chapter.id }}" class="rounded-full px-2 py-0.5 hover:bg-slate-900/5 hover:text-brand-700 dark:hover:bg-white/10 dark:hover:text-brand-300">
+    <a href="{% url 'catalog:course' %}#{{ chapter.id }}" class="rounded-full px-2 py-0.5 hover:bg-slate-900/5 hover:text-brand-700">
       {% if chapter.number %}Глава {{ chapter.number }}. {% endif %}{{ chapter.title }}
     </a>
   </nav>
@@ -20,7 +20,7 @@
     <span class="grid h-9 min-w-12 place-items-center rounded-xl bg-mint px-2 font-display font-extrabold text-mint-ink">{{ chapter.number }}.{{ lesson.order }}</span>
     <h1 class="text-2xl font-extrabold tracking-tight sm:text-3xl">{{ lesson.title }}</h1>
   </div>
-  {% if lesson.source %}<p class="mt-2 text-sm text-slate-500 dark:text-slate-400">{{ lesson.source }}</p>{% endif %}
+  {% if lesson.source %}<p class="mt-2 text-sm text-slate-500">{{ lesson.source }}</p>{% endif %}
 
   <div id="player" class="mt-6"></div>
 
@@ -28,7 +28,7 @@
     <span class="grid size-12 flex-none place-items-center rounded-2xl bg-mint text-2xl" aria-hidden="true">📗</span>
     <div class="min-w-0 flex-1">
       <h2 id="lesson-file-title" class="font-bold">Повторите урок в своём Excel</h2>
-      <p class="text-sm text-slate-500 dark:text-slate-400">
+      <p class="text-sm text-slate-500">
         Таблица в том виде, в каком урок начинается. Откройте её и выполните шаги сами.
       </p>
     </div>
@@ -40,12 +40,12 @@
   {% if show_exercises %}
     <a href="{% url 'catalog:exercises' chapter.id %}" data-testid="chapter-exercises"
        class="group relative mt-4 flex flex-wrap items-center gap-4 overflow-hidden rounded-3xl bg-butter p-5 text-butter-ink transition hover:-translate-y-0.5 hover:shadow-lift sm:p-6">
-      <span class="grid size-12 flex-none place-items-center rounded-2xl bg-white/60 text-2xl dark:bg-white/10" aria-hidden="true">✍️</span>
+      <span class="grid size-12 flex-none place-items-center rounded-2xl bg-white/60 text-2xl" aria-hidden="true">✍️</span>
       <span class="flex-1">
         <span class="block text-lg font-bold">Глава пройдена — закрепите на заданиях</span>
-        <span class="text-sm text-slate-600 dark:text-slate-300">Задачи на своих данных: файл задания и решение для проверки.</span>
+        <span class="text-sm text-slate-600">Задачи на своих данных: файл задания и решение для проверки.</span>
       </span>
-      <span class="rounded-xl bg-white/80 px-4 py-2 font-semibold transition group-hover:bg-white dark:bg-white/10">Задания к главе {{ chapter.number }} →</span>
+      <span class="rounded-xl bg-white/80 px-4 py-2 font-semibold transition group-hover:bg-white">Задания к главе {{ chapter.number }} →</span>
     </a>
   {% endif %}
 
@@ -58,7 +58,7 @@
     {% else %}<span></span>{% endif %}
     {% if next_lesson %}
       <a href="{% url 'catalog:lesson' next_lesson.id %}" rel="next" id="next-lesson" class="card card-hover px-5 py-4 text-right">
-        <span class="block text-xs font-semibold tracking-wide text-brand-600 uppercase dark:text-brand-400">Следующий →</span>
+        <span class="block text-xs font-semibold tracking-wide text-brand-600 uppercase">Следующий →</span>
         <span class="mt-1 block font-semibold">{{ next_lesson.title }}</span>
       </a>
     {% endif %}

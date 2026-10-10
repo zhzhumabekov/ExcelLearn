@@ -35,7 +35,7 @@ def _json(request) -> dict | None:
 
 @require_POST
 def update(request):
-    """POST /api/settings/ {"theme": "dark"} — частичное обновление (переключатель темы в шапке)."""
+    """POST /api/settings/ {"function_locale": "en"} — частичное обновление настроек."""
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Нужно войти"}, status=401)
     data = _json(request)

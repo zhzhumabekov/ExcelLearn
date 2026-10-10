@@ -1,7 +1,7 @@
 from .models import Preferences
 
-# Поля, которые можно менять из браузера (страница настроек, переключатель темы, перенос от гостя)
-FIELDS = ["speed", "function_locale", "narration_on", "narration_volume", "autoplay_next", "theme"]
+# Поля, которые можно менять из браузера (страница настроек, API, перенос от гостя)
+FIELDS = ["speed", "function_locale", "narration_on", "narration_volume", "autoplay_next"]
 
 
 def get_preferences(user) -> Preferences:

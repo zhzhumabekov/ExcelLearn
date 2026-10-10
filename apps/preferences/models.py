@@ -7,7 +7,6 @@ from django.db import models
 # Значения с одним знаком после запятой — как их возвращает база (decimal_places=1), иначе форма не узнает выбор
 SPEED_CHOICES = [(Decimal("0.5"), "0,5×"), (Decimal("1.0"), "1×"), (Decimal("1.5"), "1,5×"), (Decimal("2.0"), "2×")]
 LOCALE_CHOICES = [("ru", "Русский Excel"), ("en", "Английский Excel")]
-THEME_CHOICES = [("system", "Как в системе"), ("light", "Светлая"), ("dark", "Тёмная")]
 
 
 class Preferences(models.Model):
@@ -21,7 +20,6 @@ class Preferences(models.Model):
     narration_on = models.BooleanField("озвучка", default=True)
     narration_volume = models.PositiveSmallIntegerField("громкость", default=80, validators=[MaxValueValidator(100)])
     autoplay_next = models.BooleanField("автопереход к следующему уроку", default=False)
-    theme = models.CharField("тема", max_length=10, choices=THEME_CHOICES, default="system")
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
