@@ -20,10 +20,10 @@
       const cell = li.querySelector("[data-status]");
       if (item.completed) {
         done++;
-        cell.replaceChildren(status('<span class="font-medium text-brand-600 dark:text-brand-100">✓ Пройден</span>'));
+        cell.replaceChildren(status('<span class="rounded-full bg-mint px-2.5 py-1 font-semibold text-mint-ink">✓ Пройден</span>'));
       } else {
         const text = `Шаг ${item.step + 1} из ${li.dataset.steps}`;
-        const span = status('<span class="text-amber-700 dark:text-amber-300"></span>');
+        const span = status('<span class="rounded-full bg-butter px-2.5 py-1 font-semibold text-butter-ink"></span>');
         span.textContent = text;
         cell.replaceChildren(span);
       }

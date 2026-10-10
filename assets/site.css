@@ -3,29 +3,78 @@
    Плеер урока стилизуется отдельно (player/src/styles/player.css). */
 @import "tailwindcss" source(none);
 
-/* Где искать классы: только шаблоны Django-приложений */
+/* Где искать классы: шаблоны Django-приложений и скрипты, которые вставляют разметку */
 @source "../apps/**/templates/**/*.html";
+@source "../static/js/*.js";
 
 /* Тёмная тема — по атрибуту data-theme на <html> (его ставит скрипт в base.html) */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme {
-  --font-sans: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
-  --color-brand-50: #eef7f1;
-  --color-brand-100: #d6eedf;
-  --color-brand-500: #2e8b57;
-  --color-brand-600: #217346;
-  --color-brand-700: #185c37;
-  --color-brand-900: #0f3a23;
+  --font-sans: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --font-display: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+
+  /* Изумрудный — цвет Excel */
+  --color-brand-50: #ecfdf5;
+  --color-brand-100: #d1fae5;
+  --color-brand-200: #a7f3d0;
+  --color-brand-300: #6ee7b7;
+  --color-brand-400: #34d399;
+  --color-brand-500: #10b981;
+  --color-brand-600: #059669;
+  --color-brand-700: #047857;
+  --color-brand-800: #065f46;
+  --color-brand-900: #064e3b;
+
+  /* Мягкие пастельные пары «фон + текст»; значения меняются в тёмной теме (переменные ниже) */
+  --color-mint: var(--soft-mint);
+  --color-mint-ink: var(--soft-mint-ink);
+  --color-sky: var(--soft-sky);
+  --color-sky-ink: var(--soft-sky-ink);
+  --color-lavender: var(--soft-lavender);
+  --color-lavender-ink: var(--soft-lavender-ink);
+  --color-butter: var(--soft-butter);
+  --color-butter-ink: var(--soft-butter-ink);
+  --color-peach: var(--soft-peach);
+  --color-peach-ink: var(--soft-peach-ink);
+
+  --shadow-soft: 0 1px 2px rgb(15 23 42 / 0.04), 0 6px 20px -8px rgb(15 23 42 / 0.08);
+  --shadow-lift: 0 2px 4px rgb(15 23 42 / 0.04), 0 14px 32px -12px rgb(15 23 42 / 0.14);
 }
 
 @layer base {
   html {
     color-scheme: light;
+    --soft-mint: #e4f5ec;
+    --soft-mint-ink: #12704d;
+    --soft-sky: #e2f1f7;
+    --soft-sky-ink: #1d6a85;
+    --soft-lavender: #ecebfa;
+    --soft-lavender-ink: #5a4fa8;
+    --soft-butter: #fbf2d5;
+    --soft-butter-ink: #87620d;
+    --soft-peach: #fbe9e1;
+    --soft-peach-ink: #a4502c;
   }
 
   html[data-theme="dark"] {
     color-scheme: dark;
+    --soft-mint: #163a2e;
+    --soft-mint-ink: #9ee0c2;
+    --soft-sky: #15333f;
+    --soft-sky-ink: #9fd5e8;
+    --soft-lavender: #27254a;
+    --soft-lavender-ink: #c4bdf5;
+    --soft-butter: #3a3219;
+    --soft-butter-ink: #f0d791;
+    --soft-peach: #3d271f;
+    --soft-peach-ink: #f2bba3;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
   }
 
   /* Флажки и переключатели — в фирменном цвете (в т. ч. те, что рисует Django без классов) */
@@ -34,15 +83,99 @@
   input[type="range"] {
     accent-color: var(--color-brand-600);
   }
+
+  :focus-visible {
+    outline: 3px solid rgb(16 185 129 / 0.45);
+    outline-offset: 2px;
+  }
 }
 
-/* Тексты заданий (HTML из content/exercises): формулы и клавиши */
 @layer components {
+  /* Кнопки */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-semibold transition
+      duration-200 select-none active:scale-[0.98];
+  }
+
+  .btn-primary {
+    @apply bg-brand-600 text-white shadow-soft hover:bg-brand-700;
+  }
+
+  .btn-secondary {
+    @apply border border-slate-200 bg-white text-slate-800 shadow-soft hover:border-brand-200 hover:bg-mint
+      dark:border-white/10 dark:bg-white/5 dark:text-slate-100;
+  }
+
+  /* Карточки */
+  .card {
+    @apply rounded-3xl border border-slate-200/80 bg-white shadow-soft dark:border-white/10 dark:bg-slate-900;
+  }
+
+  .card-hover {
+    @apply transition duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-lift
+      dark:hover:border-brand-500/50;
+  }
+
+  /* Надзаголовок-«таблетка» */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full bg-mint px-3 py-1 text-xs font-bold tracking-wider
+      text-mint-ink uppercase;
+  }
+
+  .link {
+    @apply font-medium text-brand-700 underline decoration-brand-300 decoration-2 underline-offset-4
+      hover:decoration-brand-600 dark:text-brand-300 dark:decoration-brand-700;
+  }
+
+  .nav-link {
+    @apply rounded-full px-3 py-1.5 font-medium text-slate-600 transition hover:bg-slate-900/5 hover:text-slate-900
+      dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white;
+  }
+
+  .nav-link[aria-current="page"] {
+    @apply bg-brand-500/10 text-brand-700 dark:bg-brand-400/15 dark:text-brand-300;
+  }
+
+  .input {
+    @apply mt-1 w-full rounded-xl border bg-white px-3.5 py-2.5 transition focus:border-brand-500 focus:ring-4
+      focus:ring-brand-500/15 focus:outline-none dark:bg-slate-950;
+  }
+
+  /* Тексты заданий (HTML из content/exercises): формулы и клавиши */
   .exercise-text code {
-    @apply rounded bg-brand-50 px-1 py-0.5 font-mono text-[0.9em] text-brand-900 dark:bg-stone-800 dark:text-brand-100;
+    @apply rounded-md bg-mint px-1.5 py-0.5 font-mono text-[0.9em] text-mint-ink;
   }
 
   .exercise-text kbd {
-    @apply rounded border border-stone-300 bg-white px-1.5 py-0.5 font-mono text-[0.85em] shadow-sm dark:border-stone-600 dark:bg-stone-800;
+    @apply rounded-md border border-b-[3px] border-slate-300 bg-white px-1.5 py-0.5 font-mono text-[0.85em]
+      dark:border-slate-600 dark:bg-slate-800;
+  }
+}
+
+/* Иллюстрация на главной: мигающий курсор в формуле */
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes float {
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@utility animate-caret {
+  animation: caret 1s steps(1) infinite;
+}
+
+@utility animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-caret {
+    animation: none;
   }
 }

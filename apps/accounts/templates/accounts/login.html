@@ -11,13 +11,13 @@
     {% include "accounts/_errors.html" %}
     {% include "accounts/_field.html" with field=form.username %}
     {% include "accounts/_field.html" with field=form.password %}
-    <button type="submit" class="w-full rounded-xl bg-brand-600 px-5 py-3 font-semibold text-white hover:bg-brand-700">Войти</button>
+    <button type="submit" class="btn btn-primary w-full">Войти</button>
   </form>
   <p class="text-sm"><a href="{% url 'accounts:password_reset' %}">Забыли пароль?</a></p>
 {% endblock %}
 
 {% block after %}
-  <p class="mt-4 text-center text-sm text-stone-600 dark:text-stone-300 [&_a]:text-brand-700 [&_a]:underline dark:[&_a]:text-brand-100">
+  <p class="mt-4 text-center text-sm text-slate-600 dark:text-slate-300 [&_a]:text-brand-700 [&_a]:underline dark:[&_a]:text-brand-100">
     Нет аккаунта? <a href="{% url 'accounts:signup' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Зарегистрируйтесь</a>
   </p>
 {% endblock %}

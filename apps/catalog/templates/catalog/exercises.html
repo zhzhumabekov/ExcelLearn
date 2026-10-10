@@ -4,16 +4,16 @@
 {% block title %}Задания к главе {{ chapter.number }} — ExcelLearn{% endblock %}
 
 {% block content %}
-  <nav class="text-sm text-stone-500 dark:text-stone-400" aria-label="Хлебные крошки">
-    <a href="{% url 'catalog:course' %}" class="hover:text-brand-700 dark:hover:text-brand-100">Оглавление</a>
-    <span class="mx-1">/</span>
-    <a href="{% url 'catalog:course' %}#{{ chapter.id }}" class="hover:text-brand-700 dark:hover:text-brand-100">
+  <nav class="flex flex-wrap items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400" aria-label="Хлебные крошки">
+    <a href="{% url 'catalog:course' %}" class="rounded-full px-2 py-0.5 hover:bg-slate-900/5 hover:text-brand-700 dark:hover:bg-white/10 dark:hover:text-brand-300">Оглавление</a>
+    <span aria-hidden="true">›</span>
+    <a href="{% url 'catalog:course' %}#{{ chapter.id }}" class="rounded-full px-2 py-0.5 hover:bg-slate-900/5 hover:text-brand-700 dark:hover:bg-white/10 dark:hover:text-brand-300">
       Глава {{ chapter.number }}. {{ chapter.title }}
     </a>
   </nav>
-  <h1 class="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Задания к главе {{ chapter.number }}</h1>
-  <p class="mt-2 max-w-3xl text-stone-600 dark:text-stone-300">
-    Решите их сами в своём Excel. Скачайте файл задания: <span class="rounded bg-[#fff4cc] px-1 text-stone-900">жёлтые ячейки</span>
+  <h1 class="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">Задания к главе {{ chapter.number }}</h1>
+  <p class="mt-2 max-w-3xl text-slate-600 dark:text-slate-300">
+    Решите их сами в своём Excel. Скачайте файл задания: <span class="rounded-md bg-[#fff4cc] px-1.5 py-0.5 font-medium text-slate-900 ring-1 ring-[#f0d77a]">жёлтые ячейки</span>
     — для ваших формул. Потом откройте файл решения и сверьте ответы: щёлкните по ячейке, и в строке формул будет видна
     формула.
   </p>
@@ -21,20 +21,21 @@
   <ol class="mt-8 space-y-6">
     {% for item in exercises %}
       {% with exercise=item.exercise %}
-        <li class="rounded-2xl border border-stone-200 bg-white p-6 dark:border-stone-800 dark:bg-stone-900"
+        <li class="card scroll-mt-24 p-6 sm:p-7"
             id="{{ exercise.id }}" data-exercise="{{ exercise.id }}">
-          <h2 class="text-lg font-semibold">
-            <span class="text-brand-600 dark:text-brand-100">Задание {{ exercise.number }}.</span> {{ exercise.title }}
+          <h2 class="flex items-center gap-3 text-xl font-bold">
+            <span class="grid size-10 flex-none place-items-center rounded-xl bg-mint font-display font-extrabold text-mint-ink">{{ exercise.number }}</span>
+            <span><span class="sr-only">Задание {{ exercise.number }}. </span>{{ exercise.title }}</span>
           </h2>
 
           <div class="exercise-text mt-3 space-y-4 leading-relaxed">
             <p>{{ exercise.task|excel_text:preferences.function_locale|safe }}</p>
 
-            <details class="group rounded-xl bg-stone-50 p-4 dark:bg-stone-800/60">
-              <summary class="cursor-pointer font-semibold text-brand-700 dark:text-brand-100">Как решать — подсказка</summary>
+            <details class="group rounded-2xl border border-slate-200 bg-slate-50/80 p-4 open:bg-white dark:border-white/10 dark:bg-white/5 dark:open:bg-white/5">
+              <summary class="cursor-pointer font-semibold text-brand-700 marker:text-brand-400 dark:text-brand-300">💡 Как решать — подсказка</summary>
               <p class="mt-3">{{ exercise.explain|excel_text:preferences.function_locale|safe }}</p>
               {% if exercise.mistake %}
-                <p class="mt-3 rounded-lg border-l-4 border-amber-400 bg-amber-50 p-3 text-stone-800 dark:bg-amber-950/40 dark:text-stone-200">
+                <p class="mt-3 rounded-xl border-l-4 border-butter-ink/40 bg-butter p-3 text-slate-800 dark:text-slate-200">
                   <b>Частая ошибка.</b> {{ exercise.mistake|excel_text:preferences.function_locale|safe }}
                 </p>
               {% endif %}
@@ -43,11 +44,11 @@
 
           <div class="mt-5 flex flex-wrap gap-3">
             <a href="{% url 'catalog:exercise-task' chapter.id exercise.id %}" download data-testid="exercise-task"
-               class="rounded-xl bg-brand-600 px-5 py-3 font-semibold text-white hover:bg-brand-700">
+               class="btn btn-primary">
               ⬇ Задание: {{ item.task_name }}
             </a>
             <a href="{% url 'catalog:exercise-solution' chapter.id exercise.id %}" download data-testid="exercise-solution"
-               class="rounded-xl border border-stone-300 px-5 py-3 font-semibold hover:border-brand-600 dark:border-stone-700">
+               class="btn btn-secondary">
               ✓ Решение для проверки
             </a>
           </div>
@@ -59,8 +60,8 @@
   {% if last_lesson %}
     <nav class="mt-8" aria-label="Назад к урокам">
       <a href="{% url 'catalog:lesson' last_lesson.id %}"
-         class="inline-block rounded-xl border border-stone-300 px-5 py-3 hover:border-brand-600 dark:border-stone-700">
-        <span class="block text-xs text-stone-500">← Последний урок главы</span>{{ last_lesson.title }}
+         class="card card-hover inline-block px-5 py-4">
+        <span class="block text-xs font-semibold tracking-wide text-slate-400 uppercase">← Последний урок главы</span>{{ last_lesson.title }}
       </a>
     </nav>
   {% endif %}

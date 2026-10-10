@@ -31,34 +31,42 @@
   <script src="{% static 'vendor/alpine.min.js' %}" defer></script>
   {% block head %}{% endblock %}
 </head>
-<body class="min-h-screen flex flex-col bg-stone-50 text-stone-800 antialiased dark:bg-stone-950 dark:text-stone-100">
-  <header class="border-b border-stone-200 bg-white/80 backdrop-blur dark:border-stone-800 dark:bg-stone-900/80">
-    <div class="mx-auto flex max-w-7xl items-center gap-6 px-4 py-3 sm:px-6">
-      <a href="{% url 'catalog:home' %}" class="flex items-center gap-2 font-semibold">
-        <span class="grid size-9 place-items-center rounded-lg bg-brand-600 text-lg font-bold text-white">X</span>
-        <span class="text-lg">ExcelLearn</span>
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-100">
+  <header class="sticky top-0 z-30 border-b border-slate-200/70 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-slate-950/90">
+    <div class="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:gap-6 sm:px-6">
+      <a href="{% url 'catalog:home' %}" class="group flex items-center gap-2.5 font-display font-bold">
+        <span class="relative grid size-10 place-items-center overflow-hidden rounded-xl bg-brand-600 text-white transition group-hover:rotate-[-6deg]">
+          <svg viewBox="0 0 24 24" class="size-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+            <path d="M7 6l10 12M17 6L7 18"/>
+          </svg>
+          <span class="absolute right-1 bottom-1 size-1.5 rounded-full bg-[#fbd968]"></span>
+        </span>
+        <span class="text-lg tracking-tight">Excel<span class="text-brand-600 dark:text-brand-400">Learn</span></span>
       </a>
-      <nav class="flex items-center gap-4 text-sm" aria-label="Основная навигация">
+      <nav class="hidden items-center gap-1 text-sm sm:flex" aria-label="Основная навигация">
         {% block nav %}
-          <a href="{% url 'catalog:course' %}" class="text-stone-600 hover:text-brand-700 dark:text-stone-300 dark:hover:text-brand-100">Курс</a>
-          <a href="{% url 'preferences:page' %}" class="text-stone-600 hover:text-brand-700 dark:text-stone-300 dark:hover:text-brand-100">Настройки</a>
+          {% url 'catalog:course' as course_url %}{% url 'preferences:page' as settings_url %}
+          <a href="{{ course_url }}" class="nav-link" {% if request.path == course_url %}aria-current="page"{% endif %}>Курс</a>
+          <a href="{{ settings_url }}" class="nav-link" {% if request.path == settings_url %}aria-current="page"{% endif %}>Настройки</a>
         {% endblock %}
       </nav>
-      <div class="ml-auto flex items-center gap-3 text-sm">
+      <div class="ml-auto flex items-center gap-2 text-sm sm:gap-3">
         {% if user.is_authenticated %}
-          <span class="text-stone-600 dark:text-stone-300" data-testid="user-name">{{ user.first_name|default:user.email }}</span>
+          <span class="hidden items-center gap-2 font-medium text-slate-700 sm:flex dark:text-slate-200">
+            <span class="grid size-8 place-items-center rounded-full bg-butter text-xs font-bold text-butter-ink" aria-hidden="true">{{ user.first_name|default:user.email|first|upper }}</span>
+            <span data-testid="user-name">{{ user.first_name|default:user.email }}</span>
+          </span>
           <form method="post" action="{% url 'accounts:logout' %}">
             {% csrf_token %}
-            <button type="submit" class="text-stone-500 hover:text-brand-700 dark:text-stone-400 dark:hover:text-brand-100">Выйти</button>
+            <button type="submit" class="nav-link">Выйти</button>
           </form>
         {% else %}
-          <a href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}"
-             class="text-stone-600 hover:text-brand-700 dark:text-stone-300 dark:hover:text-brand-100">Войти</a>
+          <a href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}" class="nav-link">Войти</a>
           <a href="{% url 'accounts:signup' %}?next={{ request.path|urlencode }}"
-             class="rounded-lg bg-brand-600 px-3 py-2 font-medium text-white hover:bg-brand-700">Регистрация</a>
+             class="btn btn-primary rounded-xl px-4 py-2 text-sm">Регистрация</a>
         {% endif %}
         <button type="button" x-data="themeToggle" @click="next()" :title="title"
-                class="grid size-9 place-items-center rounded-lg border border-stone-200 text-base hover:border-brand-600 dark:border-stone-700"
+                class="grid size-10 place-items-center rounded-xl border border-slate-200 bg-white/70 text-base transition hover:border-brand-400 hover:text-brand-600 dark:border-white/10 dark:bg-white/5"
                 aria-label="Тема оформления">
           <span x-text="icon">◐</span>
         </button>
@@ -66,15 +74,15 @@
     </div>
   </header>
 
-  <main class="mx-auto w-full {% block main_width %}max-w-7xl{% endblock %} flex-1 px-4 py-8 sm:px-6">
+  <main class="mx-auto w-full {% block main_width %}max-w-7xl{% endblock %} flex-1 px-4 py-8 sm:px-6 sm:py-10">
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="border-t border-stone-200 py-6 text-sm text-stone-500 dark:border-stone-800 dark:text-stone-400">
-    <div class="mx-auto flex max-w-7xl flex-wrap gap-x-6 gap-y-2 px-4 sm:px-6">
-      <span>© ExcelLearn</span>
+  <footer class="mt-10 border-t border-slate-200/70 bg-white py-8 text-sm text-slate-500 dark:border-white/10 dark:bg-slate-950 dark:text-slate-400">
+    <div class="mx-auto grid max-w-7xl gap-4 px-4 sm:px-6 md:grid-cols-[auto_1fr_auto] md:items-center md:gap-8">
+      <span class="font-display font-bold text-slate-700 dark:text-slate-200">© ExcelLearn</span>
       <span>Анимированные уроки Excel на примерах казахстанского бизнеса. Программа курса — по мотивам книги У. Уинстона «Microsoft Excel: анализ данных и бизнес-моделирование»</span>
-      <a href="{% url 'legal:consent' %}" class="hover:text-brand-700 dark:hover:text-brand-100">Согласие на обработку персональных данных</a>
+      <a href="{% url 'legal:consent' %}" class="hover:text-brand-600 dark:hover:text-brand-300">Согласие на обработку персональных данных</a>
     </div>
   </footer>
 </body>
