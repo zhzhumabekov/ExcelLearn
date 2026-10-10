@@ -12,6 +12,8 @@ from lessons.registry import get_registry
 from lessons.theory import frame_path, png_size
 from lessons.xlsx_export import XLSX_CONTENT_TYPE, exercise_filename, exercise_xlsx, lesson_filename, lesson_xlsx
 
+from .access import FREE_CHAPTER_MAX, can_open, has_full_access
+
 # Главная, блок «Больше, чем формулы»: методы, которые осваивают в курсе
 HOME_TOPICS = [
     "Статистические методы",
@@ -35,8 +37,19 @@ HOME_STUDY_STEPS = [
 
 
 # Уроки, теория, задания и файлы — только после регистрации; главная и оглавление открыты всем.
+# Главы после бесплатных — ещё и с полным доступом (access.py).
 # Гостя ведём на регистрацию (там же ссылка «Войти»), после неё — обратно на ту же страницу.
 members_only = login_required(login_url="accounts:signup")
+
+
+def locked(request, chapter):
+    """Глава без полного доступа: страница с объяснением, как его получить (403)."""
+    return render(
+        request,
+        "catalog/locked.html",
+        {"chapter": chapter, "free_max": FREE_CHAPTER_MAX, "contact": settings.SUPPORT_EMAIL},
+        status=403,
+    )
 
 
 def home(request):
@@ -72,6 +85,7 @@ def course(request):
                 "percent": percent,
                 "exercise_count": len(registry.exercises.get(entry.chapter.id, ())),
                 "theory": registry.theory.get(entry.chapter.id),
+                "locked": request.user.is_authenticated and not can_open(request.user, entry.chapter),
             }
         )
     # Сразу раскрыты главы с начатыми уроками; если таких нет — первая глава, где есть что проходить
@@ -94,6 +108,8 @@ def course(request):
             "lesson_count": sum(len(entry["lessons"]) for entry in chapters),
             "exercise_count": sum(entry["exercise_count"] for entry in chapters),
             "empty_count": sum(1 for entry in chapters if not entry["lessons"]),
+            "full_access": has_full_access(request.user),
+            "free_max": FREE_CHAPTER_MAX,
         },
     )
 
@@ -107,6 +123,8 @@ def lesson(request, lesson_id: str):
     prev_lesson, next_lesson = registry.neighbors(lesson_id)
     entry = next(entry for entry in registry.chapters if entry.chapter.id == current.chapter)
     chapter = entry.chapter
+    if not can_open(request.user, chapter):
+        return locked(request, chapter)
     # После последнего урока главы — приглашение к заданиям
     show_exercises = entry.lessons[-1].id == current.id and bool(registry.exercises.get(chapter.id))
     # Перед первым уроком главы — приглашение к теории
@@ -137,9 +155,13 @@ def lesson(request, lesson_id: str):
 @members_only
 def lesson_file(request, lesson_id: str):
     """Файл урока: лист в начальном состоянии — открыть в своём Excel и повторить шаги."""
-    current = get_registry().get(lesson_id)
+    registry = get_registry()
+    current = registry.get(lesson_id)
     if current is None:
         raise Http404(f"Нет урока {lesson_id}")
+    chapter = registry.chapter(current.chapter)
+    if not can_open(request.user, chapter):
+        return locked(request, chapter)
     return xlsx_response(lesson_xlsx(current), lesson_filename(current))
 
 
@@ -156,6 +178,8 @@ def theory(request, chapter_id: str):
     item = registry.theory.get(chapter_id)
     if chapter is None or item is None:
         raise Http404(f"Нет теории к главе {chapter_id}")
+    if not can_open(request.user, chapter):
+        return locked(request, chapter)
     # Кадры — на языке функций ученика, как и формулы в тексте
     locale = get_preferences(request.user).function_locale
     static_dir = settings.STATICFILES_DIRS[0]
@@ -189,6 +213,8 @@ def exercises(request, chapter_id: str):
     items = registry.exercises.get(chapter_id)
     if chapter is None or not items:
         raise Http404(f"Нет заданий к главе {chapter_id}")
+    if not can_open(request.user, chapter):
+        return locked(request, chapter)
     entry = next(e for e in registry.chapters if e.chapter.id == chapter_id)
     return render(
         request,
@@ -210,7 +236,11 @@ def exercises(request, chapter_id: str):
 
 @members_only
 def exercise_file(request, chapter_id: str, exercise_id: str, kind: str):
-    exercise = get_registry().exercise(chapter_id, exercise_id)
+    registry = get_registry()
+    exercise = registry.exercise(chapter_id, exercise_id)
     if exercise is None:
         raise Http404(f"Нет задания {chapter_id}/{exercise_id}")
+    chapter = registry.chapter(chapter_id)
+    if not can_open(request.user, chapter):
+        return locked(request, chapter)
     return xlsx_response(exercise_xlsx(exercise, kind), exercise_filename(exercise, kind))  # type: ignore[arg-type]

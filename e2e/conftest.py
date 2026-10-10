@@ -68,6 +68,7 @@ def member(page: Page, django_user_model):
         first_name="Айгерим",
         last_name="С",
         phone="+77010000011",
+        full_access=True,  # e2e проигрывает уроки всех глав
     )
     client = Client()
     client.force_login(user)

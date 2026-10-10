@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Глава {{ chapter.number }} — полный доступ — ExcelLearn{% endblock %}
+
+{% block content %}
+  <nav class="flex flex-wrap items-center gap-1.5 text-sm text-slate-500" aria-label="Хлебные крошки">
+    <a href="{% url 'catalog:course' %}" class="rounded-full px-2 py-0.5 hover:bg-slate-900/5 hover:text-brand-700">Оглавление</a>
+    <span aria-hidden="true">›</span>
+    <a href="{% url 'catalog:course' %}#{{ chapter.id }}" class="rounded-full px-2 py-0.5 hover:bg-slate-900/5 hover:text-brand-700">
+      Глава {{ chapter.number }}. {{ chapter.title }}
+    </a>
+  </nav>
+
+  <div class="card mx-auto mt-8 max-w-2xl p-6 sm:p-8" data-testid="locked">
+    <span class="grid size-12 place-items-center rounded-2xl bg-butter text-butter-ink">{% include "_icon.html" with name="lock" cls="size-6" %}</span>
+    <h1 class="mt-4 text-2xl font-extrabold tracking-tight sm:text-3xl">Глава {{ chapter.number }} — в полном доступе</h1>
+    <p class="mt-3 text-slate-600">
+      Введение и главы 1–{{ free_max }} открыты всем зарегистрированным. Остальные главы откроет администратор —
+      попросите у него полный доступ для вашей учётной записи ({{ user.email }}).
+    </p>
+    {% if contact %}
+      <p class="mt-3 text-slate-600">Администратор: <a href="mailto:{{ contact }}" class="text-brand-700 hover:underline">{{ contact }}</a>.</p>
+    {% endif %}
+    <p class="mt-6"><a href="{% url 'catalog:course' %}" class="btn btn-primary">К оглавлению</a></p>
+  </div>
+{% endblock %}

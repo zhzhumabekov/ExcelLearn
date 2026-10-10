@@ -3,6 +3,7 @@ import json
 from django.http import Http404, JsonResponse
 from django.views.decorators.http import require_POST
 
+from apps.catalog.access import can_open
 from lessons.registry import get_registry
 
 from .services import merge_guest_progress, record_progress
@@ -13,9 +14,12 @@ def save_progress(request, lesson_id: str):
     """POST /api/progress/<lesson_id>/  {"step": 3, "completed": false} — от страницы урока (CSRF обязателен)."""
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Нужно войти"}, status=401)
-    lesson = get_registry().get(lesson_id)
+    registry = get_registry()
+    lesson = registry.get(lesson_id)
     if lesson is None:
         raise Http404(f"Нет урока {lesson_id}")
+    if not can_open(request.user, registry.chapter(lesson.chapter)):
+        return JsonResponse({"error": "Глава в полном доступе"}, status=403)
     try:
         payload = json.loads(request.body)
         step = payload["step"]
