@@ -15,11 +15,10 @@ order: 1
 title: Ведомость
 sheet: {}
 steps:
-  - title: С озвучкой
+  - title: Первый
     text: t
-    say: Выделяем ячейку
     actions: [{click: A1}]
-  - title: Без озвучки
+  - title: Второй
     text: t
     actions: [{click: A2}]
 """
@@ -39,13 +38,11 @@ def run(*args) -> tuple[str, str]:
     return out.getvalue(), err.getvalue()
 
 
-def test_lessons_check_reports_summary_and_missing_say(content_dir):
+def test_lessons_check_reports_summary(content_dir):
     (content_dir / "lessons" / "01-01-wages.yaml").write_text(LESSON, encoding="utf-8")
 
     out, _ = run("lessons_check")
 
-    assert "01-01-wages.yaml: steps.1: нет say" in out
-    assert "steps.0" not in out
     assert "OK: уроков — 1, заданий — 0, теорий — 0, глав — 1" in out
 
 

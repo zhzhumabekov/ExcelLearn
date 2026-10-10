@@ -1,14 +1,7 @@
-# Caddy: HTTPS (сертификат Let's Encrypt выпускается и продлевается сам), сжатие, озвучка из тома media,
-# всё остальное — в Django. SITE_DOMAIN=localhost — локальная проверка с сертификатом Caddy.
+# Caddy: HTTPS (сертификат Let's Encrypt выпускается и продлевается сам), сжатие; все запросы — в Django.
+# SITE_DOMAIN=localhost — локальная проверка с сертификатом Caddy.
 {$SITE_DOMAIN:localhost} {
 	encode zstd gzip
-
-	# Озвучка уроков (narration_build) — прямо с диска, без Django
-	handle_path /media/* {
-		root * /srv/media
-		header Cache-Control "public, max-age=604800"
-		file_server
-	}
 
 	handle {
 		reverse_proxy web:8000 {

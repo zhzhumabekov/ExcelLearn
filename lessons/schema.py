@@ -337,16 +337,14 @@ Action = Annotated[
 # ---------- Урок ----------
 
 
-# {fn:SUM} → «СУММ» / «SUM»; {f:=SUM(B2:D2)} → формула с разделителями языка (только в text).
+# {fn:SUM} → «СУММ» / «SUM»; {f:=SUM(B2:D2)} → формула с разделителями языка.
 PLACEHOLDER_RE = re.compile(r"\{(fn:[A-Z][A-Z0-9.]*|f:=[^{}]+)\}")
 
 
-def _check_placeholders(value: str, allow_formula: bool) -> str:
+def _check_placeholders(value: str) -> str:
     rest = PLACEHOLDER_RE.sub("", value)
     if "{" in rest or "}" in rest:
         raise ValueError("фигурные скобки — только плейсхолдеры {fn:SUM} и {f:=SUM(A1:A3)}")
-    if not allow_formula and "{f:" in value:
-        raise ValueError("{f:…} нельзя в say: диктору нужны слова, а не формула")
     return value
 
 
@@ -356,18 +354,12 @@ class Step(Model):
         min_length=1,
         description="Пояснение на экране; разрешены <b>, <code>, <kbd>, плейсхолдеры {fn:SUM} и {f:=SUM(A1:A3)}",
     )
-    say: str | None = Field(default=None, description="Текст для диктора; {fn:SUM} подставляется по языку")
     actions: list[Action] = Field(min_length=1)
 
     @field_validator("title", "text")
     @classmethod
     def text_placeholders(cls, value: str) -> str:
-        return _check_placeholders(value, allow_formula=True)
-
-    @field_validator("say")
-    @classmethod
-    def say_placeholders(cls, value: str | None) -> str | None:
-        return value if value is None else _check_placeholders(value, allow_formula=False)
+        return _check_placeholders(value)
 
 
 class NameSpec(Model):
@@ -477,7 +469,7 @@ class Figure(Model):
     @field_validator("caption")
     @classmethod
     def caption_placeholders(cls, value: str) -> str:
-        return _check_placeholders(value, allow_formula=True)
+        return _check_placeholders(value)
 
 
 class TheorySection(Model):
@@ -488,7 +480,7 @@ class TheorySection(Model):
     @field_validator("title", "text")
     @classmethod
     def text_placeholders(cls, value: str) -> str:
-        return _check_placeholders(value, allow_formula=True)
+        return _check_placeholders(value)
 
 
 class Term(Model):
@@ -498,7 +490,7 @@ class Term(Model):
     @field_validator("term", "meaning")
     @classmethod
     def text_placeholders(cls, value: str) -> str:
-        return _check_placeholders(value, allow_formula=True)
+        return _check_placeholders(value)
 
 
 class Question(Model):
@@ -508,7 +500,7 @@ class Question(Model):
     @field_validator("q", "a")
     @classmethod
     def text_placeholders(cls, value: str) -> str:
-        return _check_placeholders(value, allow_formula=True)
+        return _check_placeholders(value)
 
 
 class Theory(Model):
@@ -523,7 +515,7 @@ class Theory(Model):
     @field_validator("intro")
     @classmethod
     def intro_placeholders(cls, value: str) -> str:
-        return _check_placeholders(value, allow_formula=True)
+        return _check_placeholders(value)
 
     @model_validator(mode="after")
     def figure_ids_are_unique(self) -> "Theory":

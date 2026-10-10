@@ -1,7 +1,6 @@
 from decimal import Decimal
 
 from django.conf import settings
-from django.core.validators import MaxValueValidator
 from django.db import models
 
 # Значения с одним знаком после запятой — как их возвращает база (decimal_places=1), иначе форма не узнает выбор
@@ -17,8 +16,6 @@ class Preferences(models.Model):
         "скорость по умолчанию", max_digits=3, decimal_places=1, choices=SPEED_CHOICES, default=Decimal("1.0")
     )
     function_locale = models.CharField("язык функций", max_length=2, choices=LOCALE_CHOICES, default="ru")
-    narration_on = models.BooleanField("озвучка", default=True)
-    narration_volume = models.PositiveSmallIntegerField("громкость", default=80, validators=[MaxValueValidator(100)])
     autoplay_next = models.BooleanField("автопереход к следующему уроку", default=False)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -34,7 +31,5 @@ class Preferences(models.Model):
         return {
             "speed": float(self.speed),
             "functionLocale": self.function_locale,
-            "narrationOn": self.narration_on,
-            "narrationVolume": self.narration_volume,
             "autoplayNext": self.autoplay_next,
         }

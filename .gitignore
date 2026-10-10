@@ -8,7 +8,6 @@
 .venv/
 
 # Сгенерированное
-media/
 static/player/
 node_modules/
 __pycache__/

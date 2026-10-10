@@ -33,8 +33,6 @@ def logged(client, user):
 FORM = {
     "speed": "1.5",
     "function_locale": "en",
-    "narration_on": "on",
-    "narration_volume": "40",
     "autoplay_next": "on",
 }
 
@@ -50,8 +48,6 @@ def test_defaults_without_saved_row(user):
     assert prefs.player_settings() == {
         "speed": 1.0,
         "functionLocale": "ru",
-        "narrationOn": True,
-        "narrationVolume": 80,
         "autoplayNext": False,
     }
 
@@ -61,25 +57,18 @@ def test_htmx_save_returns_status_and_persists(logged, user):
 
     assert "Сохранено ✓" in response.content.decode()
     prefs = Preferences.objects.get(user=user)
-    assert (prefs.speed, prefs.function_locale, prefs.narration_volume, prefs.autoplay_next) == (
-        Decimal("1.5"),
-        "en",
-        40,
-        True,
-    )
-    assert prefs.narration_on and prefs.autoplay_next
+    assert (prefs.speed, prefs.function_locale, prefs.autoplay_next) == (Decimal("1.5"), "en", True)
 
 
 def test_unchecked_flags_turn_off(logged, user):
     logged.post(PAGE, FORM, HTTP_HX_REQUEST="true")
-    logged.post(PAGE, {**FORM, "narration_on": "", "autoplay_next": ""}, HTTP_HX_REQUEST="true")
+    logged.post(PAGE, {**FORM, "autoplay_next": ""}, HTTP_HX_REQUEST="true")
 
-    prefs = Preferences.objects.get(user=user)
-    assert not prefs.narration_on and not prefs.autoplay_next
+    assert not Preferences.objects.get(user=user).autoplay_next
 
 
 def test_invalid_value_is_reported(logged, user):
-    response = logged.post(PAGE, {**FORM, "narration_volume": "150"}, HTTP_HX_REQUEST="true")
+    response = logged.post(PAGE, {**FORM, "speed": "7"}, HTTP_HX_REQUEST="true")
 
     assert "Не сохранено" in response.content.decode()
     assert not Preferences.objects.filter(user=user).exists()
@@ -117,16 +106,11 @@ def test_partial_update_validates(logged, data):
 
 
 def test_merge_only_when_account_has_no_settings(logged, user):
-    guest = {"speed": 2, "function_locale": "en", "narration_on": False, "narration_volume": 30, "autoplay_next": True}
+    guest = {"speed": 2, "function_locale": "en", "autoplay_next": True}
 
     assert post_json(logged, MERGE, guest).json() == {"merged": True}
     prefs = Preferences.objects.get(user=user)
-    assert (prefs.speed, prefs.function_locale, prefs.narration_on, prefs.narration_volume) == (
-        Decimal("2.0"),
-        "en",
-        False,
-        30,
-    )
+    assert (prefs.speed, prefs.function_locale, prefs.autoplay_next) == (Decimal("2.0"), "en", True)
 
     assert post_json(logged, MERGE, {"function_locale": "ru"}).json() == {"merged": False}
     assert Preferences.objects.get(user=user).function_locale == "en"
@@ -156,19 +140,11 @@ def test_lesson_page_passes_player_settings(logged):
     assert config["settings"] == {
         "speed": 1.5,
         "functionLocale": "en",
-        "narrationOn": True,
-        "narrationVolume": 40,
         "autoplayNext": True,
     }
 
 
-def test_narration_settings_hidden_while_narration_disabled(logged, settings):
-    settings.NARRATION_ENABLED = False
+def test_settings_page_has_no_narration(logged):
     html = logged.get(PAGE).content.decode()
-    assert "Озвучка уроков" not in html
-    # значения уходят скрытыми полями — форма сохраняется, озвучка не сбрасывается
-    assert '<input type="hidden" name="narration_volume" value="80">' in html
-    assert '<input type="hidden" name="narration_on" value="on">' in html
 
-    settings.NARRATION_ENABLED = True
-    assert "Озвучка уроков" in logged.get(PAGE).content.decode()
+    assert "Озвучка" not in html and "narration" not in html

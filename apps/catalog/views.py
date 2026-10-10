@@ -11,7 +11,6 @@ from apps.progress.services import progress_by_lesson, start_step
 from lessons.registry import get_registry
 from lessons.theory import frame_path, png_size
 from lessons.xlsx_export import XLSX_CONTENT_TYPE, exercise_filename, exercise_xlsx, lesson_filename, lesson_xlsx
-from narration.builder import narration_urls
 
 # Главная, блок «Больше, чем формулы»: методы, которые осваивают в курсе
 HOME_TOPICS = [
@@ -119,7 +118,6 @@ def lesson(request, lesson_id: str):
             "lesson": current,
             "lesson_data": current.model_dump(mode="json"),
             "lesson_file_name": lesson_filename(current),
-            "narration": narration_urls(current.id),
             "page_config": {
                 "progressUrl": reverse("progress:save", args=[current.id]) if request.user.is_authenticated else None,
                 "csrfToken": get_token(request),

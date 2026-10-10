@@ -26,12 +26,10 @@
   {% if lesson %}
     <div id="player"></div>
     {{ lesson_data|json_script:"lesson-data" }}
-    {{ narration|json_script:"narration-data" }}
     <script src="{% static 'player/player.js' %}"></script>
     <script>
       const player = ExcelLearnPlayer.mount(document.getElementById("player"), {
         lesson: JSON.parse(document.getElementById("lesson-data").textContent),
-        narration: JSON.parse(document.getElementById("narration-data").textContent),
         settings: { functionLocale: "{{ locale }}", speed: {{ speed|stringformat:"g" }} },
       });
       {% if demo %}player.play().then(() => { window.demoDone = true; });{% endif %}

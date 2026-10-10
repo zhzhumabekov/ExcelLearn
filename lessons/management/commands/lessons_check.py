@@ -7,16 +7,9 @@ from lessons.exercises import load_exercises
 from lessons.layout import layout_errors, lesson_origin
 from lessons.loader import ContentError, load_course, load_lessons
 from lessons.registry import Registry
-from lessons.schema import Lesson
 from lessons.theory import figure_lesson, frame_errors, load_theory
 
 from ..utf8 import force_utf8_stdout
-
-
-def warnings_for(path: Path, lesson: Lesson) -> list[str]:
-    return [
-        f"{path.name}: steps.{i}: нет say — шаг не будет озвучен" for i, step in enumerate(lesson.steps) if not step.say
-    ]
 
 
 class Command(BaseCommand):
@@ -48,10 +41,6 @@ class Command(BaseCommand):
             for line in exc.errors:
                 self.stderr.write(self.style.ERROR(line))
             raise CommandError(f"Ошибок: {len(exc.errors)}") from exc
-
-        for path, lesson in lessons:
-            for line in warnings_for(path, lesson):
-                self.stdout.write(self.style.WARNING(line))
 
         exercises = sum(len(items) for items in registry.exercises.values())
         self.stdout.write(

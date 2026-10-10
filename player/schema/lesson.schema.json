@@ -698,18 +698,6 @@
           "minLength": 1,
           "type": "string"
         },
-        "say": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Текст для диктора; {fn:SUM} подставляется по языку"
-        },
         "actions": {
           "items": {
             "oneOf": [

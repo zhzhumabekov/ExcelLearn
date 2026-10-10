@@ -39,8 +39,8 @@ COPY --from=assets /app/static/css/site.css static/css/site.css
 RUN DJANGO_SECRET_KEY=build-only PRODUCTION=true python manage.py collectstatic --noinput -v 0
 
 RUN useradd --create-home --uid 1000 app \
-    && mkdir -p media var/cache \
-    && chown -R app:app media var
+    && mkdir -p var/cache \
+    && chown -R app:app var
 USER app
 
 EXPOSE 8000

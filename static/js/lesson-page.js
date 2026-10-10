@@ -64,7 +64,6 @@
   let mounted = false; // первый onStepChange — это открытие урока, а не просмотр
   const player = ExcelLearnPlayer.mount(document.getElementById("player"), {
     lesson,
-    narration: json("narration-data"),
     settings,
     startStep,
     onStepChange: (step) => {

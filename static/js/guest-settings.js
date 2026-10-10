@@ -5,8 +5,6 @@ window.guestSettings = (() => {
   const DEFAULTS = {
     speed: 1,
     function_locale: "ru",
-    narration_on: true,
-    narration_volume: 80,
     autoplay_next: false,
   };
 
@@ -42,8 +40,6 @@ window.guestSettings = (() => {
       return {
         speed: Number(s.speed),
         functionLocale: s.function_locale,
-        narrationOn: Boolean(s.narration_on),
-        narrationVolume: Number(s.narration_volume),
         autoplayNext: Boolean(s.autoplay_next),
       };
     },

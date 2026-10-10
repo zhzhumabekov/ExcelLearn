@@ -10,10 +10,10 @@ from lessons.theory import FRAMES_DIR, LOCALES, MANIFEST, figure_hash, figure_le
 from ..utf8 import force_utf8_stdout
 
 PAGE = '<!doctype html><html><body style="margin:0;background:#fff"><div id="player" style="width:1300px"></div>'
-# Плеер проигрывает кадр без анимации курсора и озвучки; на снимке — только окно Excel
+# Плеер проигрывает кадр на максимальной скорости; на снимке — только окно Excel и окна-диалоги
 MOUNT = """async ([lesson, locale]) => {
   const player = ExcelLearnPlayer.mount(document.getElementById("player"), {
-    lesson, settings: { functionLocale: locale, speed: 32, narrationOn: false },
+    lesson, settings: { functionLocale: locale, speed: 32 },
   });
   await player.play();
 }"""

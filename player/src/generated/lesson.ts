@@ -108,10 +108,6 @@ export interface Step {
    */
   text: string;
   /**
-   * Текст для диктора; {fn:SUM} подставляется по языку
-   */
-  say?: string | null;
-  /**
    * @minItems 1
    */
   actions: [

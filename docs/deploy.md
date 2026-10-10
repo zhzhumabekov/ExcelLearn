@@ -46,8 +46,6 @@ nano .env.production
 | `DJANGO_SECRET_KEY` | Секретный ключ: `python3 -c "import secrets; print(secrets.token_urlsafe(50))"` |
 | `POSTGRES_PASSWORD` | Пароль базы (сгенерируйте так же) |
 | `SUPPORT_EMAIL` | Контакт администратора для учеников, забывших пароль (пока нет почты) |
-| `NARRATION_ENABLED` | Озвучка: пока `false` (выключена до решения, нужна ли она) |
-| `TTS_API_KEY`, `TTS_FOLDER_ID` | Ключ Yandex SpeechKit — нужен, только если `NARRATION_ENABLED=true` |
 | `EMAIL_*` | SMTP — когда появится почта; тогда сброс пароля пойдёт письмом |
 
 `.env.production` не попадает в git — храните его копию в надёжном месте.
@@ -58,7 +56,7 @@ nano .env.production
 docker compose --env-file .env.production up -d --build
 ```
 
-При старте контейнер `web` сам применяет миграции базы, проверяет уроки и, если `NARRATION_ENABLED=true`, собирает озвучку (только новые и изменённые шаги). Первый запуск — 3–5 минут (сборка образа, сертификат).
+При старте контейнер `web` сам применяет миграции базы и проверяет уроки. Первый запуск — 3–5 минут (сборка образа, сертификат).
 
 Чтобы не писать `--env-file` каждый раз:
 
@@ -84,7 +82,7 @@ git pull
 dc up -d --build
 ```
 
-Миграции, проверка уроков и (при включённой озвучке) озвучка новых шагов выполняются автоматически. Простой сайта — несколько секунд при перезапуске `web`.
+Миграции и проверка уроков выполняются автоматически. Простой сайта — несколько секунд при перезапуске `web`.
 
 ## 6. Бэкапы
 
@@ -112,7 +110,6 @@ dc up -d --build
 | Логи HTTPS / Caddy | `dc logs -f caddy` |
 | Состояние сервисов | `dc ps` |
 | Сброс пароля ученику (без почты) | Админка → Пользователи → ученик → «изменить пароль», или `dc exec web python manage.py changepassword email@ученика` |
-| Пересобрать озвучку (после смены ключа или голоса) | `dc exec web python manage.py narration_build` |
 | Прогресс учеников | Админка → «Прогресс уроков» (фильтры по уроку и завершённости) |
 | Перезапуск | `dc restart web` |
 
@@ -122,7 +119,6 @@ dc up -d --build
 |---|---|
 | Браузер ругается на сертификат | DNS домена указывает на этот сервер? Порты 80/443 открыты? `dc logs caddy` |
 | Ошибка 502 | `dc logs web` — обычно ошибка в `.env.production` или в уроке (`lessons_check` в логе) |
-| Уроки без голоса | В логе `web` строка «ВНИМАНИЕ: озвучка не собрана» и причина; проверьте `TTS_API_KEY` |
 | Сайт открывается, но «Bad Request (400)» | `SITE_DOMAIN` в `.env.production` совпадает с адресом в браузере? |
 
 ## 9. Проверка локально (Windows, Docker Desktop)
@@ -130,7 +126,7 @@ dc up -d --build
 Тот же набор сервисов на своём компьютере, с адресом `https://localhost` и сертификатом Caddy:
 
 ```powershell
-# .env.production с SITE_DOMAIN=localhost и TTS_PROVIDER=silent
+# .env.production с SITE_DOMAIN=localhost
 docker compose --env-file .env.production up -d --build
 # в Git Bash перед командами docker с путями вида /backups: export MSYS_NO_PATHCONV=1
 docker compose --env-file .env.production down   # остановить (данные сохраняются в томах)

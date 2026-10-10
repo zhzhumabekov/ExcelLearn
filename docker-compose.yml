@@ -32,7 +32,6 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - media:/app/media
       - cache:/app/var/cache
 
   # Ежедневный бэкап базы в ./backups на этом же сервере (данные остаются в РК), хранение 14 дней.
@@ -67,7 +66,6 @@ services:
       - "443:443"
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - media:/srv/media:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
@@ -75,7 +73,6 @@ services:
 
 volumes:
   pgdata:
-  media:
   cache:
   caddy_data:
   caddy_config:

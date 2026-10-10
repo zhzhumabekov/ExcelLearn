@@ -15,8 +15,6 @@
         else input.value = value;
       }
     }
-    const volume = form.querySelector('[name="narration_volume"]');
-    volume?.dispatchEvent(new Event("input")); // поля нет, пока озвучка выключена
   }
 
   form.addEventListener("change", (event) => {

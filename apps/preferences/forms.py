@@ -13,7 +13,6 @@ class PreferencesForm(forms.ModelForm):
         widgets = {
             "speed": forms.RadioSelect,
             "function_locale": forms.RadioSelect,
-            "narration_volume": forms.NumberInput(attrs={"type": "range", "min": 0, "max": 100, "step": 5}),
         }
 
 
@@ -26,7 +25,6 @@ def partial_form(instance: Preferences, data: dict) -> PreferencesForm:
         merged["speed"] = f"{Decimal(str(merged['speed'])):.1f}"
     except (InvalidOperation, ValueError):
         pass  # пусть форма сообщит о неверном значении
-    # Флажки в форме — «on» или отсутствие ключа
-    for flag in ("narration_on", "autoplay_next"):
-        merged[flag] = "on" if merged.get(flag) in (True, "on", "true", "1") else ""
+    # Флажок в форме — «on» или отсутствие ключа
+    merged["autoplay_next"] = "on" if merged.get("autoplay_next") in (True, "on", "true", "1") else ""
     return PreferencesForm({k: v for k, v in merged.items() if v != ""}, instance=instance)

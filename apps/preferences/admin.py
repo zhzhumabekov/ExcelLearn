@@ -5,7 +5,7 @@ from .models import Preferences
 
 @admin.register(Preferences)
 class PreferencesAdmin(admin.ModelAdmin):
-    list_display = ["user", "speed", "function_locale", "narration_on", "autoplay_next", "updated_at"]
-    list_filter = ["function_locale", "narration_on"]
+    list_display = ["user", "speed", "function_locale", "autoplay_next", "updated_at"]
+    list_filter = ["function_locale"]
     search_fields = ["user__email"]
     list_select_related = ["user"]

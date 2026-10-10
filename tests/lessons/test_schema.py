@@ -35,7 +35,6 @@ def lesson_yaml(lesson_id="wages", chapter="ch01", order=1, actions="- click: E4
         steps:
           - title: Формула
             text: Выделите <code>E4</code>
-            say: Выделяем ячейку Е четыре, функция {{fn:SUM}}
             actions:
     """) + "\n".join(f"      {line}" for line in dedent(actions).strip().splitlines())
 
@@ -225,7 +224,7 @@ def test_text_placeholders_are_allowed(text):
         ("text", "{SUM}", "только плейсхолдеры"),
         ("text", "{fn:sum}", "только плейсхолдеры"),
         ("text", "незакрытая {fn:SUM", "только плейсхолдеры"),
-        ("say", "Формула {f:=SUM(B2:D2)}", "нельзя в say"),
+        ("title", "{f:SUM}", "только плейсхолдеры"),
     ],
 )
 def test_bad_placeholders_are_rejected(field, value, fragment):

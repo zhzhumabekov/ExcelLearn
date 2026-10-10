@@ -75,7 +75,6 @@
   </nav>
 
   {{ lesson_data|json_script:"lesson-data" }}
-  {{ narration|json_script:"narration-data" }}
   {{ page_config|json_script:"lesson-page" }}
   <script src="{% static 'player/player.js' %}"></script>
   <script src="{% static 'js/lesson-page.js' %}"></script>

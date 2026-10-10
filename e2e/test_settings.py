@@ -1,5 +1,4 @@
 from decimal import Decimal
-from pathlib import Path
 
 from playwright.sync_api import Page, expect
 
@@ -50,8 +49,7 @@ def test_guest_settings_live_in_browser(page: Page):
     assert page.errors == []
 
 
-def test_autoplay_opens_and_starts_next_lesson(page: Page, django_user_model, settings, tmp_path: Path):
-    settings.NARRATION_DIR = tmp_path  # без озвучки: последний шаг проходит быстро
+def test_autoplay_opens_and_starts_next_lesson(page: Page, django_user_model):
     user = log_in(page, django_user_model, email="auto@example.kz")
     Preferences.objects.create(user=user, autoplay_next=True, speed=Decimal("2.0"))
 
