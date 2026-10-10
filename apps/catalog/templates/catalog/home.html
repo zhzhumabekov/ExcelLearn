@@ -114,6 +114,26 @@
     </ul>
   </section>
 
+  {# ---------- Как проходить уроки ---------- #}
+  <section class="py-10">
+    <p class="eyebrow">Как учиться</p>
+    <h2 class="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">Как проходить уроки</h2>
+    <ol class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {% for title, text in study_steps %}
+        <li class="card p-6">
+          <span class="grid size-10 place-items-center rounded-xl {% cycle 'bg-mint text-mint-ink' 'bg-sky text-sky-ink' 'bg-lavender text-lavender-ink' 'bg-butter text-butter-ink' %} font-display text-lg font-extrabold">{{ forloop.counter }}</span>
+          <h3 class="mt-4 text-lg font-bold">{{ title }}</h3>
+          <p class="mt-1.5 text-sm leading-relaxed text-slate-600">{{ text }}</p>
+        </li>
+      {% endfor %}
+    </ol>
+    <p class="mt-5 flex items-start gap-3 rounded-2xl border-l-4 border-butter-ink/40 bg-butter px-5 py-4 text-slate-800">
+      <span class="mt-0.5 flex-none text-butter-ink">{% include "_icon.html" with name="bulb" cls="size-5" %}</span>
+      <span><b>Быстро посмотреть и пройти не получится.</b> Навык появляется, когда вы сами повторяете расчёт в Excel:
+      без этого шага урок забудется на следующий день.</span>
+    </p>
+  </section>
+
   {# ---------- Программа ---------- #}
   <section class="py-10">
     <div class="flex flex-wrap items-end justify-between gap-4">
@@ -144,7 +164,7 @@
     <section class="mt-10 rounded-[2rem] bg-mint px-6 py-12 sm:px-12">
       <div class="flex flex-wrap items-center justify-between gap-6">
         <div>
-          <h2 class="text-3xl font-extrabold tracking-tight text-mint-ink">Первый урок — пять минут</h2>
+          <h2 class="text-3xl font-extrabold tracking-tight text-mint-ink">Начните с первого урока</h2>
           <p class="mt-2 max-w-xl text-slate-600">Без регистрации. Войдите позже — прогресс перенесётся в аккаунт.</p>
         </div>
         <a href="{% url 'catalog:lesson' first_lesson.id %}" class="btn btn-primary px-7 py-3.5 text-base">▶ Смотреть урок</a>

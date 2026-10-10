@@ -23,6 +23,14 @@ HOME_TOPICS = [
     "Модели ценообразования",
 ]
 
+# Главная, «Как проходить уроки»
+HOME_STUDY_STEPS = [
+    ("Вникните в ситуацию", "Прочитайте условие: какая задача стоит перед бизнесом и что нужно посчитать."),
+    ("Посмотрите анимацию", "Следите за каждым шагом в окне Excel. Ставьте паузу и пересматривайте непонятное."),
+    ("Скачайте таблицу", "Под уроком — файл Excel в том виде, в каком урок начинается."),
+    ("Повторите сами", "Выполните шаги в своём Excel, а потом решите задания к главе и сверьтесь с решением."),
+]
+
 
 def home(request):
     registry = get_registry()
@@ -36,6 +44,7 @@ def home(request):
             "lesson_count": len(registry.lessons),
             "exercise_count": sum(len(items) for items in registry.exercises.values()),
             "topics": HOME_TOPICS,
+            "study_steps": HOME_STUDY_STEPS,
         },
     )
 
