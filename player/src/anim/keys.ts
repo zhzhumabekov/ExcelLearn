@@ -1,5 +1,8 @@
 import type { Clock } from "./clock";
 
+/** Сколько держится подсказка с клавишами — успеть прочитать (по часам урока: с учётом скорости). */
+export const KEYS_SHOW_MS = 1800;
+
 /** Показ нажатых клавиш внизу сцены: «Ctrl + C», «Enter». */
 export class KeysView {
   readonly el: HTMLElement;
@@ -19,7 +22,7 @@ export class KeysView {
     this.el.classList.add("xl-show");
   }
 
-  async show(keys: readonly string[], ms = 1000): Promise<void> {
+  async show(keys: readonly string[], ms = KEYS_SHOW_MS): Promise<void> {
     const parts = this.parts(keys);
     this.el.replaceChildren(...parts);
     // Перезапуск CSS-анимации нажатия при повторном показе

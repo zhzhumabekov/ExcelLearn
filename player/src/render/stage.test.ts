@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { KEYS_SHOW_MS } from "../anim/keys";
 import { SheetModel } from "../sheet/sheet-model";
 import { fakeClock } from "../test/fake-clock";
 import { Stage } from "./stage";
@@ -93,6 +94,19 @@ describe("KeysView", () => {
     await advance(520);
     await done;
 
+    expect(s.keys.el.classList.contains("xl-show")).toBe(false);
+  });
+
+  it("по умолчанию держит подсказку KEYS_SHOW_MS — дольше секунды, чтобы успеть прочитать", async () => {
+    const { stage: s, advance } = stage();
+
+    const done = s.keys.show(["Enter"]);
+    await advance(KEYS_SHOW_MS - 200);
+    expect(s.keys.el.classList.contains("xl-show")).toBe(true);
+    await advance(220);
+    await done;
+
+    expect(KEYS_SHOW_MS).toBeGreaterThan(1000);
     expect(s.keys.el.classList.contains("xl-show")).toBe(false);
   });
 
