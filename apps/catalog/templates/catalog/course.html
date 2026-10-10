@@ -50,7 +50,7 @@
                 <span class="block truncate font-bold">{{ entry.chapter.title }}</span>
                 <span class="block text-xs text-slate-500">
                   {% if entry.chapter.number %}Глава {{ entry.chapter.number }}{% else %}Вступление{% endif %}
-                  · {{ entry.lessons|length|ru_plural:"урок,урока,уроков" }}{% if entry.exercise_count %} · {{ entry.exercise_count|ru_plural:"задание,задания,заданий" }}{% endif %}
+                  {% if entry.theory %}· теория {% endif %}· {{ entry.lessons|length|ru_plural:"урок,урока,уроков" }}{% if entry.exercise_count %} · {{ entry.exercise_count|ru_plural:"задание,задания,заданий" }}{% endif %}
                 </span>
               </h2>
               <span class="hidden w-24 flex-none text-right sm:block">
@@ -61,6 +61,15 @@
               </span>
               <svg viewBox="0 0 24 24" class="size-5 flex-none text-slate-400 transition group-open:rotate-180" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
             </summary>
+            {% if entry.theory %}
+              <a href="{% url 'catalog:theory' entry.chapter.id %}" data-theory
+                 class="group/t flex items-center gap-3 border-t border-slate-100 bg-sky/50 px-4 py-2.5 text-sm transition hover:bg-sky">
+                <span class="grid size-7 flex-none place-items-center rounded-lg bg-white/70 text-sky-ink">{% include "_icon.html" with name="book" cls="size-4" %}</span>
+                <span class="flex-1 font-semibold text-sky-ink">Теория к главе: {{ entry.theory.title }}</span>
+                <span class="text-xs whitespace-nowrap text-slate-500">{{ entry.theory.minutes }} мин чтения</span>
+                <span class="text-slate-400 transition group-hover/t:translate-x-0.5" aria-hidden="true">→</span>
+              </a>
+            {% endif %}
             <ol class="border-t border-slate-100 p-1.5">
               {% for item in entry.lessons %}
                 <li data-lesson="{{ item.lesson.id }}" data-steps="{{ item.lesson.steps|length }}" data-search="{{ item.lesson.title|lower }}">

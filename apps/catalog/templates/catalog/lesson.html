@@ -22,6 +22,15 @@
   </div>
   {% if lesson.source %}<p class="mt-2 text-sm text-slate-500">{{ lesson.source }}</p>{% endif %}
 
+  {% if theory %}
+    <a href="{% url 'catalog:theory' chapter.id %}" data-testid="chapter-theory"
+       class="mt-4 flex flex-wrap items-center gap-3 rounded-2xl bg-sky px-4 py-3 text-sm text-sky-ink transition hover:shadow-lift">
+      {% include "_icon.html" with name="book" cls="size-5 flex-none" %}
+      <span class="flex-1"><b>Перед уроками главы</b> — прочитайте теорию: «{{ theory.title }}», {{ theory.minutes }} мин.</span>
+      <span class="font-semibold">Теория →</span>
+    </a>
+  {% endif %}
+
   {# --xl-sticky-top: панель шага «прилипает» под липкой шапкой сайта #}
   <div id="player" class="mt-6 [--xl-sticky-top:84px]"></div>
 

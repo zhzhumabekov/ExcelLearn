@@ -129,6 +129,43 @@
   .exercise-text kbd {
     @apply rounded-md border border-b-[3px] border-slate-300 bg-white px-1.5 py-0.5 font-mono text-[0.85em];
   }
+
+  /* Теория к главе: текст из YAML (абзацы, списки, таблички) */
+  .theory-text {
+    @apply space-y-3 leading-relaxed text-slate-800;
+  }
+
+  .theory-text ul {
+    @apply list-disc space-y-1.5 pl-6 marker:text-brand-400;
+  }
+
+  .theory-text ol {
+    @apply list-decimal space-y-1.5 pl-6 marker:text-slate-400;
+  }
+
+  .theory-text table {
+    @apply w-full border-collapse overflow-hidden rounded-xl text-sm ring-1 ring-slate-200;
+  }
+
+  .theory-text th {
+    @apply bg-slate-50 px-3 py-2 text-left font-semibold;
+  }
+
+  .theory-text td {
+    @apply border-t border-slate-100 px-3 py-2 align-top;
+  }
+
+  .theory-text .note {
+    @apply rounded-xl border-l-4 border-butter-ink/40 bg-butter p-3 text-slate-800;
+  }
+
+  .theory-text code {
+    @apply rounded-md bg-mint px-1.5 py-0.5 font-mono text-[0.9em] text-mint-ink;
+  }
+
+  .theory-text kbd {
+    @apply rounded-md border border-b-[3px] border-slate-300 bg-white px-1.5 py-0.5 font-mono text-[0.85em];
+  }
 }
 
 /* Иллюстрация на главной: мигающий курсор в формуле */

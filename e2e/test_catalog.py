@@ -87,3 +87,24 @@ def test_course_search_finds_lessons_and_chapters(page: Page):
     expect(page.locator("#ch03")).to_be_visible()
     expect(page.locator("#ch03 details")).not_to_have_attribute("open", "")  # раскрытие до поиска вернулось
     assert page.errors == []
+
+
+def test_course_to_theory_with_frames_and_on_to_first_lesson(page: Page):
+    page.goto(f"{page.base_url}/course/")
+    page.locator("#ch01 summary").click()  # глава свёрнута: раскрыта первая непройденная
+    page.locator("#ch01 [data-theory]").click()
+    expect(page.get_by_role("heading", level=1)).to_have_text("Как Excel считает: ячейки, формулы и ссылки")
+
+    images = page.locator("[data-figure] img")
+    expect(images.first).to_be_visible()
+    for i in range(images.count()):
+        images.nth(i).scroll_into_view_if_needed()
+        assert images.nth(i).evaluate("img => img.complete && img.naturalWidth > 0")
+
+    page.locator("[data-question] summary").first.click()
+    expect(page.locator("[data-question]").first).to_have_attribute("open", "")
+
+    page.get_by_test_id("theory-next").click()
+    expect(page.locator(".xl-title")).to_contain_text("Автомойка_модель.xlsx")
+    expect(page.get_by_test_id("chapter-theory")).to_be_visible()
+    assert page.errors == []

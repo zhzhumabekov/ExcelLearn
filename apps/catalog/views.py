@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.http import Http404, HttpResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import render
@@ -7,6 +8,7 @@ from django.utils.http import content_disposition_header
 from apps.preferences.services import get_preferences
 from apps.progress.services import progress_by_lesson, start_step
 from lessons.registry import get_registry
+from lessons.theory import frame_path, png_size
 from lessons.xlsx_export import XLSX_CONTENT_TYPE, exercise_filename, exercise_xlsx, lesson_filename, lesson_xlsx
 from narration.builder import narration_urls
 
@@ -64,6 +66,7 @@ def course(request):
                 "done": done,
                 "percent": percent,
                 "exercise_count": len(registry.exercises.get(entry.chapter.id, ())),
+                "theory": registry.theory.get(entry.chapter.id),
             }
         )
     # Сразу раскрыты главы с начатыми уроками; если таких нет — первая глава, где есть что проходить
@@ -100,6 +103,8 @@ def lesson(request, lesson_id: str):
     chapter = entry.chapter
     # После последнего урока главы — приглашение к заданиям
     show_exercises = entry.lessons[-1].id == current.id and bool(registry.exercises.get(chapter.id))
+    # Перед первым уроком главы — приглашение к теории
+    theory = registry.theory.get(chapter.id) if entry.lessons[0].id == current.id else None
     return render(
         request,
         "catalog/lesson.html",
@@ -117,6 +122,7 @@ def lesson(request, lesson_id: str):
             },
             "chapter": chapter,
             "show_exercises": show_exercises,
+            "theory": theory,
             "prev_lesson": prev_lesson,
             "next_lesson": next_lesson,
         },
@@ -135,6 +141,38 @@ def xlsx_response(content: bytes, filename: str) -> HttpResponse:
     response = HttpResponse(content, content_type=XLSX_CONTENT_TYPE)
     response["Content-Disposition"] = content_disposition_header(as_attachment=True, filename=filename)
     return response
+
+
+def theory(request, chapter_id: str):
+    registry = get_registry()
+    chapter = registry.chapter(chapter_id)
+    item = registry.theory.get(chapter_id)
+    if chapter is None or item is None:
+        raise Http404(f"Нет теории к главе {chapter_id}")
+    # Кадры — на языке функций ученика, как и формулы в тексте
+    locale = get_preferences(request.user).function_locale
+    static_dir = settings.STATICFILES_DIRS[0]
+    sections = []
+    for section in item.sections:
+        image = None
+        if section.figure:
+            path = frame_path(chapter_id, section.figure.id, locale)
+            # Кадры сняты с двойной плотностью: показываем в половину размера, чтобы текст был чётким
+            width, height = png_size(static_dir / path)
+            image = {"path": path, "width": width // 2, "height": height // 2}
+        sections.append({"section": section, "image": image})
+    entry = next(e for e in registry.chapters if e.chapter.id == chapter_id)
+    return render(
+        request,
+        "catalog/theory.html",
+        {
+            "chapter": chapter,
+            "theory": item,
+            "sections": sections,
+            "first_lesson": entry.lessons[0] if entry.lessons else None,
+            "exercise_count": len(registry.exercises.get(chapter_id, ())),
+        },
+    )
 
 
 def exercises(request, chapter_id: str):

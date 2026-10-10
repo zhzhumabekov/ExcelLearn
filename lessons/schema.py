@@ -460,6 +460,84 @@ class ExerciseSet(Model):
         return exercises
 
 
+# ---------- Теория к главе ----------
+# Текстовый урок без плеера: читают перед уроками главы. Картинки — кадры окна Excel, снятые плеером
+# (manage.py theory_frames): кадр описан как мини-урок — лист и действия, которые плеер выполняет до снимка.
+
+
+class Figure(Model):
+    id: Slug
+    caption: str = Field(min_length=1, description="Подпись под кадром; плейсхолдеры как в text")
+    sheet: Sheet
+    sheets: list[Sheet] = Field(default_factory=list)
+    names: list[NameSpec] = Field(default_factory=list)
+    actions: list[Action] = Field(default_factory=list, description="Что сделать на листе до снимка")
+    expect: dict[ExpectAddr, Scalar] = Field(default_factory=dict, description="Значения на кадре для сверки")
+
+    @field_validator("caption")
+    @classmethod
+    def caption_placeholders(cls, value: str) -> str:
+        return _check_placeholders(value, allow_formula=True)
+
+
+class TheorySection(Model):
+    title: str = Field(min_length=1)
+    text: str = Field(min_length=1, description="HTML: <p>, <b>, <code>, <kbd>, <ul>, <li>; плейсхолдеры")
+    figure: Figure | None = None
+
+    @field_validator("title", "text")
+    @classmethod
+    def text_placeholders(cls, value: str) -> str:
+        return _check_placeholders(value, allow_formula=True)
+
+
+class Term(Model):
+    term: str = Field(min_length=1)
+    meaning: str = Field(min_length=1)
+
+    @field_validator("term", "meaning")
+    @classmethod
+    def text_placeholders(cls, value: str) -> str:
+        return _check_placeholders(value, allow_formula=True)
+
+
+class Question(Model):
+    q: str = Field(min_length=1)
+    a: str = Field(min_length=1)
+
+    @field_validator("q", "a")
+    @classmethod
+    def text_placeholders(cls, value: str) -> str:
+        return _check_placeholders(value, allow_formula=True)
+
+
+class Theory(Model):
+    chapter: Slug
+    title: str = Field(min_length=1)
+    minutes: int = Field(ge=1, le=60, description="Время чтения")
+    intro: str = Field(min_length=1, description="Зачем читать: что будет понятно после")
+    sections: list[TheorySection] = Field(min_length=1)
+    terms: list[Term] = Field(default_factory=list, description="Словарик главы")
+    questions: list[Question] = Field(default_factory=list, description="Проверьте себя (ответ скрыт)")
+
+    @field_validator("intro")
+    @classmethod
+    def intro_placeholders(cls, value: str) -> str:
+        return _check_placeholders(value, allow_formula=True)
+
+    @model_validator(mode="after")
+    def figure_ids_are_unique(self) -> "Theory":
+        ids = [s.figure.id for s in self.sections if s.figure]
+        duplicates = sorted({i for i in ids if ids.count(i) > 1})
+        if duplicates:
+            raise ValueError(f"повторяются id кадров: {', '.join(duplicates)}")
+        return self
+
+    @property
+    def figures(self) -> list[Figure]:
+        return [s.figure for s in self.sections if s.figure]
+
+
 # ---------- Курс ----------
 
 

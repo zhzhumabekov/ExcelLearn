@@ -12,6 +12,11 @@
 ## Как устроен контент
 
 - Курс: `content/course.yaml` (главы). Уроки: `content/lessons/NN-MM-*.yaml`. Задания: `content/exercises/chNN.yaml`.
+- Глава = «Теория к главе» (текст без плеера, `content/theory/chNN.yaml`) → вводный урок `NN-00-*.yaml`
+  (`order: 0`) → уроки → задания. Генераторы: `scripts/content/gen_theory.py`, `gen_intros.py`.
+- Картинки теории — кадры окна Excel: кадр описан мини-уроком (лист + действия + `expect`), снимает его
+  `uv run python manage.py theory_frames` (нужен `pnpm --dir player build`) в `static/theory/`. Правка YAML
+  кадра → переснять, иначе `lessons_check` упадёт.
 - Урок = лист (+ `sheets`, `names`) + шаги с действиями + `expect` (ответы, посчитанные **независимо** на Python).
 - Каждый урок: «Ситуация» → шаги → «Частая ошибка» (где уместно) → «Что запомнить» + «На работе пригодится».
 - Тексты: `{fn:VLOOKUP}` → «ВПР», `{f:=SUM(A1,B1)}` → формула на языке ученика. В `say` — только `{fn:}`.
@@ -35,6 +40,7 @@
    uv run python manage.py lessons_check
    pnpm --dir player lessons:verify
    uv run python manage.py exercises_dump | pnpm --dir player exercises:verify
+   uv run python manage.py theory_dump | pnpm --dir player theory:verify
    pnpm --dir player typecheck && pnpm --dir player lint && pnpm --dir player test
    uv run ruff check . && uv run ruff format --check . && uv run pytest -q
    pnpm --dir player build && uv run pytest e2e -q

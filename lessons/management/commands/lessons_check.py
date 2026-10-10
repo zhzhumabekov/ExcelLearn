@@ -4,10 +4,11 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
 from lessons.exercises import load_exercises
-from lessons.layout import layout_errors
+from lessons.layout import layout_errors, lesson_origin
 from lessons.loader import ContentError, load_course, load_lessons
 from lessons.registry import Registry
 from lessons.schema import Lesson
+from lessons.theory import figure_lesson, frame_errors, load_theory
 
 from ..utf8 import force_utf8_stdout
 
@@ -19,7 +20,10 @@ def warnings_for(path: Path, lesson: Lesson) -> list[str]:
 
 
 class Command(BaseCommand):
-    help = "Проверяет course.yaml, уроки (content/lessons) и задания (content/exercises): схема, адреса, id."
+    help = (
+        "Проверяет course.yaml, уроки (content/lessons), задания (content/exercises) и теорию (content/theory): "
+        "схема, адреса, id, кадры теории."
+    )
 
     def handle(self, *args, **options):
         force_utf8_stdout()
@@ -28,9 +32,17 @@ class Command(BaseCommand):
             course = load_course(content_dir)
             lessons = load_lessons(content_dir)
             exercise_sets = load_exercises(content_dir)
-            registry = Registry(course, lessons, exercise_sets)
+            theory_sets = load_theory(content_dir)
+            registry = Registry(course, lessons, exercise_sets, theory_sets)
             # Таблица — с A1: пустые строки и столбцы по краям раздувают окно Excel в плеере
-            if errors := layout_errors(lessons, exercise_sets):
+            errors = layout_errors(lessons, exercise_sets)
+            for path, theory in theory_sets:
+                for figure in theory.figures:
+                    origin = lesson_origin(figure_lesson(theory.chapter, figure))
+                    if origin not in (None, "A1"):
+                        errors.append(f"{path.name}: кадр {figure.id}: таблица начинается с {origin}, а не с A1")
+            errors += frame_errors(theory_sets, Path(settings.STATICFILES_DIRS[0]))
+            if errors:
                 raise ContentError(errors)
         except ContentError as exc:
             for line in exc.errors:
@@ -44,6 +56,7 @@ class Command(BaseCommand):
         exercises = sum(len(items) for items in registry.exercises.values())
         self.stdout.write(
             self.style.SUCCESS(
-                f"OK: уроков — {len(registry.lessons)}, заданий — {exercises}, глав — {len(registry.chapters)}"
+                f"OK: уроков — {len(registry.lessons)}, заданий — {exercises}, теорий — {len(registry.theory)}, "
+                f"глав — {len(registry.chapters)}"
             )
         )
