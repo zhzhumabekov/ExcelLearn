@@ -106,7 +106,10 @@ export class PanelView {
     list.append(...this.items);
     this.plan.append(list);
 
-    this.el.append(caption, controls, this.plan);
+    // Обёртка «прилипает» к верху экрана: пояснение и кнопки видны, пока прокручивают длинную таблицу
+    const body = el("div", "xl-panel-body");
+    body.append(caption, controls, this.plan);
+    this.el.append(body);
     this.setSpeed(speed);
   }
 

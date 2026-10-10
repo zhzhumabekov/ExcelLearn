@@ -22,7 +22,8 @@
   </div>
   {% if lesson.source %}<p class="mt-2 text-sm text-slate-500">{{ lesson.source }}</p>{% endif %}
 
-  <div id="player" class="mt-6"></div>
+  {# --xl-sticky-top: панель шага «прилипает» под липкой шапкой сайта #}
+  <div id="player" class="mt-6 [--xl-sticky-top:84px]"></div>
 
   <section class="card mt-6 flex flex-wrap items-center gap-4 p-5 sm:p-6" aria-labelledby="lesson-file-title">
     <span class="grid size-12 flex-none place-items-center rounded-2xl bg-mint text-2xl" aria-hidden="true">📗</span>
