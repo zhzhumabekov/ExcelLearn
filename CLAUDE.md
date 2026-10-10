@@ -69,3 +69,11 @@
 - Запуск: `pnpm --dir player build; pnpm css; python manage.py runserver`.
 - **Никогда не удалять `db.sqlite3`.** Для экспериментов — копия базы и `DATABASE_URL=sqlite:///…`.
 - Отвечать пользователю по-русски.
+
+## Git
+
+- `main` защищена: прямой push и force push запрещены, слияние — только через PR, когда CI (`checks`, `e2e`)
+  зелёный; история линейная (squash/rebase). Работать в ветке (`ch07-…`, `fix/…`, `docs/…`), пушить ветку,
+  PR открывает пользователь (ссылка из вывода `git push`) — `gh` не установлен.
+- Статус CI (репозиторий публичный, без авторизации):
+  `curl -s "https://api.github.com/repos/zhzhumabekov/ExcelLearn/actions/runs?branch=<ветка>&per_page=1"`.
