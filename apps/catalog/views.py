@@ -10,6 +10,19 @@ from lessons.registry import get_registry
 from lessons.xlsx_export import XLSX_CONTENT_TYPE, exercise_filename, exercise_xlsx, lesson_filename, lesson_xlsx
 from narration.builder import narration_urls
 
+# Главная, блок «Больше, чем формулы»: методы, которые осваивают в курсе
+HOME_TOPICS = [
+    "Статистические методы",
+    "Прогнозирование",
+    "Модели оптимизации",
+    "Моделирование",
+    "Управление запасами",
+    "Теория очередей",
+    "Реальные опционы",
+    "Потребительская ценность",
+    "Модели ценообразования",
+]
+
 
 def home(request):
     registry = get_registry()
@@ -21,6 +34,8 @@ def home(request):
             "chapters": registry.chapters,
             "first_lesson": registry.lessons[0] if registry.lessons else None,
             "lesson_count": len(registry.lessons),
+            "exercise_count": sum(len(items) for items in registry.exercises.values()),
+            "topics": HOME_TOPICS,
         },
     )
 

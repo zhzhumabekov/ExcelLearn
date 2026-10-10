@@ -30,4 +30,4 @@ def test_committed_assets_exist(asset):
 def test_header_and_footer(home):
     assert 'aria-label="Основная навигация"' in home
     assert "ExcelLearn" in home
-    assert "Уинстона" in home
+    assert "Уинстон" not in home  # книгу на сайте не упоминаем
