@@ -23,6 +23,37 @@ export function errorCode(code: string, locale: FunctionLocale): string {
 const TOKEN_RE =
   /"(?:[^"]|"")*"|'(?:[^']|'')*'|#(?:DIV\/0!|N\/A|NAME\?|NULL!|NUM!|REF!|VALUE!)|[A-Za-z_][A-Za-z0-9_.]*|\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|\.\d+|[\s\S]/g;
 
+/**
+ * Код формата ТЕКСТ на языке русского Excel: даты — Д, М, Г («dd.mm.yyyy» → «ДД.ММ.ГГГГ»), в числах
+ * «.» → «,» и «,» (разряды) → пробел. Текст в кавычках внутри кода и символы после \ не меняются.
+ */
+export function localizeFormatCode(code: string): string {
+  const isDate = /[dmy]/i.test(code.replace(/"[^"]*"|\\./g, ""));
+  return code
+    .split(/("[^"]*"|\\.)/)
+    .map((part, i) => {
+      if (i % 2 === 1) return part;
+      if (isDate) return part.replace(/[dmyhs]/gi, (ch) => ({ d: "Д", m: "М", y: "Г", h: "Ч", s: "С" })[ch.toLowerCase()] ?? ch);
+      return part.replace(/[.,]/g, (ch) => (ch === "." ? "," : " "));
+    })
+    .join("");
+}
+
+/** Строка в кавычках — второй аргумент ТЕКСТ? Тогда это код формата и его тоже переводим. */
+function isTextFormatArg(tokens: readonly string[], i: number): boolean {
+  let depth = 0;
+  let commas = 0;
+  for (let k = i - 1; k >= 0; k--) {
+    const t = tokens[k];
+    if (t === ")") depth++;
+    else if (t === "(") {
+      if (depth === 0) return commas === 1 && (tokens[k - 1] ?? "").toUpperCase() === "TEXT";
+      depth--;
+    } else if (t === "," && depth === 0) commas++;
+  }
+  return false;
+}
+
 /** =SUM(B2:D2,1.5) → =СУММ(B2:D2;1,5) для ru; для en — без изменений. */
 export function localizeFormula(formula: string, locale: FunctionLocale): string {
   if (locale === "en") return formula;
@@ -30,6 +61,7 @@ export function localizeFormula(formula: string, locale: FunctionLocale): string
   return tokens
     .map((token, i) => {
       const first = token.charAt(0);
+      if (first === '"' && isTextFormatArg(tokens, i)) return `"${localizeFormatCode(token.slice(1, -1))}"`;
       if (first === '"' || first === "'") return token;
       if (/^[A-Za-z_]/.test(token)) {
         const isCall = tokens[i + 1] === "(";

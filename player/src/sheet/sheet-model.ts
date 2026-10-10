@@ -19,13 +19,16 @@ export type SheetSnapshot = ReadonlyMap<string, Readonly<CellState>>;
 
 const EMPTY: Readonly<CellState> = Object.freeze({ input: null, value: null, fmt: "general", style: null });
 
-/** Текст, набранный в ячейке, → значение ввода: формула, число или строка. */
+/**
+ * Текст, набранный в ячейке, → значение ввода: формула, число или строка. Числом считается только текст
+ * из цифр с обычными пробелами по краям: «'31», перевод строки или неразрывный пробел (СИМВОЛ(160))
+ * перед числом оставляют его текстом, как в Excel.
+ */
 export function parseInput(raw: string | number | null): number | string | null {
   if (raw === null || typeof raw === "number") return raw;
   if (raw.startsWith("=")) return raw;
-  const trimmed = raw.trim();
-  if (trimmed === "") return null;
-  const n = Number(trimmed);
+  if (raw.trim() === "") return null;
+  const n = /^ *[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)? *$/.test(raw) ? Number(raw) : NaN;
   return Number.isFinite(n) ? n : raw;
 }
 

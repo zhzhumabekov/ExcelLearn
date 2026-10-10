@@ -1,5 +1,6 @@
 import { type CellPos, parseCell } from "./address";
 import { type CellSource, type CellValue, createEvaluator } from "./evaluator";
+import type { TextLocale } from "./text-functions";
 import { expandNames, type NameDef, nameProblem, sameName } from "./names";
 import type { SheetModel, SheetSnapshot } from "./sheet-model";
 
@@ -32,14 +33,27 @@ export class Workbook {
   private computed = new Map<string, CellValue>();
   private inProgress = new Set<string>();
   private readonly evaluate: (formula: string, at: CellPos & { sheet: string }) => CellValue;
+  private textLocale: TextLocale = "ru";
 
   constructor() {
     const source: CellSource = {
       value: (addr, sheet) => this.sheetOrNull(sheet)?.value(addr) ?? null,
       formula: (addr, sheet) => this.sheetOrNull(sheet)?.formula(addr) ?? null,
       extent: (sheet) => this.sheetOrNull(sheet)?.extent() ?? { rows: 1, cols: 1 },
+      locale: () => this.textLocale,
     };
     this.evaluate = createEvaluator(source);
+  }
+
+  /** Язык Excel ученика: от него зависит результат ТЕКСТ («Октябрь» / «October», «1,5» / «1.5»). */
+  get locale(): TextLocale {
+    return this.textLocale;
+  }
+
+  setLocale(locale: TextLocale): void {
+    if (locale === this.textLocale) return;
+    this.textLocale = locale;
+    this.recalc();
   }
 
   /** Подключить лист (вызывает конструктор SheetModel). */

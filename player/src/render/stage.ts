@@ -31,6 +31,7 @@ export class Stage {
   ) {
     this.el = document.createElement("div");
     this.el.className = "xl-stage";
+    sheet.book.setLocale(currentLocale);
     this.window = new WindowView(sheet.book, currentLocale);
     this.el.append(this.window.el);
     this.overlays = new Overlays(this.window.gridWrap, this.window);
@@ -46,6 +47,7 @@ export class Stage {
 
   setLocale(locale: FunctionLocale): void {
     this.currentLocale = locale;
+    this.sheet.book.setLocale(locale);
     this.window.setLocale(locale);
   }
 

@@ -96,18 +96,23 @@ export class GridView {
     const width = this.sheet.columns[colToLetters(parseCell(addr).col)] ?? DEFAULT_COLUMN_WIDTH;
     const display = formatValue(state.value, state.fmt, this.locale, fitsIn(width));
 
+    // Длинный текст Excel выводит поверх пустых соседей справа, а у непустого соседа обрезает
+    const { row, col } = parseCell(addr);
+    const neighbor = this.sheet.get(cellName({ row, col: col + 1 })).input;
     td.className = [
       "xl-cell",
       `xl-${display.align}`,
       state.style ? `xl-${state.style}` : "",
-      this.hidden.has(colToLetters(parseCell(addr).col)) ? "xl-colhidden" : "",
+      this.hidden.has(colToLetters(col)) ? "xl-colhidden" : "",
+      display.align === "left" && neighbor !== null ? "xl-clip" : "",
     ]
       .filter(Boolean)
       .join(" ");
     if (display.currency && !display.text.startsWith("#")) {
       td.replaceChildren(span("xl-acc", [span("", display.currency), span("", display.text)]));
     } else {
-      td.textContent = display.text;
+      // Перевод строки (СИМВОЛ(10)) без «Переносить текст» в ячейке не виден
+      td.textContent = display.text.replace(/[\r\n]/g, "");
     }
   }
 

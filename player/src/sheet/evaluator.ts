@@ -3,6 +3,7 @@ import FormulaParser, { type CellRef, type FunctionArg, type RangeRef } from "fa
 import { cellName, MAX_COL, MAX_ROW } from "./address";
 import { installFormulajs, PARSER_ERRORS } from "./formulajs-bridge";
 import { LOOKUP_FUNCTIONS } from "./lookup";
+import { type TextLocale, textFunctions } from "./text-functions";
 
 /** Ошибка Excel (#DIV/0!, #REF!, #NAME? …) — отдельный тип, чтобы не путать с текстом. */
 export class ExcelError {
@@ -22,6 +23,8 @@ export interface CellSource {
   formula(addr: string, sheet?: string): string | null;
   /** Заполненная часть листа — граница для ссылок на целые строки и столбцы (A:A, 12:12). */
   extent?(sheet?: string): { rows: number; cols: number };
+  /** Язык книги — для ТЕКСТ (названия месяцев, разделители). По умолчанию русский. */
+  locale?(): TextLocale;
 }
 
 // Функции, которым нужна ссылка, а не значение аргумента. В fast-formula-parser нет публичной настройки
@@ -94,6 +97,8 @@ function createParser(source: CellSource): FormulaParser {
   // ВПР/ГПР/ПОИСКПОЗ — свои, с двоичным поиском Excel (см. lookup.ts); formulajs их не перекрывает
   Object.assign(parser.functions, LOOKUP_FUNCTIONS);
   installFormulajs(parser, [...PRESERVE_REF, ...Object.keys(LOOKUP_FUNCTIONS)]);
+  // Текстовые функции, где formulajs расходится с Excel, и ТЕКСТ — свои (text-functions.ts)
+  Object.assign(parser.functions, textFunctions(() => source.locale?.() ?? "ru"));
   return parser;
 }
 

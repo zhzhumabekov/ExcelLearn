@@ -225,12 +225,19 @@
   border: 1px solid var(--xl-line);
   height: 26px;
   padding: 0 7px;
-  white-space: nowrap;
+  /* pre: пробелы видны как в Excel («Reggie   Miller», пробел в начале); переносов нет */
+  white-space: pre;
   overflow: visible;
 }
 
 .xl-player .xl-grid td.xl-right {
   text-align: right;
+}
+
+/* Сосед справа не пустой — длинный текст обрезается по границе ячейки, как в Excel */
+.xl-player .xl-grid td.xl-clip {
+  overflow: hidden;
+  text-overflow: clip;
 }
 
 .xl-player .xl-grid td.xl-center {
