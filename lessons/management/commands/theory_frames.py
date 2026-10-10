@@ -79,7 +79,9 @@ class Command(BaseCommand):
             browser.close()
 
         manifest_path.parent.mkdir(parents=True, exist_ok=True)
-        manifest_path.write_text(json.dumps(dict(sorted(manifest.items())), indent=2) + "\n", encoding="utf-8")
+        manifest_path.write_text(
+            json.dumps(dict(sorted(manifest.items())), indent=2) + "\n", encoding="utf-8", newline="\n"
+        )
         self.stdout.write(self.style.SUCCESS(f"Снято кадров: {len(jobs)}"))
 
 
