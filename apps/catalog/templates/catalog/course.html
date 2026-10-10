@@ -8,68 +8,97 @@
     <p class="eyebrow">Оглавление курса</p>
     <h1 class="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">{{ course.title }}</h1>
     {% if course.source %}<p class="mt-3 text-slate-500">{{ course.source }}</p>{% endif %}
+    <p class="mt-3 text-sm font-medium text-slate-600">
+      {{ chapters|length|ru_plural:"глава,главы,глав" }} · {{ lesson_count|ru_plural:"урок,урока,уроков" }} · {{ exercise_count|ru_plural:"задание,задания,заданий" }}
+    </p>
   </div>
 
+  {# Поиск и фильтры — static/js/course-page.js #}
+  <div class="sticky top-[65px] z-20 -mx-4 mt-8 flex flex-wrap items-center gap-3 border-b border-slate-200/70 bg-slate-50/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6" data-course-tools>
+    <label class="relative min-w-60 flex-1 sm:max-w-md">
+      <span class="sr-only">Поиск по главам и урокам</span>
+      <svg viewBox="0 0 24 24" class="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+      <input type="search" data-course-search placeholder="Найти главу или урок: ВПР, имена, сводные…"
+             class="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pr-3 pl-11 shadow-soft transition focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15 focus:outline-none">
+    </label>
+    {% if empty_count %}
+      <label class="flex cursor-pointer items-center gap-2 rounded-xl px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-900/5">
+        <input type="checkbox" data-course-hide-empty class="size-4">
+        Скрыть главы без уроков <span class="text-slate-400">({{ empty_count }})</span>
+      </label>
+    {% endif %}
+    <span class="ml-auto flex gap-1 text-sm">
+      <button type="button" data-course-expand="1" class="nav-link">Развернуть всё</button>
+      <button type="button" data-course-expand="0" class="nav-link">Свернуть всё</button>
+    </span>
+  </div>
+  <p class="mt-8 hidden rounded-2xl bg-white px-5 py-4 text-slate-500" data-course-nothing>
+    Ничего не нашлось. Попробуйте другое слово — например, название функции.
+  </p>
+
   {# Статусы: у вошедшего — с сервера; у гостя их проставляет static/js/course-page.js из браузера #}
-  <ol class="mt-10 space-y-6" data-course data-guest="{{ user.is_authenticated|yesno:'0,1' }}">
+  <ol class="mt-6 grid items-start gap-3 lg:grid-cols-2" data-course data-guest="{{ user.is_authenticated|yesno:'0,1' }}">
     {% for entry in chapters %}
-      <li class="card scroll-mt-24 overflow-hidden" id="{{ entry.chapter.id }}" data-chapter>
-        <div class="flex flex-wrap items-center gap-4 px-5 py-5 sm:px-6">
-          <span class="grid size-14 flex-none place-items-center rounded-2xl {% cycle 'bg-mint text-mint-ink' 'bg-sky text-sky-ink' 'bg-lavender text-lavender-ink' 'bg-butter text-butter-ink' 'bg-peach text-peach-ink' %} font-display text-2xl font-extrabold">
-            {{ entry.chapter.number }}
-          </span>
-          <h2 class="min-w-0 flex-1">
-            <span class="block text-xs font-bold tracking-wider text-brand-600 uppercase">
-              {% if entry.chapter.number %}Глава {{ entry.chapter.number }}{% else %}Вступление{% endif %}
-            </span>
-            <span class="mt-0.5 block text-xl font-bold tracking-tight">{{ entry.chapter.title }}</span>
-          </h2>
-          {% if entry.lessons %}
-            <div class="w-full sm:w-44">
-              <span class="block text-right text-sm font-medium text-slate-500" data-chapter-percent>
-                {% if user.is_authenticated %}пройдено {{ entry.percent }}%{% else %}{{ entry.lessons|length|ru_plural:"урок,урока,уроков" }}{% endif %}
-              </span>
-              {% if user.is_authenticated %}
-                <span class="mt-1.5 block h-2 overflow-hidden rounded-full bg-slate-100">
-                  <span class="block h-full rounded-full bg-brand-500" style="width: {{ entry.percent }}%"></span>
-                </span>
-              {% endif %}
-            </div>
-          {% endif %}
-        </div>
+      {% cycle 'bg-mint text-mint-ink' 'bg-sky text-sky-ink' 'bg-lavender text-lavender-ink' 'bg-butter text-butter-ink' 'bg-peach text-peach-ink' as tone silent %}
+      <li class="scroll-mt-40" id="{{ entry.chapter.id }}" data-chapter data-number="{{ entry.chapter.number }}"
+          data-search="{{ entry.chapter.title|lower }}" {% if not entry.lessons %}data-empty{% endif %}>
         {% if entry.lessons %}
-          <ol class="border-t border-slate-100 p-2">
-            {% for item in entry.lessons %}
-              <li data-lesson="{{ item.lesson.id }}" data-steps="{{ item.lesson.steps|length }}">
-                <a href="{% url 'catalog:lesson' item.lesson.id %}"
-                   class="group flex items-center gap-4 rounded-2xl px-3 py-3 transition hover:bg-slate-50 sm:px-4">
-                  <span class="grid h-8 w-12 flex-none place-items-center rounded-lg bg-slate-100 text-sm font-semibold tabular-nums text-slate-500 transition group-hover:bg-mint group-hover:text-mint-ink">{{ entry.chapter.number }}.{{ item.lesson.order }}</span>
-                  <span class="flex-1 font-medium">{{ item.lesson.title }}</span>
-                  <span class="text-sm whitespace-nowrap" data-status>
-                    {% if item.progress.completed %}
-                      <span class="rounded-full bg-mint px-2.5 py-1 font-semibold text-mint-ink">✓ Пройден</span>
-                    {% elif item.progress %}
-                      <span class="rounded-full bg-butter px-2.5 py-1 font-semibold text-butter-ink">Шаг {{ item.progress.last_step|add:1 }} из {{ item.lesson.steps|length }}</span>
-                    {% else %}
-                      <span class="text-slate-500">{{ item.lesson.steps|length|ru_plural:"шаг,шага,шагов" }}</span>
-                    {% endif %}
-                  </span>
-                  <span class="text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-brand-500" aria-hidden="true">→</span>
-                </a>
-              </li>
-            {% endfor %}
-          </ol>
-          {% if entry.exercise_count %}
-            <a href="{% url 'catalog:exercises' entry.chapter.id %}" data-exercises
-               class="group flex items-center gap-4 border-t border-slate-100 bg-butter/60 px-5 py-4 transition hover:bg-butter sm:px-7">
-              <span class="grid size-9 flex-none place-items-center rounded-xl bg-white/70 text-butter-ink">{% include "_icon.html" with name="pencil" cls="size-5" %}</span>
-              <span class="flex-1 font-semibold text-butter-ink">Задания к главе</span>
-              <span class="text-sm text-slate-500">{{ entry.exercise_count|ru_plural:"задание,задания,заданий" }} · файлы Excel</span>
-              <span class="text-slate-400 transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
-            </a>
-          {% endif %}
+          <details class="card group overflow-hidden" {% if entry.open %}open{% endif %}>
+            <summary class="flex cursor-pointer list-none items-center gap-3 px-4 py-3 transition hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
+              <span class="grid size-11 flex-none place-items-center rounded-xl {{ tone }} font-display text-lg font-extrabold">{{ entry.chapter.number }}</span>
+              <h2 class="min-w-0 flex-1">
+                <span class="block truncate font-bold">{{ entry.chapter.title }}</span>
+                <span class="block text-xs text-slate-500">
+                  {% if entry.chapter.number %}Глава {{ entry.chapter.number }}{% else %}Вступление{% endif %}
+                  · {{ entry.lessons|length|ru_plural:"урок,урока,уроков" }}{% if entry.exercise_count %} · {{ entry.exercise_count|ru_plural:"задание,задания,заданий" }}{% endif %}
+                </span>
+              </h2>
+              <span class="hidden w-24 flex-none text-right sm:block">
+                <span class="block text-xs font-medium text-slate-500" data-chapter-percent>{% if user.is_authenticated %}пройдено {{ entry.percent }}%{% endif %}</span>
+                <span class="mt-1 block h-1.5 overflow-hidden rounded-full bg-slate-100">
+                  <span class="block h-full rounded-full bg-brand-500" style="width: {{ entry.percent }}%" data-chapter-bar></span>
+                </span>
+              </span>
+              <svg viewBox="0 0 24 24" class="size-5 flex-none text-slate-400 transition group-open:rotate-180" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </summary>
+            <ol class="border-t border-slate-100 p-1.5">
+              {% for item in entry.lessons %}
+                <li data-lesson="{{ item.lesson.id }}" data-steps="{{ item.lesson.steps|length }}" data-search="{{ item.lesson.title|lower }}">
+                  <a href="{% url 'catalog:lesson' item.lesson.id %}"
+                     class="group/l flex items-center gap-3 rounded-xl px-2.5 py-2 transition hover:bg-slate-50">
+                    <span class="grid h-7 w-11 flex-none place-items-center rounded-lg bg-slate-100 text-xs font-semibold tabular-nums text-slate-500 transition group-hover/l:bg-mint group-hover/l:text-mint-ink">{{ entry.chapter.number }}.{{ item.lesson.order }}</span>
+                    <span class="flex-1 text-sm font-medium">{{ item.lesson.title }}</span>
+                    <span class="text-xs whitespace-nowrap" data-status>
+                      {% if item.progress.completed %}
+                        <span class="rounded-full bg-mint px-2 py-0.5 font-semibold text-mint-ink">✓ Пройден</span>
+                      {% elif item.progress %}
+                        <span class="rounded-full bg-butter px-2 py-0.5 font-semibold text-butter-ink">Шаг {{ item.progress.last_step|add:1 }} из {{ item.lesson.steps|length }}</span>
+                      {% else %}
+                        <span class="text-slate-500">{{ item.lesson.steps|length|ru_plural:"шаг,шага,шагов" }}</span>
+                      {% endif %}
+                    </span>
+                  </a>
+                </li>
+              {% endfor %}
+            </ol>
+            {% if entry.exercise_count %}
+              <a href="{% url 'catalog:exercises' entry.chapter.id %}" data-exercises
+                 class="group/e flex items-center gap-3 border-t border-slate-100 bg-butter/60 px-4 py-2.5 text-sm transition hover:bg-butter">
+                <span class="grid size-7 flex-none place-items-center rounded-lg bg-white/70 text-butter-ink">{% include "_icon.html" with name="pencil" cls="size-4" %}</span>
+                <span class="flex-1 font-semibold text-butter-ink">Задания к главе</span>
+                <span class="text-xs text-slate-500">{{ entry.exercise_count|ru_plural:"задание,задания,заданий" }} · файлы Excel</span>
+                <span class="text-slate-400 transition group-hover/e:translate-x-0.5" aria-hidden="true">→</span>
+              </a>
+            {% endif %}
+          </details>
         {% else %}
-          <p class="border-t border-slate-100 px-6 py-4 text-sm text-slate-500">Уроки готовятся.</p>
+          <div class="flex items-center gap-3 rounded-3xl border border-dashed border-slate-200 px-4 py-3 text-slate-400">
+            <span class="grid size-11 flex-none place-items-center rounded-xl bg-slate-100 font-display text-lg font-extrabold">{{ entry.chapter.number }}</span>
+            <h2 class="min-w-0 flex-1">
+              <span class="block truncate font-semibold text-slate-500">{{ entry.chapter.title }}</span>
+              <span class="block text-xs">Глава {{ entry.chapter.number }} · уроки готовятся</span>
+            </h2>
+          </div>
         {% endif %}
       </li>
     {% endfor %}

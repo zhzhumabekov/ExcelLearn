@@ -39,6 +39,8 @@ def test_lesson_file_downloads(page: Page):
 
 def test_chapter_exercises_from_course_with_task_and_solution(page: Page):
     page.goto(f"{page.base_url}/course/")
+    expect(page.locator("#ch01 [data-exercises]")).to_be_hidden()  # глава свёрнута
+    page.locator("#ch01 summary").click()
     page.locator("#ch01 [data-exercises]").click()
     expect(page.get_by_role("heading", level=1)).to_have_text("Задания к главе 1")
 
@@ -52,4 +54,36 @@ def test_chapter_exercises_from_course_with_task_and_solution(page: Page):
         exercise.get_by_test_id("exercise-solution").click()
     assert task.value.suggested_filename == "Рыба_Алаколь_задание.xlsx"
     assert solution.value.suggested_filename == "Рыба_Алаколь_решение.xlsx"
+    assert page.errors == []
+
+
+def test_course_opens_first_chapter_and_chapter_from_link(page: Page):
+    page.goto(f"{page.base_url}/course/")
+    expect(page.locator("#ch00 details")).to_have_attribute("open", "")  # гость без прогресса — первая глава
+    expect(page.locator("#ch04 details")).not_to_have_attribute("open", "")
+
+    page.goto(f"{page.base_url}/course/#ch04")  # так ведут хлебные крошки урока
+    expect(page.get_by_role("link", name="ИНДЕКС с нулём: вся строка или весь столбец")).to_be_visible()
+    assert page.errors == []
+
+
+def test_course_search_finds_lessons_and_chapters(page: Page):
+    page.goto(f"{page.base_url}/course/")
+    search = page.get_by_placeholder("Найти главу или урок")
+
+    search.fill("гпр")  # урок главы 3: глава раскрывается, видны только совпавшие уроки
+    expect(page.get_by_role("link", name="ГПР: цена на дату продажи")).to_be_visible()
+    expect(page.get_by_role("link", name="ВПР по шкале: премия от суммы продаж")).to_be_hidden()
+    expect(page.locator("#ch01")).to_be_hidden()
+
+    search.fill("имена диапазонов")  # название главы: видна вся глава
+    expect(page.locator("#ch02")).to_be_visible()
+    expect(page.locator("#ch03")).to_be_hidden()
+
+    search.fill("сводные таблицы олимпиады")
+    expect(page.get_by_text("Ничего не нашлось")).to_be_visible()
+
+    search.fill("")
+    expect(page.locator("#ch03")).to_be_visible()
+    expect(page.locator("#ch03 details")).not_to_have_attribute("open", "")  # раскрытие до поиска вернулось
     assert page.errors == []

@@ -42,7 +42,28 @@ def course(request):
                 "exercise_count": len(registry.exercises.get(entry.chapter.id, ())),
             }
         )
-    return render(request, "catalog/course.html", {"course": registry.course, "chapters": chapters})
+    # Сразу раскрыты главы с начатыми уроками; если таких нет — первая глава, где есть что проходить
+    started = {
+        entry["chapter"].id
+        for entry in chapters
+        if any(item["progress"] and not item["progress"].completed for item in entry["lessons"])
+    }
+    if not started:
+        first = next((e["chapter"].id for e in chapters if e["lessons"] and e["done"] < len(e["lessons"])), None)
+        started = {first} if first else set()
+    for entry in chapters:
+        entry["open"] = entry["chapter"].id in started
+    return render(
+        request,
+        "catalog/course.html",
+        {
+            "course": registry.course,
+            "chapters": chapters,
+            "lesson_count": sum(len(entry["lessons"]) for entry in chapters),
+            "exercise_count": sum(entry["exercise_count"] for entry in chapters),
+            "empty_count": sum(1 for entry in chapters if not entry["lessons"]),
+        },
+    )
 
 
 def lesson(request, lesson_id: str):
