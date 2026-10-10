@@ -18,6 +18,11 @@ class User(AbstractUser):
     # при самостоятельной регистрации согласие обязательно (T22).
     consent_at = models.DateTimeField("согласие на обработку ПДн", null=True, blank=True)
     consent_version = models.CharField("версия согласия", max_length=20, blank=True)
+    # Первые главы открыты всем зарегистрированным, остальные — после того, как администратор
+    # отметит полный доступ (catalog.access).
+    full_access = models.BooleanField(
+        "полный доступ", default=False, help_text="Открыты все главы курса, а не только бесплатные."
+    )
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["first_name", "last_name", "phone"]
