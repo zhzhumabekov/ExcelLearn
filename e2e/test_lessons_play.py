@@ -33,11 +33,11 @@ def test_wages_final_sheet(page: Page):
     page.wait_for_function("window.demoDone === true", timeout=60_000)
 
     cell = lambda addr: page.locator(f'td[data-addr="{addr}"]')  # noqa: E731
-    expect(cell("E4")).to_have_text(re.compile(r"^88\s200 ₸$"))
-    expect(cell("C12")).to_have_text("320")
-    expect(cell("E14")).to_have_text(re.compile(r"^80\s463 ₸$"))
-    expect(cell("C13")).to_have_text("=СУММ(C4:C11)")  # FORMULATEXT в русском Excel
-    expect(cell("F11")).to_have_text("=C11*D11")
+    expect(cell("D2")).to_have_text(re.compile(r"^88\s200 ₸$"))
+    expect(cell("B10")).to_have_text("320")
+    expect(cell("D12")).to_have_text(re.compile(r"^80\s463 ₸$"))
+    expect(cell("B11")).to_have_text("=СУММ(B2:B9)")  # FORMULATEXT в русском Excel
+    expect(cell("E9")).to_have_text("=B9*C9")
     assert page.errors == []
 
 
@@ -52,7 +52,7 @@ def test_start_seek_and_pause(page: Page):
     page.click(".xl-seg >> nth=7")  # перемотка к шагу 8
     expect(page.locator(".xl-meta")).to_have_text("Шаг 8 из 10")
     # До шага 8 столбец F уже заполнен FORMULATEXT (шаг 7)
-    expect(page.locator('td[data-addr="F11"]')).to_have_text("=C11*D11")
+    expect(page.locator('td[data-addr="E9"]')).to_have_text("=B9*C9")
 
     page.keyboard.press("Space")
     expect(page.locator(".xl-primary")).to_have_attribute("title", "Продолжить")

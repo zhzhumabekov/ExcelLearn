@@ -8,35 +8,35 @@ source: Свой пример (цена мешка цемента в 2025 год
 sheet:
   file: Цены_по_датам.xlsx
   name: Цены
-  columns: {A: 170, B: 110, C: 110, D: 110, E: 30}
-  rows: 13
+  columns: { A: 170, B: 110, C: 110, D: 110, E: 30 }
+  rows: 12
   cells:
-    A2: {v: Действует с, style: label}
-    B2: {v: "2025-01-01", fmt: date, style: head}
-    C2: {v: "2025-05-01", fmt: date, style: head}
-    D2: {v: "2025-08-01", fmt: date, style: head}
-    A3: {v: "Цена мешка, ₸", style: label}
-    B3: {v: 2450, fmt: kzt}
-    C3: {v: 2600, fmt: kzt}
-    D3: {v: 2750, fmt: kzt}
-    A7: {v: Продажа, style: head}
-    B7: {v: Дата, style: head}
-    C7: {v: Цена, style: head}
-    A8: Счёт № 112
-    B8: {v: "2025-02-15", fmt: date}
-    A9: Счёт № 245
-    B9: {v: "2025-05-01", fmt: date}
-    A10: Счёт № 318
-    B10: {v: "2025-07-20", fmt: date}
-    A11: Счёт № 402
-    B11: {v: "2025-11-03", fmt: date}
-    C8: {fmt: kzt}
+    A1: {v: Действует с, style: label}
+    B1: {v: "2025-01-01", fmt: date, style: head}
+    C1: {v: "2025-05-01", fmt: date, style: head}
+    D1: {v: "2025-08-01", fmt: date, style: head}
+    A2: {v: "Цена мешка, ₸", style: label}
+    B2: {v: 2450, fmt: kzt}
+    C2: {v: 2600, fmt: kzt}
+    D2: {v: 2750, fmt: kzt}
+    A6: {v: Продажа, style: head}
+    B6: {v: Дата, style: head}
+    C6: {v: Цена, style: head}
+    A7: Счёт № 112
+    B7: {v: "2025-02-15", fmt: date}
+    A8: Счёт № 245
+    B8: {v: "2025-05-01", fmt: date}
+    A9: Счёт № 318
+    B9: {v: "2025-07-20", fmt: date}
+    A10: Счёт № 402
+    B10: {v: "2025-11-03", fmt: date}
+    C7: {fmt: kzt}
 
 expect:
-  C8: 2450
+  C7: 2450
+  C8: 2600
   C9: 2600
-  C10: 2600
-  C11: 2750
+  C10: 2750
 
 steps:
   - title: Ситуация
@@ -52,28 +52,28 @@ steps:
 
   - title: Имя для таблицы цен
     text: >-
-      Выделите <code>B2:D3</code> — даты вместе с ценами — и назовите диапазон <code>прайс</code>.
+      Выделите <code>B1:D2</code> — даты вместе с ценами — и назовите диапазон <code>прайс</code>.
     say: Выделяем даты вместе с ценами и называем диапазон «прайс».
     actions:
-      - dragSelect: B2:D3
+      - dragSelect: B1:D2
       - nameBox: прайс
 
   - title: "{fn:HLOOKUP}: ищем в первой строке"
     text: >-
-      В <code>C8</code> введите <code>{f:=HLOOKUP(B8,прайс,2,TRUE)}</code>. Всё как у {fn:VLOOKUP}, только
+      В <code>C7</code> введите <code>{f:=HLOOKUP(B7,прайс,2,TRUE)}</code>. Всё как у {fn:VLOOKUP}, только
       Excel ищет дату в <b>первой строке</b> таблицы, а ответ берёт из строки номер 2. Дата 15.02.2025 — между
       1 января и 1 мая, значит, цена <b>2 450 ₸</b>.
     say: >-
       Вводим {fn:HLOOKUP}: ищем дату продажи в первой строке прайса и берём ответ из второй строки. Пятнадцатое
       февраля — между январём и маем, цена две тысячи четыреста пятьдесят.
     actions:
-      - click: C8
+      - click: C7
       - type: =HLOOKUP(
-      - clickRef: B8
+      - clickRef: B7
       - type: ",прайс,2,TRUE)"
       - keys: [Enter]
-      - click: C8
-      - fill: C8:C11
+      - click: C7
+      - fill: C7:C10
 
   - title: Почему здесь ИСТИНА
     text: >-
@@ -84,9 +84,9 @@ steps:
       Дата для Excel — это число, поэтому даты отсортированы, и работает приблизительный поиск: берётся
       последняя дата изменения цены, не позже даты продажи.
     actions:
-      - showRefs: C10
+      - showRefs: C9
       - wait: 1800
-      - click: C11
+      - click: C10
       - wait: 1200
 
   - title: "Частая ошибка: ЛОЖЬ для дат"
@@ -108,4 +108,4 @@ steps:
       Готово! {fn:HLOOKUP} ищет в первой строке таблицы. Даты — это числа, поэтому цену на дату ищут
       приблизительным поиском.
     actions:
-      - click: C9
+      - click: C8

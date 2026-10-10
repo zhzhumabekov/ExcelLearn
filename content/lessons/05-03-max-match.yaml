@@ -14,126 +14,126 @@ sheet:
     D: 16
     E: 150
     F: 130
-  rows: 20
+  rows: 18
   cells:
-    A3:
+    A1:
       v: №
       style: head
-    B3:
+    B1:
       v: Игрок
       style: head
-    C3:
+    C1:
       v: Зарплата, ₸
       style: head
-    A4: 1
-    B4: Абылай С.
-    C4:
+    A2: 1
+    B2: Абылай С.
+    C2:
       v: 3400000
       fmt: kzt
-    A5: 2
-    B5: Бахтияр О.
-    C5:
+    A3: 2
+    B3: Бахтияр О.
+    C3:
       v: 5800000
       fmt: kzt
-    A6: 3
-    B6: Владимир К.
-    C6:
+    A4: 3
+    B4: Владимир К.
+    C4:
       v: 2900000
       fmt: kzt
-    A7: 4
-    B7: Гани Е.
-    C7:
+    A5: 4
+    B5: Гани Е.
+    C5:
       v: 7200000
       fmt: kzt
-    A8: 5
-    B8: Данияр А.
-    C8:
+    A6: 5
+    B6: Данияр А.
+    C6:
       v: 4100000
       fmt: kzt
-    A9: 6
-    B9: Ерболат Ж.
-    C9:
+    A7: 6
+    B7: Ерболат Ж.
+    C7:
       v: 3900000
       fmt: kzt
-    A10: 7
-    B10: Жандос Б.
-    C10:
+    A8: 7
+    B8: Жандос Б.
+    C8:
       v: 6500000
       fmt: kzt
-    A11: 8
-    B11: Ислам Н.
-    C11:
+    A9: 8
+    B9: Ислам Н.
+    C9:
       v: 2600000
       fmt: kzt
-    A12: 9
-    B12: Кайрат М.
-    C12:
+    A10: 9
+    B10: Кайрат М.
+    C10:
       v: 4800000
       fmt: kzt
-    A13: 10
-    B13: Марлен Т.
-    C13:
+    A11: 10
+    B11: Марлен Т.
+    C11:
       v: 5100000
       fmt: kzt
-    A14: 11
-    B14: Нурсултан Д.
-    C14:
+    A12: 11
+    B12: Нурсултан Д.
+    C12:
       v: 3300000
       fmt: kzt
-    A15: 12
-    B15: Олжас Р.
-    C15:
+    A13: 12
+    B13: Олжас Р.
+    C13:
       v: 6100000
       fmt: kzt
-    A16: 13
-    B16: Пётр В.
-    C16:
+    A14: 13
+    B14: Пётр В.
+    C14:
       v: 2400000
       fmt: kzt
-    A17: 14
-    B17: Рустем Х.
-    C17:
+    A15: 14
+    B15: Рустем Х.
+    C15:
       v: 4400000
       fmt: kzt
-    A18: 15
-    B18: Самат И.
-    C18:
+    A16: 15
+    B16: Самат И.
+    C16:
       v: 3700000
       fmt: kzt
-    A19: 16
-    B19: Тимур Ш.
-    C19:
+    A17: 16
+    B17: Тимур Ш.
+    C17:
       v: 5500000
       fmt: kzt
-    E4:
+    E2:
       v: Самая высокая
       style: label
-    E5:
+    E3:
       v: Номер игрока
+      style: label
+    E4:
+      v: Игрок
       style: label
     E6:
-      v: Игрок
-      style: label
-    E8:
       v: 5-я по величине
       style: label
-    E9:
+    E7:
       v: Номер игрока
       style: label
-    E10:
+    E8:
       v: Игрок
       style: label
-    F4:
+    F2:
       fmt: kzt
-    F8:
+    F6:
       fmt: kzt
 expect:
-  F4: 7200000
-  F5: 4
-  F6: Гани Е.
-  F8: 5500000
-  F9: 16
-  F10: Тимур Ш.
+  F2: 7200000
+  F3: 4
+  F4: Гани Е.
+  F6: 5500000
+  F7: 16
+  F8: Тимур Ш.
 steps:
 - title: Ситуация
   text: 'У футбольного клуба 16 игроков (вымышленных), зарплаты не отсортированы. Директор спрашивает: <b>кто</b>
@@ -142,40 +142,40 @@ steps:
   actions:
   - wait: 3000
 - title: Имя для зарплат
-  text: Выделите <code>C4:C19</code> и назовите <code>зарплаты</code>.
+  text: Выделите <code>C2:C17</code> и назовите <code>зарплаты</code>.
   say: Называем столбец зарплат.
   actions:
-  - dragSelect: C4:C19
+  - dragSelect: C2:C17
   - nameBox: зарплаты
 - title: '1. Самое большое число: {fn:MAX}'
-  text: 'В <code>F4</code>: <code>{f:=MAX(зарплаты)}</code> — <b>7 200 000 ₸</b>.'
+  text: 'В <code>F2</code>: <code>{f:=MAX(зарплаты)}</code> — <b>7 200 000 ₸</b>.'
   say: Сначала функция {fn:MAX} находит самую большую зарплату — семь миллионов двести тысяч.
   actions:
-  - click: F4
+  - click: F2
   - type: =MAX(зарплаты)
   - keys:
     - Enter
 - title: '2. На каком она месте: {fn:MATCH}'
-  text: 'В <code>F5</code>: <code>{f:=MATCH(F4,зарплаты,0)}</code> — <b>4</b>. Зарплаты не отсортированы, поэтому
+  text: 'В <code>F3</code>: <code>{f:=MATCH(F2,зарплаты,0)}</code> — <b>4</b>. Зарплаты не отсортированы, поэтому
     тип <code>0</code>.'
   say: Потом {fn:MATCH} находит, на каком месте эта зарплата, — на четвёртом. Тип ноль, потому что список не отсортирован.
   actions:
-  - click: F5
+  - click: F3
   - type: =MATCH(
-  - clickRef: F4
+  - clickRef: F2
   - type: ',зарплаты,0)'
   - keys:
     - Enter
 - title: '3. Имя: {fn:INDEX}'
-  text: 'В <code>F6</code>: <code>{f:=INDEX(B4:B19,F5)}</code> — <b>Гани Е.</b>. (Книга берёт имя через {fn:VLOOKUP}
+  text: 'В <code>F4</code>: <code>{f:=INDEX(B2:B17,F3)}</code> — <b>Гани Е.</b>. (Книга берёт имя через {fn:VLOOKUP}
     по номеру — результат тот же.)'
   say: И {fn:INDEX} достаёт имя из этой позиции — Гани.
   actions:
-  - click: F6
+  - click: F4
   - type: =INDEX(
-  - dragRef: B4:B19
+  - dragRef: B2:B17
   - type: ','
-  - clickRef: F5
+  - clickRef: F3
   - type: )
   - keys:
     - Enter
@@ -184,14 +184,14 @@ steps:
     — <b>16</b>, имя — <b>Тимур Ш.</b>. Для пятой снизу есть <code>{fn:SMALL}</code>.'
   say: 'Для пятой по величине зарплаты есть функция {fn:LARGE}. Дальше — те же шаги: место и имя.'
   actions:
-  - click: F8
+  - click: F6
   - type: =LARGE(зарплаты,5)
   - keys:
     - Enter
-  - type: =MATCH(F8,зарплаты,0)
+  - type: =MATCH(F6,зарплаты,0)
   - keys:
     - Enter
-  - type: =INDEX(B4:B19,F9)
+  - type: =INDEX(B2:B17,F7)
   - keys:
     - Enter
 - title: Что запомнить
@@ -200,4 +200,4 @@ steps:
     месяца, самый дорогой заказ, филиал с минимальной выручкой.'
   say: Готово! Максимум, место максимума и имя — так находят лучшего продавца или самый дорогой заказ.
   actions:
-  - click: F6
+  - click: F4

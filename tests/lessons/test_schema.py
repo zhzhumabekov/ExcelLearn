@@ -219,3 +219,35 @@ def test_bad_placeholders_are_rejected(field, value, fragment):
 
     with pytest.raises(ValidationError, match=fragment):
         Step(**fields)
+
+
+def test_layout_origin_counts_cells_expect_and_actions():
+    from lessons.layout import exercise_origin, lesson_origin
+    from lessons.schema import Exercise, Lesson
+
+    lesson = Lesson.model_validate(
+        {
+            "id": "x",
+            "chapter": "ch01",
+            "order": 1,
+            "title": "t",
+            "sheet": {"cells": {"C3": 1}},
+            "expect": {"D5": 1},
+            "steps": [{"title": "t", "text": "t", "actions": [{"selectColumn": "B"}, {"selectRow": 2}]}],
+        }
+    )
+    assert lesson_origin(lesson) == "B2"
+
+    exercise = Exercise.model_validate(
+        {
+            "id": "e",
+            "number": 1,
+            "title": "t",
+            "task": "t",
+            "explain": "t",
+            "sheet": {"cells": {"B2": 1}},
+            "solution": {"cells": {"A4": {"f": "=B2"}}},
+            "expect": {"A4": 1},
+        }
+    )
+    assert exercise_origin(exercise) == "A2"

@@ -29,7 +29,7 @@ def test_dev_player_selects_lesson_and_locale(client):
     response = client.get(reverse("core:dev-player"), {"lesson": "wages-weekly-salary", "locale": "en"})
 
     data = lesson_json(response)
-    assert data["sheet"]["cells"]["D4"] == {"v": 1800, "f": None, "fmt": "kzt", "style": None}
+    assert data["sheet"]["cells"]["C2"] == {"v": 1800, "f": None, "fmt": "kzt", "style": None}
     assert 'functionLocale: "en"' in response.content.decode()
 
 

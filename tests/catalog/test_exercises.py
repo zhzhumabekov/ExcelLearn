@@ -51,14 +51,14 @@ def test_task_file_has_empty_yellow_answer_cells_and_solution_has_formulas(clien
     _, solution = workbook(client, "final-grade", "solution")
     task_ws, solution_ws = task["Оценки"], solution["Оценки"]
 
-    assert task_ws["L11"].value is None
-    assert task_ws["L11"].fill.fgColor.rgb == ANSWER_FILL.fgColor.rgb
+    assert task_ws["L10"].value is None
+    assert task_ws["L10"].fill.fgColor.rgb == ANSWER_FILL.fgColor.rgb
     # Формула протянута со сдвигом ссылок, $ сохранены
-    assert solution_ws["L11"].value == "=$B$2*K11+$B$3*J11"
-    assert solution_ws["J11"].value == "=SUM(B11:F11)/SUM(B$6:F$6)"
-    assert solution_ws["L11"].number_format == "0.00%"
-    assert solution_ws["B3"].value == "=1-B2"
-    assert solution_ws["B3"].number_format == "0.00%"  # формат ячейки задания (процент) сохранился
+    assert solution_ws["L10"].value == "=$B$1*K10+$B$2*J10"
+    assert solution_ws["J10"].value == "=SUM(B10:F10)/SUM(B$5:F$5)"
+    assert solution_ws["L10"].number_format == "0.00%"
+    assert solution_ws["B2"].value == "=1-B1"
+    assert solution_ws["B2"].number_format == "0.00%"  # формат ячейки задания (процент) сохранился
     assert "Это решение" in solution["Условие"]["A2"].value
 
 
@@ -70,9 +70,9 @@ def test_info_sheet_has_plain_text_task():
 
 def test_solution_sheet_keeps_task_style():
     gini = next(e for e in EXERCISES if e.id == "gini-coefficient")
-    cell = solution_sheet(gini).cells["B11"]
+    cell = solution_sheet(gini).cells["B10"]
 
-    assert (cell.f, cell.fmt, cell.style) == ("=SUM(D5:D9)/($B$2*SUM(B5:B9))", "number", "total")
+    assert (cell.f, cell.fmt, cell.style) == ("=SUM(D4:D8)/($B$1*SUM(B4:B8))", "number", "total")
 
 
 def test_fill_source_must_be_a_formula():

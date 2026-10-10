@@ -9,46 +9,46 @@ source: Свой пример (прайс магазина стройматер�
 sheet:
   file: Прайс_магазина.xlsx
   name: Прайс
-  columns: {A: 110, B: 90, C: 70, D: 80, E: 90, F: 16, G: 90, H: 100}
-  rows: 9
+  columns: { A: 110, B: 90, C: 70, D: 80, E: 90, F: 16, G: 90, H: 100 }
+  rows: 8
   cells:
-    A2: {v: Поставщик, style: head}
-    B2: {v: "Закупка, ₸", style: head}
-    C2: {v: Наценка, style: head}
-    D2: {v: Артикул, style: head}
-    E2: {v: "Цена, ₸", style: head}
-    A3: ТОО «Береке»
-    B3: {v: 4000, fmt: kzt}
+    A1: {v: Поставщик, style: head}
+    B1: {v: "Закупка, ₸", style: head}
+    C1: {v: Наценка, style: head}
+    D1: {v: Артикул, style: head}
+    E1: {v: "Цена, ₸", style: head}
+    A2: ТОО «Береке»
+    B2: {v: 4000, fmt: kzt}
+    C2: {v: 0.3, fmt: percent}
+    D2: Z-210
+    E2: {v: 5200, fmt: kzt}
+    A3: ИП «Самал»
+    B3: {v: 2700, fmt: kzt}
     C3: {v: 0.3, fmt: percent}
-    D3: Z-210
-    E3: {v: 5200, fmt: kzt}
-    A4: ИП «Самал»
-    B4: {v: 2700, fmt: kzt}
-    C4: {v: 0.3, fmt: percent}
-    D4: A-105
-    E4: {v: 3500, fmt: kzt}
-    A5: ТОО «Береке»
-    B5: {v: 2300, fmt: kzt}
-    C5: {v: 0.25, fmt: percent}
-    D5: K-020
-    E5: {v: 2900, fmt: kzt}
-    A6: ТОО «Достык»
-    B6: {v: 5700, fmt: kzt}
+    D3: A-105
+    E3: {v: 3500, fmt: kzt}
+    A4: ТОО «Береке»
+    B4: {v: 2300, fmt: kzt}
+    C4: {v: 0.25, fmt: percent}
+    D4: K-020
+    E4: {v: 2900, fmt: kzt}
+    A5: ТОО «Достык»
+    B5: {v: 5700, fmt: kzt}
+    C5: {v: 0.3, fmt: percent}
+    D5: M-777
+    E5: {v: 7400, fmt: kzt}
+    A6: ИП «Самал»
+    B6: {v: 3150, fmt: kzt}
     C6: {v: 0.3, fmt: percent}
-    D6: M-777
-    E6: {v: 7400, fmt: kzt}
-    A7: ИП «Самал»
-    B7: {v: 3150, fmt: kzt}
-    C7: {v: 0.3, fmt: percent}
-    D7: B-300
-    E7: {v: 4100, fmt: kzt}
-    G2: {v: Артикул, style: head}
-    H2: {v: Цена, style: head}
-    G3: Z-210
-    H3: {fmt: kzt}
+    D6: B-300
+    E6: {v: 4100, fmt: kzt}
+    G1: {v: Артикул, style: head}
+    H1: {v: Цена, style: head}
+    G2: Z-210
+    H2: {fmt: kzt}
 
 expect:
-  H3: 2900
+  H2: 2900
 
 steps:
   - title: Ситуация
@@ -64,15 +64,15 @@ steps:
 
   - title: Имя для прайса
     text: >-
-      Выделите <code>D3:E7</code> — артикулы и цены — и назовите диапазон <code>прайс</code>.
+      Выделите <code>D2:E6</code> — артикулы и цены — и назовите диапазон <code>прайс</code>.
     say: Выделяем артикулы с ценами и называем диапазон «прайс».
     actions:
-      - dragSelect: D3:E7
+      - dragSelect: D2:E6
       - nameBox: прайс
 
   - title: "Без последнего аргумента — ошибка"
     text: >-
-      В <code>H3</code> введите <code>{f:=VLOOKUP(G3,прайс,2)}</code>. Excel показывает <b>4 100 ₸</b>, а у
+      В <code>H2</code> введите <code>{f:=VLOOKUP(G2,прайс,2)}</code>. Excel показывает <b>4 100 ₸</b>, а у
       <code>Z-210</code> цена 5 200 ₸! Без последнего аргумента поиск <b>приблизительный</b>: Excel считает, что
       артикулы отсортированы, ищет «половинным делением» и на неупорядоченном списке ошибается.
     say: >-
@@ -80,38 +80,38 @@ steps:
       пять тысяч двести. Без последнего аргумента поиск приблизительный, и на неотсортированном списке Excel
       ошибается.
     actions:
-      - click: H3
+      - click: H2
       - type: =VLOOKUP(
-      - clickRef: G3
+      - clickRef: G2
       - type: ",прайс,2)"
       - keys: [Enter]
-      - click: H3
+      - click: H2
       - wait: 1500
 
   - title: "ЛОЖЬ — точный поиск"
     text: >-
-      Допишите четвёртый аргумент <code>ЛОЖЬ</code>: <code>{f:=VLOOKUP(G3,прайс,2,FALSE)}</code>. Теперь Excel
+      Допишите четвёртый аргумент <code>ЛОЖЬ</code>: <code>{f:=VLOOKUP(G2,прайс,2,FALSE)}</code>. Теперь Excel
       ищет <b>точное совпадение</b> по всему списку — <b>5 200 ₸</b>. Правило простое: если первый столбец не
       отсортирован (артикулы, фамилии, ИИН), всегда пишите <code>ЛОЖЬ</code>.
     say: >-
       Дописываем четвёртый аргумент — «ложь». Теперь поиск точный, и цена правильная — пять тысяч двести. Если
       первый столбец не отсортирован, всегда пишите «ложь».
     actions:
-      - type: =VLOOKUP(G3,прайс,2,FALSE)
+      - type: =VLOOKUP(G2,прайс,2,FALSE)
       - keys: [Enter]
-      - click: H3
+      - click: H2
       - wait: 1200
 
   - title: Другой артикул
     text: >-
-      Введите в <code>G3</code> артикул <code>K-020</code> — цена сразу пересчитается: <b>2 900 ₸</b>. Артикула,
+      Введите в <code>G2</code> артикул <code>K-020</code> — цена сразу пересчитается: <b>2 900 ₸</b>. Артикула,
       которого нет в прайсе, Excel не найдёт и покажет <code>#Н/Д</code>.
     say: Вводим другой артикул — цена сразу пересчитывается. Несуществующий артикул дал бы «нет данных».
     actions:
-      - click: G3
+      - click: G2
       - type: K-020
       - keys: [Enter]
-      - click: H3
+      - click: H2
 
   - title: Скрыть служебные столбцы
     text: >-
@@ -134,4 +134,4 @@ steps:
       Готово! Если первый столбец не отсортирован, последним аргументом пишите «ложь». Иначе {fn:VLOOKUP}
       может молча вернуть чужое значение.
     actions:
-      - click: G3
+      - click: G2

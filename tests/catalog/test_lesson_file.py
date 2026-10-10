@@ -32,14 +32,14 @@ def test_every_lesson_has_a_downloadable_xlsx(client, lesson_id):
 def test_file_has_lesson_data_formats_and_widths(client):
     ws = openpyxl.load_workbook(BytesIO(download(client, "wages-weekly-salary").content)).active
 
-    assert ws["B4"].value == "Айгерим Сапарова"
-    assert ws["C4"].value == 49
-    assert ws["D4"].value == 1800
-    assert ws["D4"].number_format == '#,##0 "₸"'
-    assert ws["E4"].value is None  # результат ученик посчитает сам
-    assert ws["E4"].number_format == '#,##0 "₸"'  # но формат уже стоит, как в уроке
-    assert ws["B3"].font.bold and ws["B3"].fill.fgColor.rgb.endswith("E8F3EC")
-    assert ws.column_dimensions["B"].width == column_width_chars(150)
+    assert ws["A2"].value == "Айгерим Сапарова"
+    assert ws["B2"].value == 49
+    assert ws["C2"].value == 1800
+    assert ws["C2"].number_format == '#,##0 "₸"'
+    assert ws["D2"].value is None  # результат ученик посчитает сам
+    assert ws["D2"].number_format == '#,##0 "₸"'  # но формат уже стоит, как в уроке
+    assert ws["A1"].font.bold and ws["A1"].fill.fgColor.rgb.endswith("E8F3EC")
+    assert ws.column_dimensions["A"].width == column_width_chars(150)
 
 
 def test_link_under_player(client):
@@ -81,7 +81,7 @@ def test_multi_sheet_lesson_file_has_all_sheets(client):
     wb = openpyxl.load_workbook(BytesIO(download(client, "name-scope").content))
 
     assert wb.sheetnames == ["Алматы", "Астана", "Свод"]
-    assert wb["Свод"]["E6"].value == 15
+    assert wb["Свод"]["D4"].value == 15
 
 
 def test_initial_names_are_written(tmp_path):

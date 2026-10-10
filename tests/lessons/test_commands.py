@@ -18,10 +18,10 @@ steps:
   - title: С озвучкой
     text: t
     say: Выделяем ячейку
-    actions: [{click: E4}]
+    actions: [{click: A1}]
   - title: Без озвучки
     text: t
-    actions: [{click: E5}]
+    actions: [{click: A2}]
 """
 
 
@@ -50,12 +50,21 @@ def test_lessons_check_reports_summary_and_missing_say(content_dir):
 
 
 def test_lessons_check_fails_with_file_names(content_dir):
-    bad = LESSON.replace("click: E4", "click: e4")
+    bad = LESSON.replace("click: A1", "click: a1")
     (content_dir / "lessons" / "bad.yaml").write_text(bad, encoding="utf-8")
 
     with pytest.raises(CommandError, match="Ошибок: 1"):
         call_command("lessons_check", stdout=StringIO(), stderr=(err := StringIO()))
     assert "bad.yaml: steps.0.actions.0.click" in err.getvalue()
+
+
+def test_lessons_check_requires_table_from_a1(content_dir):
+    shifted = LESSON.replace("click: A1", "click: C3").replace("click: A2", "click: D4")
+    (content_dir / "lessons" / "01-01-wages.yaml").write_text(shifted, encoding="utf-8")
+
+    with pytest.raises(CommandError, match="Ошибок: 1"):
+        call_command("lessons_check", stdout=StringIO(), stderr=(err := StringIO()))
+    assert "01-01-wages.yaml: таблица начинается с C3, а не с A1" in err.getvalue()
 
 
 def test_lessons_check_passes_on_real_content():
