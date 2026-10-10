@@ -11,8 +11,8 @@ def test_home_to_course_to_lesson_and_next(page: Page):
     expect(page.locator(".xl-player .xl-window")).to_be_visible()
     expect(page.locator(".xl-start button")).to_have_text("▶ Начать урок")
 
-    page.get_by_role("link", name="Следующий → Расчёт недельной платёжной ведомости").click()
-    expect(page.locator(".xl-title")).to_contain_text("Табель_кафе.xlsx")
+    page.get_by_role("link", name="Следующий → Модель в Excel: входы, формулы, выходы").click()
+    expect(page.locator(".xl-title")).to_contain_text("Автомойка_модель.xlsx")
     expect(page.get_by_role("link", name="← Предыдущий Функция СУММ и автозаполнение")).to_be_visible()
     assert page.errors == []
 

@@ -50,8 +50,9 @@ def test_lesson_neighbors_across_chapters(client):
     first, second, last = page("sum-and-autofill"), page("wages-weekly-salary"), page(get_registry().lessons[-1].id)
 
     assert 'rel="prev"' not in first
-    assert 'rel="next"' in first and reverse("catalog:lesson", args=["wages-weekly-salary"]) in first  # 0.1 → 1.1
-    assert 'rel="prev"' in second and reverse("catalog:lesson", args=["bakery-supplier-payments"]) in second
+    assert 'rel="next"' in first and reverse("catalog:lesson", args=["intro-model"]) in first  # 0.1 → 1.0
+    assert 'rel="prev"' in second and reverse("catalog:lesson", args=["intro-model"]) in second  # 1.1 ← 1.0
+    assert reverse("catalog:lesson", args=["bakery-supplier-payments"]) in second
     assert 'rel="prev"' in last and 'rel="next"' not in last
 
 

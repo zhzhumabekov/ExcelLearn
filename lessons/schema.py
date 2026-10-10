@@ -388,7 +388,7 @@ class NameSpec(Model):
 class Lesson(Model):
     id: Slug = Field(description="Стабильный id: хранится в БД прогресса, не переименовывать")
     chapter: Slug
-    order: int = Field(ge=1, description="Порядок внутри главы")
+    order: int = Field(ge=0, description="Порядок внутри главы; 0 — вводный урок главы")
     title: str = Field(min_length=1)
     source: str | None = Field(default=None, description="Откуда сценарий, например «Рис. 1.1»")
     sheet: Sheet

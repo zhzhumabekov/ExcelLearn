@@ -7,7 +7,7 @@ export interface Lesson {
   id: string;
   chapter: string;
   /**
-   * Порядок внутри главы
+   * Порядок внутри главы; 0 — вводный урок главы
    */
   order: number;
   title: string;

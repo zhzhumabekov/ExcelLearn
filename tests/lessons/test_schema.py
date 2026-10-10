@@ -170,6 +170,20 @@ def test_lessons_are_ordered_by_chapter_then_order_with_neighbors(content):
     assert registry.get("missing") is None
 
 
+def test_chapter_intro_lesson_has_order_zero_and_comes_first(content):
+    content("y.yaml", lesson_yaml(lesson_id="ch1-first", chapter="ch01", order=1))
+    content("x.yaml", lesson_yaml(lesson_id="ch1-intro", chapter="ch01", order=0))
+
+    assert [lesson.id for lesson in build_registry(content.dir).lessons] == ["ch1-intro", "ch1-first"]
+
+
+def test_negative_order_is_rejected(content):
+    content("x.yaml", lesson_yaml(order=-1))
+
+    with pytest.raises(ContentError, match="order"):
+        build_registry(content.dir)
+
+
 def test_duplicate_chapter_ids_in_course(content):
     (content.dir / "course.yaml").write_text(
         COURSE + "  - {id: ch01, number: 2, title: Дубль}\n",

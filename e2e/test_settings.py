@@ -64,6 +64,6 @@ def test_autoplay_opens_and_starts_next_lesson(page: Page, django_user_model, se
     page.click(".xl-primary")
     expect(page.locator("[data-autoplay-countdown]")).to_contain_text("Откроется через", timeout=20_000)
 
-    page.wait_for_url("**/lessons/wages-weekly-salary/?autoplay=1", timeout=15_000)
+    page.wait_for_url("**/lessons/intro-model/?autoplay=1", timeout=15_000)
     expect(page.locator(".xl-primary")).to_have_attribute("title", "Пауза")  # урок запустился сам
     assert page.errors == []

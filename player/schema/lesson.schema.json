@@ -851,8 +851,8 @@
       "type": "string"
     },
     "order": {
-      "description": "Порядок внутри главы",
-      "minimum": 1,
+      "description": "Порядок внутри главы; 0 — вводный урок главы",
+      "minimum": 0,
       "type": "integer"
     },
     "title": {
