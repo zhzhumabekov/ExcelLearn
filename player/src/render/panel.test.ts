@@ -70,6 +70,20 @@ describe("PanelView", () => {
     expect(handlers.onSeek).toHaveBeenCalledWith(0);
   });
 
+  it("текущий отрезок шкалы заливается по прогрессу шага и «дышит», пока урок играет", () => {
+    const panel = new PanelView(lesson, "ru", handlers, 1);
+    const progress = panel.el.querySelector(".xl-progress");
+    const segment = panel.el.querySelectorAll<HTMLElement>(".xl-seg")[1];
+
+    panel.showStepProgress(1, 0.5);
+    expect(segment?.style.getPropertyValue("--p")).toBe("0.500");
+
+    panel.showStatus("playing");
+    expect(progress?.classList.contains("xl-playing")).toBe(true);
+    panel.showStatus("paused");
+    expect(progress?.classList.contains("xl-playing")).toBe(false);
+  });
+
   it("план урока свёрнут, кнопка «План» его раскрывает", () => {
     const panel = new PanelView(lesson, "ru", handlers, 1);
     const plan = panel.el.querySelector<HTMLElement>(".xl-plan");

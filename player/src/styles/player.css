@@ -730,6 +730,11 @@
 }
 
 .xl-player .xl-seg {
+  --xl-seg-fill: #34b98a;
+  --xl-seg-rest: #c9ecdb;
+  --xl-seg-breath: #a9dfc5;
+  position: relative;
+  overflow: hidden;
   flex: 1;
   height: 8px;
   padding: 0;
@@ -749,8 +754,41 @@
   background: #34b98a;
 }
 
+/* Текущий шаг: заливка растёт по --p (доля выполненных действий, ставит панель) */
 .xl-player .xl-seg.xl-active {
-  background: linear-gradient(90deg, #34b98a 50%, #c9ecdb 50%);
+  background: var(--xl-seg-rest);
+}
+
+.xl-player .xl-seg.xl-active::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(var(--p, 0) * 100%);
+  border-radius: inherit;
+  background: var(--xl-seg-fill);
+  /* Скачки после действий превращаются в плавный рост; в паузе между шагами ширина и так меняется плавно */
+  transition: width 0.9s cubic-bezier(0.25, 0.6, 0.3, 1);
+}
+
+/* Пока урок играет, незалитая часть мягко «дышит»; на паузе замирает */
+.xl-player .xl-progress.xl-playing .xl-seg.xl-active {
+  animation: xl-seg-breath 1.4s ease-in-out infinite;
+}
+
+@keyframes xl-seg-breath {
+  50% {
+    background: var(--xl-seg-breath);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xl-player .xl-seg.xl-active::after {
+    transition: none;
+  }
+
+  .xl-player .xl-progress.xl-playing .xl-seg.xl-active {
+    animation: none;
+  }
 }
 
 .xl-player .xl-speed {
@@ -944,6 +982,8 @@
 }
 
 [data-theme="dark"] .xl-player .xl-seg {
+  --xl-seg-rest: #1f4a3c;
+  --xl-seg-breath: #2a6450;
   background: rgba(255, 255, 255, 0.1);
 }
 
@@ -952,7 +992,7 @@
 }
 
 [data-theme="dark"] .xl-player .xl-seg.xl-active {
-  background: linear-gradient(90deg, #34b98a 50%, #1f4a3c 50%);
+  background: var(--xl-seg-rest);
 }
 
 [data-theme="dark"] .xl-player .xl-speed {

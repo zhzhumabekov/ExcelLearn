@@ -50,6 +50,7 @@ export class PanelView {
   private readonly nextLabel = el("span");
   private readonly playButton: HTMLButtonElement;
   private readonly soundButton: HTMLButtonElement | null;
+  private readonly progress = el("div", "xl-progress");
   private readonly segments: HTMLButtonElement[];
   private readonly speedButtons: HTMLButtonElement[];
   private readonly plan: HTMLElement;
@@ -74,11 +75,10 @@ export class PanelView {
     // Управление
     this.playButton = button("xl-ctl xl-primary", "", () => handlers.onPlayPause());
     const restart = button("xl-ctl", "⟲", () => handlers.onRestart(), "Сначала");
-    const progress = el("div", "xl-progress");
     this.segments = lesson.steps.map((step, i) =>
       button("xl-seg", "", () => handlers.onSeek(i), `${i + 1}. ${plainText(stepHtml(step.title, locale))}`),
     );
-    progress.append(...this.segments);
+    this.progress.append(...this.segments);
     const speeds = el("div", "xl-speed");
     this.speedButtons = SPEEDS.map((s) => {
       const b = button("", `${String(s).replace(".", ",")}×`, () => handlers.onSpeed(s), "Скорость");
@@ -90,7 +90,7 @@ export class PanelView {
     const onToggleSound = handlers.onToggleSound;
     this.soundButton = onToggleSound ? button("xl-ctl", "", () => onToggleSound()) : null;
     const controls = el("div", "xl-controls");
-    controls.append(this.playButton, restart, progress, ...(this.soundButton ? [this.soundButton] : []), speeds, planToggle);
+    controls.append(this.playButton, restart, this.progress, ...(this.soundButton ? [this.soundButton] : []), speeds, planToggle);
 
     // План урока (свёрнут)
     this.plan = el("div", "xl-plan");
@@ -136,6 +136,13 @@ export class PanelView {
             : ["▶", "Смотреть"];
     this.playButton.textContent = icon;
     this.playButton.title = label;
+    // Текущий отрезок шкалы «дышит», пока урок играет
+    this.progress.classList.toggle("xl-playing", status === "playing");
+  }
+
+  /** Заливка текущего отрезка шкалы: доля выполненных действий шага (0…1). */
+  showStepProgress(i: number, progress: number): void {
+    this.segments[i]?.style.setProperty("--p", progress.toFixed(3));
   }
 
   /** Пауза перед следующим шагом: кольцо заполняется, подпись — какой шаг дальше. null — скрыть. */

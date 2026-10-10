@@ -12,6 +12,11 @@ export interface TimelineEvents {
   /** Начался шаг (при воспроизведении или после перемотки). */
   onStepChange?: (step: number) => void;
   onStatusChange?: (status: TimelineStatus) => void;
+  /**
+   * Прогресс шага 0…1 для шкалы: 0 при входе, действия заполняют долю ACTIONS_SHARE (у последнего
+   * шага — всё), остаток плавно заполняется паузой перед следующим шагом.
+   */
+  onStepProgress?: (step: number, progress: number) => void;
   /** Пауза перед следующим шагом: progress 0…1, null — пауза закончилась или прервана. */
   onWaitNext?: (progress: number | null, nextStep: number) => void;
   onComplete?: () => void;
@@ -19,6 +24,9 @@ export interface TimelineEvents {
 
 /** Пауза между шагами — дочитать пояснение; идёт по часам урока (замирает на паузе, ускоряется). */
 export const BETWEEN_STEPS_MS = 2500;
+
+/** Какую часть шкалы шага заполняют действия, если за шагом следует пауза. */
+export const ACTIONS_SHARE = 0.8;
 
 /**
  * Воспроизведение урока по шагам. Перемотка к шагу N: лист в исходное состояние, apply() всех
@@ -72,15 +80,22 @@ export class Timeline {
       for (let i = this.stepIndex; i < this.steps.length; i++) {
         this.enterStep(i);
         const voice = this.narration?.start(i) ?? Promise.resolve();
-        for (const action of this.steps[i] ?? []) {
+        const actions = this.steps[i] ?? [];
+        const last = i === this.steps.length - 1;
+        const share = last ? 1 : ACTIONS_SHARE;
+        for (const [k, action] of actions.entries()) {
           await action.animate({ state: this.state, stage: this.stage, clock: this.stage.clock });
           if (run !== this.run) return;
+          this.events.onStepProgress?.(i, (share * (k + 1)) / actions.length);
         }
         await voice;
         if (run !== this.run) return;
-        if (i < this.steps.length - 1) {
+        if (!last) {
           try {
-            await this.stage.clock.tween(BETWEEN_STEPS_MS, (t) => this.events.onWaitNext?.(t, i + 1));
+            await this.stage.clock.tween(BETWEEN_STEPS_MS, (t) => {
+              this.events.onWaitNext?.(t, i + 1);
+              this.events.onStepProgress?.(i, share + (1 - share) * t);
+            });
           } finally {
             this.events.onWaitNext?.(null, i + 1);
           }
@@ -148,6 +163,7 @@ export class Timeline {
   private enterStep(i: number): void {
     this.stepIndex = i;
     this.events.onStepChange?.(i);
+    this.events.onStepProgress?.(i, 0);
   }
 
   private setStatus(status: TimelineStatus): void {

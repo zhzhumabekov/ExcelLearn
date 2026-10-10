@@ -10,7 +10,7 @@ import { Stage } from "../render/stage";
 import { fakeClock, finish } from "../test/fake-clock";
 import { createBook } from "./book";
 import { createState, type LessonState } from "./state";
-import { Timeline } from "./timeline";
+import { ACTIONS_SHARE, Timeline } from "./timeline";
 
 const LESSONS_DIR = join(__dirname, "../../../content/lessons");
 const lessons = readdirSync(LESSONS_DIR)
@@ -125,6 +125,36 @@ describe("воспроизведение", () => {
 
     expect(timeline.status).toBe("done");
     expect(onComplete).toHaveBeenCalledOnce();
+  });
+
+  it("прогресс шага: 0 при входе, действия — до ACTIONS_SHARE, пауза — до 1; последний шаг — действиями", async () => {
+    const progress: number[][] = sumLesson.steps.map(() => []);
+    const { timeline, advance } = setup(sumLesson, {
+      onStepProgress: (step: number, p: number) => progress[step]?.push(p),
+    });
+
+    await finish(timeline.play(), advance);
+
+    const lastStep = sumLesson.steps.length - 1;
+    sumLesson.steps.forEach((step, i) => {
+      const n = step.actions.length;
+      const share = i === lastStep ? 1 : ACTIONS_SHARE;
+      const values = progress[i] ?? [];
+      const start = values.lastIndexOf(0);
+      expect(values.slice(start, start + n + 1)).toEqual([0, ...step.actions.map((_, k) => (share * (k + 1)) / n)]);
+      expect(values.at(-1)).toBe(1);
+      // не убывает: шкала только растёт
+      expect(values.slice(start).every((v, k, a) => k === 0 || v >= (a[k - 1] ?? 0))).toBe(true);
+    });
+  });
+
+  it("перемотка сбрасывает прогресс шага в 0", () => {
+    const onStepProgress = vi.fn();
+    const { timeline } = setup(sumLesson, { onStepProgress });
+
+    timeline.seek(2);
+
+    expect(onStepProgress).toHaveBeenLastCalledWith(2, 0);
   });
 
   it("между шагами — пауза с прогрессом 0…1, затем null", async () => {
