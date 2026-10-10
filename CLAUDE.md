@@ -74,6 +74,6 @@
 
 - `main` защищена: прямой push и force push запрещены, слияние — только через PR, когда CI (`checks`, `e2e`)
   зелёный; история линейная (squash/rebase). Работать в ветке (`ch07-…`, `fix/…`, `docs/…`), пушить ветку,
-  PR открывает пользователь (ссылка из вывода `git push`) — `gh` не установлен.
-- Статус CI (репозиторий публичный, без авторизации):
-  `curl -s "https://api.github.com/repos/zhzhumabekov/ExcelLearn/actions/runs?branch=<ветка>&per_page=1"`.
+  открыть PR и включить auto-merge: `gh pr create --fill` → `gh pr merge --auto --squash --delete-branch`.
+- Статус CI — коротко, без логов: `gh pr checks`; упало — `gh run view <id> --log-failed | tail -60`.
+- После слияния: `git switch main; git pull`.
