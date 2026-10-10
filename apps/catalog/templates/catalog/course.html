@@ -62,7 +62,7 @@
           {% if entry.exercise_count %}
             <a href="{% url 'catalog:exercises' entry.chapter.id %}" data-exercises
                class="group flex items-center gap-4 border-t border-slate-100 bg-butter/60 px-5 py-4 transition hover:bg-butter sm:px-7">
-              <span class="grid size-9 flex-none place-items-center rounded-xl bg-white/70 text-lg" aria-hidden="true">✍️</span>
+              <span class="grid size-9 flex-none place-items-center rounded-xl bg-white/70 text-butter-ink">{% include "_icon.html" with name="pencil" cls="size-5" %}</span>
               <span class="flex-1 font-semibold text-butter-ink">Задания к главе</span>
               <span class="text-sm text-slate-500">{{ entry.exercise_count|ru_plural:"задание,задания,заданий" }} · файлы Excel</span>
               <span class="text-slate-400 transition group-hover:translate-x-0.5" aria-hidden="true">→</span>

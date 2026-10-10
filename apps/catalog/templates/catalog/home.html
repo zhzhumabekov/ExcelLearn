@@ -64,11 +64,11 @@
           <span class="text-slate-600">Протягиваем курсор по <b class="text-slate-900">C3:C6</b> — Excel сам подставит диапазон.</span>
         </div>
       </div>
-      <div class="animate-float absolute -top-5 -right-3 hidden rounded-2xl bg-butter px-4 py-2 text-sm font-bold text-butter-ink shadow-soft sm:block">
-        ✓ Ответ проверен
+      <div class="animate-float absolute -top-5 -right-3 hidden items-center gap-1.5 rounded-2xl bg-butter px-4 py-2 text-sm font-bold text-butter-ink shadow-soft sm:flex">
+        {% include "_icon.html" with name="check" cls="size-4" %} Ответ проверен
       </div>
-      <div class="animate-float absolute -bottom-12 -left-4 hidden rounded-2xl bg-lavender px-4 py-2.5 text-sm font-semibold text-lavender-ink shadow-soft [animation-delay:-3s] sm:block">
-        <span>⏯</span> Пауза, скорость, любой шаг
+      <div class="animate-float absolute -bottom-12 -left-4 hidden items-center gap-1.5 rounded-2xl bg-lavender px-4 py-2.5 text-sm font-semibold text-lavender-ink shadow-soft [animation-delay:-3s] sm:flex">
+        {% include "_icon.html" with name="play" cls="size-4" %} Пауза, скорость, любой шаг
       </div>
     </div>
   </section>
@@ -77,22 +77,22 @@
   <section class="py-10">
     <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <li class="card card-hover p-6">
-        <span class="grid size-12 place-items-center rounded-2xl bg-mint text-2xl">🖱️</span>
+        <span class="grid size-12 place-items-center rounded-2xl bg-mint text-mint-ink">{% include "_icon.html" with name="cursor" cls="size-6" %}</span>
         <h2 class="mt-5 text-lg font-bold">Как в настоящем Excel</h2>
         <p class="mt-1.5 text-sm leading-relaxed text-slate-600">Лента, строка формул, цветные ссылки, маркер заполнения.</p>
       </li>
       <li class="card card-hover p-6">
-        <span class="grid size-12 place-items-center rounded-2xl bg-lavender text-2xl">⏯️</span>
+        <span class="grid size-12 place-items-center rounded-2xl bg-lavender text-lavender-ink">{% include "_icon.html" with name="play" cls="size-6" %}</span>
         <h2 class="mt-5 text-lg font-bold">В своём темпе</h2>
         <p class="mt-1.5 text-sm leading-relaxed text-slate-600">Пауза, скорость, переход к любому шагу урока.</p>
       </li>
       <li class="card card-hover p-6">
-        <span class="grid size-12 place-items-center rounded-2xl bg-sky text-2xl">🔤</span>
+        <span class="grid size-12 place-items-center rounded-2xl bg-sky text-sky-ink">{% include "_icon.html" with name="globe" cls="size-6" %}</span>
         <h2 class="mt-5 text-lg font-bold">Русский и английский Excel</h2>
         <p class="mt-1.5 text-sm leading-relaxed text-slate-600">СУММ или SUM — формулы на языке вашего Excel.</p>
       </li>
       <li class="card card-hover p-6">
-        <span class="grid size-12 place-items-center rounded-2xl bg-butter text-2xl">✅</span>
+        <span class="grid size-12 place-items-center rounded-2xl bg-butter text-butter-ink">{% include "_icon.html" with name="check" cls="size-6" %}</span>
         <h2 class="mt-5 text-lg font-bold">Задачи из жизни</h2>
         <p class="mt-1.5 text-sm leading-relaxed text-slate-600">Тенге, филиалы, поставщики, табель — и каждый расчёт проверен автоматически.</p>
       </li>

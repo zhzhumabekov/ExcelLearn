@@ -32,7 +32,7 @@
             <p>{{ exercise.task|excel_text:preferences.function_locale|safe }}</p>
 
             <details class="group rounded-2xl border border-slate-200 bg-slate-50/80 p-4 open:bg-white">
-              <summary class="cursor-pointer font-semibold text-brand-700 marker:text-brand-400">💡 Как решать — подсказка</summary>
+              <summary class="cursor-pointer font-semibold text-brand-700 marker:text-brand-400">{% include "_icon.html" with name="bulb" cls="-mt-1 mr-0.5 inline size-5" %} Как решать — подсказка</summary>
               <p class="mt-3">{{ exercise.explain|excel_text:preferences.function_locale|safe }}</p>
               {% if exercise.mistake %}
                 <p class="mt-3 rounded-xl border-l-4 border-butter-ink/40 bg-butter p-3 text-slate-800">
@@ -45,11 +45,11 @@
           <div class="mt-5 flex flex-wrap gap-3">
             <a href="{% url 'catalog:exercise-task' chapter.id exercise.id %}" download data-testid="exercise-task"
                class="btn btn-primary">
-              ⬇ Задание: {{ item.task_name }}
+              {% include "_icon.html" with name="download" cls="size-5" %} Задание: {{ item.task_name }}
             </a>
             <a href="{% url 'catalog:exercise-solution' chapter.id exercise.id %}" download data-testid="exercise-solution"
                class="btn btn-secondary">
-              ✓ Решение для проверки
+              {% include "_icon.html" with name="check" cls="size-5" %} Решение для проверки
             </a>
           </div>
         </li>

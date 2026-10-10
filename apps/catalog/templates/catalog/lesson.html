@@ -26,7 +26,7 @@
   <div id="player" class="mt-6 [--xl-sticky-top:84px]"></div>
 
   <section class="card mt-6 flex flex-wrap items-center gap-4 p-5 sm:p-6" aria-labelledby="lesson-file-title">
-    <span class="grid size-12 flex-none place-items-center rounded-2xl bg-mint text-2xl" aria-hidden="true">📗</span>
+    <span class="grid size-12 flex-none place-items-center rounded-2xl bg-mint text-mint-ink">{% include "_icon.html" with name="sheet" cls="size-6" %}</span>
     <div class="min-w-0 flex-1">
       <h2 id="lesson-file-title" class="font-bold">Повторите урок в своём Excel</h2>
       <p class="text-sm text-slate-500">
@@ -34,14 +34,14 @@
       </p>
     </div>
     <a href="{% url 'catalog:lesson-file' lesson.id %}" download data-testid="lesson-file" class="btn btn-primary">
-      ⬇ Скачать {{ lesson_file_name }}
+      {% include "_icon.html" with name="download" cls="size-5" %} Скачать {{ lesson_file_name }}
     </a>
   </section>
 
   {% if show_exercises %}
     <a href="{% url 'catalog:exercises' chapter.id %}" data-testid="chapter-exercises"
        class="group relative mt-4 flex flex-wrap items-center gap-4 overflow-hidden rounded-3xl bg-butter p-5 text-butter-ink transition hover:-translate-y-0.5 hover:shadow-lift sm:p-6">
-      <span class="grid size-12 flex-none place-items-center rounded-2xl bg-white/60 text-2xl" aria-hidden="true">✍️</span>
+      <span class="grid size-12 flex-none place-items-center rounded-2xl bg-white/60">{% include "_icon.html" with name="pencil" cls="size-6" %}</span>
       <span class="flex-1">
         <span class="block text-lg font-bold">Глава пройдена — закрепите на заданиях</span>
         <span class="text-sm text-slate-600">Задачи на своих данных: файл задания и решение для проверки.</span>
