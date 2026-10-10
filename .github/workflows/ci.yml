@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DJANGO_SETTINGS_MODULE: config.settings_test
+  PYTHONUTF8: "1"
+
+jobs:
+  checks:
+    name: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: player/pnpm-lock.yaml
+      - run: uv sync --locked
+      - run: pnpm --dir player install --frozen-lockfile
+
+      - name: ruff
+        run: uv run ruff check . && uv run ruff format --check .
+      - name: lessons_check
+        run: uv run python manage.py lessons_check
+      - name: lessons:verify
+        run: pnpm --dir player lessons:verify
+      - name: exercises:verify
+        run: uv run python manage.py exercises_dump | pnpm --dir player exercises:verify
+      - name: theory:verify
+        run: uv run python manage.py theory_dump | pnpm --dir player theory:verify
+      - name: typecheck, lint, vitest
+        run: pnpm --dir player typecheck && pnpm --dir player lint && pnpm --dir player test
+      - name: pytest
+        run: uv run pytest -q
+
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            player/pnpm-lock.yaml
+      - run: uv sync --locked
+      - run: pnpm --dir player install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
+      - name: build player and css
+        run: pnpm --dir player build && pnpm css
+      - name: playwright chromium
+        run: uv run playwright install --with-deps chromium
+      - name: e2e
+        env:
+          E2E_BROWSER_CHANNEL: chromium
+        run: uv run pytest e2e -q
