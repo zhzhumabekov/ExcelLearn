@@ -6,6 +6,7 @@ import {
   openNewName,
 } from "../lesson/dialogs";
 import { type LessonState, pasteClipboard, ribbonAutosum, type RibbonTabId } from "../lesson/state";
+import { flashFill, openFindReplace, openTextToColumns } from "../lesson/text-tools";
 import type { Stage } from "../render/stage";
 import type { RibbonButton } from "../render/window";
 import type { Action, ActionContext, ActionSpec } from "./types";
@@ -32,6 +33,9 @@ const COMMANDS: Record<RibbonCommand, Command> = {
   defineName: { tab: "formulas", apply: (state) => (openNewName(state), []) },
   createFromSelection: { tab: "formulas", apply: (state) => (openCreateFromSelection(state), []) },
   applyNames: { tab: "formulas", apply: (state) => (openApplyNames(state), []) },
+  findReplace: { tab: "home", apply: (state) => (openFindReplace(state), []) },
+  textToColumns: { tab: "data", apply: (state) => (openTextToColumns(state), []) },
+  flashFill: { tab: "data", apply: flashFill },
 };
 
 const FLASH_STAGGER_MS = 140;
@@ -94,6 +98,11 @@ export function clickRibbon(command: RibbonCommand): Action {
         state.menu = "defineName";
         stage.render(state);
         await clickAt(stage, stage.menuPoint("applyNames"), stage.window.menuItem("applyNames"), 500);
+      } else if (command === "findReplace") {
+        await clickAt(stage, stage.ribbonPoint("find"), stage.window.ribbonButton("find"));
+        state.menu = "find";
+        stage.render(state);
+        await clickAt(stage, stage.menuPoint("replace"), stage.window.menuItem("replace"), 500);
       } else {
         const button = command as RibbonButton;
         await clickAt(stage, stage.ribbonPoint(button), stage.window.ribbonButton(button));

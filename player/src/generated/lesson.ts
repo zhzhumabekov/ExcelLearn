@@ -201,7 +201,25 @@ export interface Keys {
    * @minItems 1
    */
   keys: [
-    "Enter" | "Escape" | "Tab" | "Delete" | "F2" | "F3" | "F4" | "Ctrl" | "Alt" | "Shift" | "C" | "V" | "X" | "Z" | "=",
+    (
+      | "Enter"
+      | "Escape"
+      | "Tab"
+      | "Delete"
+      | "F2"
+      | "F3"
+      | "F4"
+      | "Ctrl"
+      | "Alt"
+      | "Shift"
+      | "C"
+      | "V"
+      | "X"
+      | "Z"
+      | "E"
+      | "1"
+      | "="
+    ),
     ...(
       | "Enter"
       | "Escape"
@@ -217,6 +235,8 @@ export interface Keys {
       | "V"
       | "X"
       | "Z"
+      | "E"
+      | "1"
       | "="
     )[]
   ];
@@ -231,17 +251,28 @@ export interface Wait {
   wait: number;
 }
 /**
- * Щелчок по кнопке ленты. Главная: «Σ Автосумма», «Копировать», «Вставить». Формулы → Определённые имена:
- * «Диспетчер имён», «Присвоить имя», «Создать из выделенного», «Применить имена…» (из меню «Присвоить имя»).
+ * Щелчок по кнопке ленты. Главная: «Σ Автосумма», «Копировать», «Вставить», «Найти и выделить ▾ → Заменить…».
+ * Формулы → Определённые имена: «Диспетчер имён», «Присвоить имя», «Создать из выделенного», «Применить имена…»
+ * (из меню «Присвоить имя»). Данные → Работа с данными: «Текст по столбцам», «Мгновенное заполнение».
  */
 export interface ClickRibbon {
-  clickRibbon: "autosum" | "copy" | "paste" | "nameManager" | "defineName" | "createFromSelection" | "applyNames";
+  clickRibbon:
+    | "autosum"
+    | "copy"
+    | "paste"
+    | "nameManager"
+    | "defineName"
+    | "createFromSelection"
+    | "applyNames"
+    | "findReplace"
+    | "textToColumns"
+    | "flashFill";
 }
 /**
  * Переключить вкладку ленты.
  */
 export interface RibbonTab {
-  ribbonTab: "home" | "formulas";
+  ribbonTab: "home" | "formulas" | "data";
 }
 /**
  * Щелчок в поле «Имя», набор имени и Enter: имя выделенному диапазону (или переход к существующему).

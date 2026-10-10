@@ -30,7 +30,7 @@ export interface EditorState {
  * Состояние урока, которое меняют действия. Всё, что видит ученик, рисуется из него, поэтому
  * перемотка (apply всех действий подряд) даёт ту же картинку, что и анимация.
  */
-export type RibbonTabId = "home" | "formulas";
+export type RibbonTabId = "home" | "formulas" | "data";
 
 export interface LessonState {
   /** Активный лист (ярлык которого выбран). Книга — sheet.book. */
@@ -48,8 +48,9 @@ export interface LessonState {
   /** Снимки книги (ячейки всех листов и имена) до каждого изменения — для Ctrl+Z. */
   undo: WorkbookSnapshot[];
   ribbonTab: RibbonTabId;
-  /** Открытое меню кнопки ленты: «Присвоить имя ▾», «Формат ▾» и его подменю «Скрыть или отобразить». */
-  menu: "defineName" | "format" | "format-hide" | null;
+  /** Открытое меню кнопки ленты: «Присвоить имя ▾», «Формат ▾» (и подменю «Скрыть или отобразить»),
+   *  «Найти и выделить ▾». */
+  menu: "defineName" | "format" | "format-hide" | "find" | null;
   /** Скрытые столбцы по листам (буквы). */
   hiddenColumns: Record<string, string[]>;
   /** Раскрыт список поля «Имя». */

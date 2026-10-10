@@ -10,6 +10,7 @@ import {
   undo,
 } from "../lesson/state";
 import { openPasteName } from "../lesson/dialogs";
+import { flashFill, openFormatCells } from "../lesson/text-tools";
 import type { RibbonButton } from "../render/window";
 import type { Key } from "./key-types";
 import { type Action, type ActionSpec, UnsupportedAction } from "./types";
@@ -50,6 +51,17 @@ const HANDLERS: Record<string, KeyHandler> = {
   "Ctrl+Z": {
     apply(state) {
       undo(state);
+      return undefined;
+    },
+  },
+  // Мгновенное заполнение по примеру над активной ячейкой (глава 6)
+  "Ctrl+E": {
+    ribbon: "flashFill",
+    apply: flashFill,
+  },
+  "Ctrl+1": {
+    apply(state) {
+      openFormatCells(state);
       return undefined;
     },
   },

@@ -1392,3 +1392,97 @@
   color: transparent;
   overflow: hidden;
 }
+
+/* ---------- Глава 6: «Найти и заменить», «Текст по столбцам», «Формат ячеек» ---------- */
+.xl-player .xl-radio {
+  width: 13px;
+  height: 13px;
+  border: 1px solid #777;
+  border-radius: 50%;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.xl-player .xl-radio.xl-on::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--xl-green-dark);
+}
+
+.xl-player .xl-dtabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid #c9c9c9;
+  margin-bottom: 4px;
+}
+
+.xl-player .xl-dtabs span {
+  padding: 3px 10px;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  color: #555;
+}
+
+.xl-player .xl-dtabs .xl-on {
+  border-color: #c9c9c9;
+  background: #fff;
+  color: #222;
+  margin-bottom: -1px;
+  padding-bottom: 4px;
+}
+
+.xl-player .xl-dcaption {
+  color: #555;
+}
+
+.xl-player .xl-dchecks {
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  gap: 4px 18px;
+}
+
+.xl-player .xl-dother {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.xl-player .xl-dshort {
+  min-width: 34px;
+}
+
+.xl-player .xl-dpreview {
+  border-collapse: collapse;
+  font-family: Consolas, "Cascadia Mono", monospace;
+  font-size: 11px;
+  border: 1px solid #b9b9b9;
+  min-width: 300px;
+}
+
+.xl-player .xl-dpreview td {
+  border-right: 1px dashed #b9b9b9;
+  padding: 1px 6px;
+  white-space: pre;
+}
+
+.xl-player .xl-dformat {
+  display: grid;
+  grid-template-columns: 170px 210px;
+  gap: 14px;
+}
+
+.xl-player .xl-dformat .xl-dlist {
+  max-height: 230px;
+}
+
+.xl-player .xl-dsample {
+  min-height: 22px;
+  padding: 2px 6px;
+  border: 1px solid #d9d9d9;
+  background: #fafafa;
+  margin-bottom: 10px;
+}

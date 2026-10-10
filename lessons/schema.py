@@ -107,7 +107,9 @@ class Fill(Model):
         return value
 
 
-Key = Literal["Enter", "Escape", "Tab", "Delete", "F2", "F3", "F4", "Ctrl", "Alt", "Shift", "C", "V", "X", "Z", "="]
+Key = Literal[
+    "Enter", "Escape", "Tab", "Delete", "F2", "F3", "F4", "Ctrl", "Alt", "Shift", "C", "V", "X", "Z", "E", "1", "="
+]
 
 
 class Keys(Model):
@@ -123,16 +125,28 @@ class Wait(Model):
 
 
 class ClickRibbon(Model):
-    """Щелчок по кнопке ленты. Главная: «Σ Автосумма», «Копировать», «Вставить». Формулы → Определённые имена:
-    «Диспетчер имён», «Присвоить имя», «Создать из выделенного», «Применить имена…» (из меню «Присвоить имя»)."""
+    """Щелчок по кнопке ленты. Главная: «Σ Автосумма», «Копировать», «Вставить», «Найти и выделить ▾ → Заменить…».
+    Формулы → Определённые имена: «Диспетчер имён», «Присвоить имя», «Создать из выделенного», «Применить имена…»
+    (из меню «Присвоить имя»). Данные → Работа с данными: «Текст по столбцам», «Мгновенное заполнение»."""
 
-    clickRibbon: Literal["autosum", "copy", "paste", "nameManager", "defineName", "createFromSelection", "applyNames"]
+    clickRibbon: Literal[
+        "autosum",
+        "copy",
+        "paste",
+        "nameManager",
+        "defineName",
+        "createFromSelection",
+        "applyNames",
+        "findReplace",
+        "textToColumns",
+        "flashFill",
+    ]
 
 
 class RibbonTab(Model):
     """Переключить вкладку ленты."""
 
-    ribbonTab: Literal["home", "formulas"]
+    ribbonTab: Literal["home", "formulas", "data"]
 
 
 class NameBox(Model):

@@ -12,7 +12,16 @@ import {
   scopeOptions,
 } from "../lesson/dialogs";
 import { bookOf, type LessonState } from "../lesson/state";
-import { type FunctionLocale, formatValue, localizeFormula } from "../locale/format";
+import {
+  DELIMITERS,
+  FORMAT_CATEGORIES,
+  formatCode,
+  SPLIT_MODES,
+  sourceTexts,
+  splitText,
+  type TextToColumnsDialog,
+} from "../lesson/text-tools";
+import { type FunctionLocale, formatValue, localizeFormatCode, localizeFormula } from "../locale/format";
 import { cellsInRange, parseRange } from "../sheet/address";
 import { type NameDef, refersToText } from "../sheet/names";
 import type { Workbook } from "../sheet/workbook";
@@ -37,6 +46,25 @@ function nameValue(book: Workbook, def: NameDef, locale: FunctionLocale): string
     }
   }
   return values.length === 1 ? (values[0] ?? "") : `{${values.join(locale === "ru" ? ";" : ",")}}`;
+}
+
+const check = (label: string, on: boolean, radio = false) =>
+  `<label class="xl-dcheck" data-check="${attr(label)}"><span class="${radio ? "xl-radio" : "xl-box-check"}${on ? " xl-on" : ""}"></span>${escapeHtml(label)}</label>`;
+
+const inputField = (label: string, value: string, focus: boolean) =>
+  `<label class="xl-dfield${focus ? " xl-focus" : ""}"><span>${escapeHtml(label)}:</span>
+    <span class="xl-dinput" data-field="${attr(label)}">${escapeHtml(value)}</span></label>`;
+
+/** Образец данных мастера «Текст по столбцам»: строки источника, на шаге 2–3 — уже разделённые. */
+function splitPreview(state: LessonState, dialog: TextToColumnsDialog): string {
+  const rows = sourceTexts(state, dialog)
+    .slice(0, 5)
+    .map(({ text }) => {
+      const parts = dialog.step === 1 ? [text] : splitText(dialog, text);
+      return `<tr>${parts.map((p) => `<td>${escapeHtml(p)}</td>`).join("")}</tr>`;
+    })
+    .join("");
+  return `<p class="xl-dcaption">Образец разбора данных:</p><table class="xl-dpreview">${rows}</table>`;
 }
 
 function buttonsHtml(dialog: Dialog): string {
@@ -127,6 +155,40 @@ export class DialogView {
           })
           .join("");
         return `<table class="xl-dtable"><tr><th>Имя</th><th>Значение</th><th>Диапазон</th><th>Область</th><th>Примечание</th></tr>${rows}</table>`;
+      }
+      case "findReplace":
+        return `<div class="xl-dtabs"><span>Найти</span><span class="xl-on">Заменить</span></div>
+          ${inputField("Найти", dialog.fields.Найти, isTop && dialog.focus === "Найти")}
+          ${inputField("Заменить на", dialog.fields["Заменить на"], isTop && dialog.focus === "Заменить на")}`;
+      case "textToColumns": {
+        const head = `<p class="xl-dcaption">Шаг ${dialog.step} из 3</p>`;
+        if (dialog.step === 1) {
+          return `${head}<p>Формат исходных данных:</p>${SPLIT_MODES.map((m) => check(m, dialog.mode === m, true)).join("")}${splitPreview(state, dialog)}`;
+        }
+        if (dialog.step === 2) {
+          const other = `<span class="xl-dinput xl-dshort" data-field="другой">${escapeHtml(dialog.other)}</span>`;
+          return `${head}<p>Символом-разделителем является:</p><div class="xl-dchecks">${DELIMITERS.map((d) =>
+            d === "другой" ? `<span class="xl-dother">${check(d, dialog.delimiters[d])}${other}</span>` : check(d, dialog.delimiters[d]),
+          ).join("")}</div>${splitPreview(state, dialog)}`;
+        }
+        return `${head}<p>Формат данных столбца:</p>${check("общий", true, true)}
+          ${inputField("Поместить в", dialog.destination, isTop && dialog.focus === "Поместить в")}${splitPreview(state, dialog)}`;
+      }
+      case "formatCells": {
+        const cell = state.sheet.get(dialog.cell);
+        const sample = formatValue(state.sheet.value(dialog.cell), cell.fmt, locale).text;
+        const code = formatCode(cell.fmt, locale);
+        const shown = locale === "ru" ? (code === "General" ? "Основной" : localizeFormatCode(code)) : code;
+        const list = FORMAT_CATEGORIES.map(
+          (c) => `<div data-item="${attr(c)}"${dialog.category === c ? ' class="xl-on"' : ""}>${escapeHtml(c)}</div>`,
+        ).join("");
+        const custom =
+          dialog.category === "(все форматы)"
+            ? `<label class="xl-dfield"><span>Тип:</span><span class="xl-dinput" data-field="Тип">${escapeHtml(shown)}</span></label>`
+            : "";
+        return `<div class="xl-dtabs"><span class="xl-on">Число</span><span>Выравнивание</span><span>Шрифт</span><span>Граница</span><span>Заливка</span></div>
+          <div class="xl-dformat"><div><p>Числовые форматы:</p><div class="xl-dlist">${list}</div></div>
+          <div><p>Образец</p><div class="xl-dsample">${escapeHtml(sample)}</div>${custom}</div></div>`;
       }
       case "pasteName":
       case "applyNames": {

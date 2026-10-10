@@ -24,6 +24,18 @@ import {
   switchSheet,
   typeChars,
 } from "./state";
+import {
+  DELIMITERS,
+  type Delimiter,
+  FORMAT_CATEGORIES,
+  type FindReplaceDialog,
+  type FormatCellsDialog,
+  finishTextToColumns,
+  replaceAll,
+  SPLIT_MODES,
+  type SplitMode,
+  type TextToColumnsDialog,
+} from "./text-tools";
 
 export const CREATE_CHECKS = ["в строке выше", "в столбце слева", "в строке ниже", "в столбце справа"] as const;
 export type CreateCheck = (typeof CREATE_CHECKS)[number];
@@ -74,7 +86,10 @@ export type Dialog =
   | NameDialog
   | NameManagerDialog
   | PasteNameDialog
-  | ApplyNamesDialog;
+  | ApplyNamesDialog
+  | FindReplaceDialog
+  | TextToColumnsDialog
+  | FormatCellsDialog;
 
 export const DIALOG_TITLES: Record<Dialog["kind"], string> = {
   alert: "Microsoft Excel",
@@ -83,6 +98,9 @@ export const DIALOG_TITLES: Record<Dialog["kind"], string> = {
   nameManager: "Диспетчер имён",
   pasteName: "Вставка имени",
   applyNames: "Применение имён",
+  findReplace: "Найти и заменить",
+  textToColumns: "Мастер распределения текста по столбцам",
+  formatCells: "Формат ячеек",
 };
 
 // ---------- Имена: ключи строк и что видно с листа ----------
@@ -244,6 +262,23 @@ export function openApplyNames(state: LessonState): void {
 // ---------- Поля, флажки, списки ----------
 
 export function dialogFieldText(state: LessonState, field: string, text: string): void {
+  const top = topDialog(state);
+  if (top.kind === "findReplace") {
+    if (field !== "Найти" && field !== "Заменить на") throw new Error(`В окне «Найти и заменить» нет поля «${field}»`);
+    top.fields[field] = text;
+    top.focus = field;
+    return;
+  }
+  if (top.kind === "textToColumns") {
+    if (field === "другой" && top.step === 2) {
+      // Набор символа в поле «другой» отмечает и сам флажок, как в Excel
+      top.other = text;
+      top.delimiters.другой = text !== "" || top.delimiters.другой;
+    } else if (field === "Поместить в" && top.step === 3) top.destination = text;
+    else throw new Error(`На шаге ${top.step} мастера нет поля «${field}»`);
+    top.focus = field;
+    return;
+  }
   const dialog = topOf(state, "name");
   if (!(field in dialog.fields)) throw new Error(`В окне «${DIALOG_TITLES.name}» нет поля «${field}»`);
   const key = field as keyof NameDialog["fields"];
@@ -257,6 +292,14 @@ export function dialogFieldRange(state: LessonState, field: string, range: strin
 }
 
 export function dialogToggle(state: LessonState, label: string): void {
+  const top = topDialog(state);
+  if (top.kind === "textToColumns") {
+    if (top.step === 1 && SPLIT_MODES.includes(label as SplitMode)) top.mode = label as SplitMode;
+    else if (top.step === 2 && DELIMITERS.includes(label as Delimiter)) {
+      top.delimiters[label as Delimiter] = !top.delimiters[label as Delimiter];
+    } else throw new Error(`На шаге ${top.step} мастера нет флажка «${label}»`);
+    return;
+  }
   const dialog = topOf(state, "createFromSelection");
   if (!CREATE_CHECKS.includes(label as CreateCheck)) throw new Error(`Нет флажка «${label}»`);
   dialog.checks[label as CreateCheck] = !dialog.checks[label as CreateCheck];
@@ -279,6 +322,7 @@ export function dialogChooseOption(state: LessonState, field: string, option: st
 export function dialogItems(state: LessonState, dialog: Dialog): string[] {
   if (dialog.kind === "nameManager") return bookOf(state).names.map(nameKey);
   if (dialog.kind === "pasteName" || dialog.kind === "applyNames") return visibleNames(state).map((d) => d.name);
+  if (dialog.kind === "formatCells") return [...FORMAT_CATEGORIES];
   return [];
 }
 
@@ -290,6 +334,10 @@ export function dialogPickItem(state: LessonState, item: string, add: "ctrl" | "
   if (!found) throw new Error(`В списке окна нет «${item}»`);
   if (dialog.kind === "pasteName") {
     dialog.selected = found;
+    return;
+  }
+  if (dialog.kind === "formatCells") {
+    dialog.category = found;
     return;
   }
   if (dialog.kind !== "nameManager" && dialog.kind !== "applyNames") throw new Error("В этом окне нет списка");
@@ -478,6 +526,34 @@ export function pressDialogButton(state: LessonState, label: string): string[] {
       if (label !== "OK") break;
       closeTop(state);
       return applyNamesToSelection(state, dialog);
+    case "findReplace": {
+      if (label === "Закрыть") {
+        closeTop(state);
+        return [];
+      }
+      if (label !== "Заменить все") break;
+      const { cells, count } = replaceAll(state, dialog.fields.Найти, dialog.fields["Заменить на"]);
+      alert(state, `Все готово. Выполнено замен: ${count}.`);
+      return cells;
+    }
+    case "textToColumns":
+      if (label === "Далее >" && dialog.step < 3) {
+        dialog.step = (dialog.step + 1) as 2 | 3;
+        return [];
+      }
+      if (label === "< Назад" && dialog.step > 1) {
+        dialog.step = (dialog.step - 1) as 1 | 2;
+        return [];
+      }
+      if (label === "Готово") {
+        closeTop(state);
+        return finishTextToColumns(state, dialog);
+      }
+      break;
+    case "formatCells":
+      if (label !== "OK") break;
+      closeTop(state);
+      return [];
   }
   throw new Error(`В окне «${DIALOG_TITLES[dialog.kind]}» нет кнопки «${label}»`);
 }
@@ -491,6 +567,10 @@ export function dialogButtons(dialog: Dialog): string[] {
       return ["Создать…", "Изменить…", "Удалить", "Закрыть"];
     case "pasteName":
       return ["Все имена", "OK", "Отмена"];
+    case "findReplace":
+      return ["Заменить все", "Закрыть"];
+    case "textToColumns":
+      return ["Отмена", "< Назад", "Далее >", "Готово"];
     default:
       return ["OK", "Отмена"];
   }

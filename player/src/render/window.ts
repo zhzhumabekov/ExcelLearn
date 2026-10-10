@@ -13,7 +13,10 @@ export type RibbonButton =
   | "defineName"
   | "defineNameMenu"
   | "createFromSelection"
-  | "format";
+  | "format"
+  | "find"
+  | "textToColumns"
+  | "flashFill";
 
 /** Пункты меню «Присвоить имя ▾» и «Формат ▾» (с подменю «Скрыть или отобразить»). */
 export type MenuItem =
@@ -23,9 +26,11 @@ export type MenuItem =
   | "hideRows"
   | "hideColumns"
   | "unhideRows"
-  | "unhideColumns";
+  | "unhideColumns"
+  | "findItem"
+  | "replace";
 
-export type MenuState = "defineName" | "format" | "format-hide" | null;
+export type MenuState = "defineName" | "format" | "format-hide" | "find" | null;
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, className = "", text = ""): HTMLElementTagNameMap[K] {
   const node = document.createElement(tag);
@@ -67,7 +72,7 @@ const TABS: [string, RibbonTabId | null][] = [
   ["Главная", "home"],
   ["Вставка", null],
   ["Формулы", "formulas"],
-  ["Данные", null],
+  ["Данные", "data"],
   ["Вид", null],
 ];
 
@@ -87,6 +92,7 @@ export class WindowView {
   private readonly menu: HTMLElement;
   private readonly formatMenu: HTMLElement;
   private readonly hideMenu: HTMLElement;
+  private readonly findMenu: HTMLElement;
   private current: GridView;
 
   constructor(
@@ -123,12 +129,22 @@ export class WindowView {
     this.hideMenu.classList.add("xl-submenu");
     this.formatMenu.append(this.hideMenu);
     format.append(this.formatMenu);
+    // «Найти и выделить ▾» → «Заменить…» (Главная → Редактирование)
+    const find = el("span", "xl-split");
+    find.append(ribbonButton("find", "🔍", "Найти и выделить ▾"));
+    this.findMenu = menu([
+      ["findItem", "Найти…"],
+      ["replace", "Заменить…"],
+    ]);
+    find.append(this.findMenu);
+    const editing = el("div", "xl-rstack");
+    editing.append(ribbonButton("autosum", "Σ", "Автосумма"), find);
     const home = el("div", "xl-ribbon");
     home.append(
       ribbonGroup("Буфер обмена", ribbonButton("paste", "📋", "Вставить"), ribbonButton("copy", "⧉", "Копировать")),
       ribbonGroup("Шрифт", el("span", "xl-font", "Calibri"), el("span", "xl-font", "11"), ribbonButton(null, "Ж", "")),
       ribbonGroup("Ячейки", format),
-      ribbonGroup("Редактирование", ribbonButton("autosum", "Σ", "Автосумма")),
+      ribbonGroup("Редактирование", editing),
     );
 
     // «Присвоить имя ▾»: основная часть открывает окно, стрелка — меню («Применить имена…»)
@@ -148,8 +164,17 @@ export class WindowView {
     insertFunction.classList.add("xl-rbig");
     const formulas = el("div", "xl-ribbon");
     formulas.append(ribbonGroup("Библиотека функций", insertFunction), ribbonGroup("Определённые имена", manager, stack));
+    // Данные → Работа с данными: «Текст по столбцам», «Мгновенное заполнение»
+    const data = el("div", "xl-ribbon");
+    const toColumns = ribbonButton("textToColumns", "⫼", "Текст по столбцам");
+    toColumns.classList.add("xl-rbig");
+    data.append(
+      ribbonGroup("Сортировка и фильтр", ribbonButton(null, "⇅", "Сортировка"), ribbonButton(null, "⏷", "Фильтр")),
+      ribbonGroup("Работа с данными", toColumns, ribbonButton("flashFill", "⚡", "Мгновенное заполнение")),
+    );
     this.ribbons.set("home", home);
     this.ribbons.set("formulas", formulas);
+    this.ribbons.set("data", data);
 
     const formulaBar = el("div", "xl-fbar");
     // Поле «Имя» — отдельное поле со стрелкой списка, как в Excel, а не просто подпись
@@ -179,7 +204,7 @@ export class WindowView {
     }
     sheets.append(el("span", "", "+"));
 
-    this.el.append(title, tabs, home, formulas, formulaBar, this.gridWrap, sheets);
+    this.el.append(title, tabs, home, formulas, data, formulaBar, this.gridWrap, sheets);
     this.showTab("home");
     this.showSheet(first.name);
   }
@@ -234,6 +259,7 @@ export class WindowView {
     this.menu.hidden = open !== "defineName";
     this.formatMenu.hidden = open !== "format" && open !== "format-hide";
     this.hideMenu.hidden = open !== "format-hide";
+    this.findMenu.hidden = open !== "find";
   }
 
   showNameList(names: readonly string[] | null): void {
