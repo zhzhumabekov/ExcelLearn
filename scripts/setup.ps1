@@ -27,8 +27,10 @@ function Refresh-Path {
     $env:Path = "$machine;$user;$env:USERPROFILE\.local\bin;$env:APPDATA\npm"
 }
 function Run($exe) {
-    # Внешняя программа: при ошибке — остановить установку
-    & $exe @args
+    # Внешняя программа: при ошибке — остановить установку.
+    # Только .exe/.cmd: обёртки npm.ps1/pnpm.ps1 теряют аргументы, переданные через @args.
+    $path = (Get-Command $exe -CommandType Application | Select-Object -First 1).Source
+    & $path @args
     if ($LASTEXITCODE -ne 0) { throw "Команда завершилась с ошибкой: $exe $args" }
 }
 
@@ -51,7 +53,7 @@ if ((Has "node") -and ((Major "node") -ge 24)) {
     if (-not (Has "winget")) {
         throw "Нет winget. Установите Node.js 24 LTS вручную с https://nodejs.org и запустите скрипт снова."
     }
-    Run winget install --id OpenJS.NodeJS.LTS -e --accept-source-agreements --accept-package-agreements
+    Run winget install --id OpenJS.NodeJS.LTS --exact --accept-source-agreements --accept-package-agreements
     Refresh-Path
     if ((Major "node") -lt 24) { throw "Нужен Node.js 24 или новее, установлен $(node --version)." }
     Note "Node.js: $(node --version)"
@@ -85,15 +87,14 @@ Step "Файл настроек .env"
 if (Test-Path .env) {
     Note ".env уже есть — не трогаю"
 } else {
-    $code = @'
-import secrets
-from pathlib import Path
-
-text = Path(".env.example").read_text(encoding="utf-8")
-text = text.replace("DJANGO_SECRET_KEY=change-me", f"DJANGO_SECRET_KEY={secrets.token_urlsafe(50)}")
-Path(".env").write_text(text, encoding="utf-8")
-'@
-    Run uv run python -c $code
+    # Без python -c: Windows PowerShell 5.1 срезает кавычки в аргументах внешних программ
+    $bytes = New-Object byte[] 48
+    [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+    $key = [Convert]::ToBase64String($bytes).TrimEnd("=").Replace("+", "-").Replace("/", "_")
+    $utf8 = New-Object Text.UTF8Encoding $false
+    $text = [IO.File]::ReadAllText((Resolve-Path .env.example), $utf8)
+    $text = $text.Replace("DJANGO_SECRET_KEY=change-me", "DJANGO_SECRET_KEY=$key")
+    [IO.File]::WriteAllText((Join-Path (Get-Location) ".env"), $text, $utf8)
     Note "создан из .env.example со случайным секретным ключом"
 }
 
