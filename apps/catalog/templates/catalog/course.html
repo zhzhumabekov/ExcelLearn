@@ -13,6 +13,17 @@
     </p>
   </div>
 
+  {% if not user.is_authenticated %}
+    <div class="mt-6 flex flex-wrap items-center gap-4 rounded-3xl bg-butter p-5 text-butter-ink sm:p-6" data-testid="members-only">
+      <span class="flex-1">
+        <span class="block text-lg font-bold">Уроки открываются после регистрации</span>
+        <span class="text-sm text-slate-600">Оглавление открыто всем, а уроки, теория и задания — после входа на сайт.</span>
+      </span>
+      <a href="{% url 'accounts:signup' %}?next={{ request.path|urlencode }}" class="btn btn-primary">Зарегистрироваться</a>
+      <a href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}" class="btn btn-secondary">Войти</a>
+    </div>
+  {% endif %}
+
   {# Поиск и фильтры — static/js/course-page.js #}
   <div class="sticky top-[65px] z-20 -mx-4 mt-8 flex flex-wrap items-center gap-3 border-b border-slate-200/70 bg-slate-50/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6" data-course-tools>
     <label class="relative min-w-60 flex-1 sm:max-w-md">

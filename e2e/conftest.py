@@ -54,3 +54,23 @@ def page(browser: Browser, live_server, settings) -> Page:
     page.base_url = live_server.url
     yield page
     context.close()
+
+
+@pytest.fixture
+def member(page: Page, django_user_model):
+    """Вошедший ученик: уроки, теория и задания открыты только после регистрации.
+    Вход — сессионной cookie, без формы (форму входа проверяют тесты аккаунтов)."""
+    from django.test import Client
+
+    user = django_user_model.objects.create_user(
+        email="member@example.kz",
+        password="Excel-learn-2026",
+        first_name="Айгерим",
+        last_name="С",
+        phone="+77010000011",
+    )
+    client = Client()
+    client.force_login(user)
+    cookie = client.cookies[settings.SESSION_COOKIE_NAME]
+    page.context.add_cookies([{"name": cookie.key, "value": cookie.value, "url": page.base_url}])
+    return user

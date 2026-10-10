@@ -98,12 +98,10 @@ def test_one_record_per_user_and_lesson(user):
         LessonProgress.objects.create(user=user, lesson_id=LESSON)
 
 
-def test_lesson_page_config_for_user_and_guest(client, user):
-    def config():
-        html = client.get(reverse("catalog:lesson", args=[LESSON])).content.decode()
-        return json.loads(html.split('<script id="lesson-page" type="application/json">')[1].split("</script>")[0])
-
-    assert config()["progressUrl"] is None
+def test_lesson_page_config_for_user(client, user):
     client.force_login(user)
-    assert config()["progressUrl"] == URL
-    assert config()["csrfToken"]
+    html = client.get(reverse("catalog:lesson", args=[LESSON])).content.decode()
+    config = json.loads(html.split('<script id="lesson-page" type="application/json">')[1].split("</script>")[0])
+
+    assert config["progressUrl"] == URL
+    assert config["csrfToken"]

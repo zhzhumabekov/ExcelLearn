@@ -26,7 +26,7 @@ def narration(settings, tmp_path: Path):
     call_command("narration_build", "--provider", "silent", stdout=StringIO())
 
 
-def test_lesson_plays_step_narration_in_locale(page: Page, narration):
+def test_lesson_plays_step_narration_in_locale(page: Page, member, narration):
     page.add_init_script(RECORD_AUDIO)
     page.goto(f"{page.base_url}/lessons/sum-and-autofill/")
     expect(page.locator(".xl-controls").get_by_title("Выключить озвучку")).to_be_visible()
@@ -41,7 +41,7 @@ def test_lesson_plays_step_narration_in_locale(page: Page, narration):
     assert page.errors == []
 
 
-def test_sound_toggle_turns_narration_off(page: Page, narration):
+def test_sound_toggle_turns_narration_off(page: Page, member, narration):
     page.add_init_script(RECORD_AUDIO)
     page.goto(f"{page.base_url}/lessons/sum-and-autofill/")
 
@@ -54,7 +54,7 @@ def test_sound_toggle_turns_narration_off(page: Page, narration):
     assert page.errors == []
 
 
-def test_lesson_without_narration_has_no_sound_button(page: Page, settings, tmp_path: Path):
+def test_lesson_without_narration_has_no_sound_button(page: Page, member, settings, tmp_path: Path):
     settings.NARRATION_DIR = tmp_path / "empty"
     page.goto(f"{page.base_url}/lessons/sum-and-autofill/")
 

@@ -5,7 +5,13 @@
 {% block content %}
   <div class="mx-auto max-w-md">
     <h1 class="text-2xl font-bold">Регистрация</h1>
-    <p class="mt-1 text-sm text-slate-500">Чтобы сохранять прогресс и настройки на всех устройствах.</p>
+    <p class="mt-1 text-sm text-slate-500">
+      Уроки, теория и задания курса открываются после регистрации. Прогресс и настройки сохранятся на всех
+      устройствах.
+    </p>
+    <p class="mt-2 text-sm text-slate-600 [&_a]:font-medium [&_a]:text-brand-700 [&_a]:underline">
+      Уже есть аккаунт? <a href="{% url 'accounts:login' %}{% if next and next != '/' %}?next={{ next|urlencode }}{% endif %}" data-testid="signup-login">Войдите</a>
+    </p>
 
     <form method="post" novalidate
           class="mt-6 space-y-4 rounded-2xl border border-slate-200 bg-white p-6">

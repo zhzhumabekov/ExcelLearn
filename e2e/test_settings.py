@@ -45,11 +45,7 @@ def test_guest_settings_live_in_browser(page: Page):
     page.get_by_label("Английский Excel").check()
     expect(page.locator("#settings-status")).to_have_text("Сохранено в этом браузере ✓")
 
-    page.goto(f"{page.base_url}/lessons/wages-weekly-salary/")
-    page.click(".xl-seg >> nth=7")
-    expect(page.locator(".xl-step-title")).to_have_text("Сумма часов: SUM")
-
-    page.goto(f"{page.base_url}/settings/")
+    page.reload()  # уроки гостю закрыты — проверяем, что выбор сохранился в браузере
     expect(page.get_by_label("Английский Excel")).to_be_checked()
     assert page.errors == []
 

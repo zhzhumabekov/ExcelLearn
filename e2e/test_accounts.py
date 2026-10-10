@@ -15,9 +15,10 @@ def fill_signup(page: Page, **overrides: str) -> None:
         page.get_by_label(label, exact=True).fill(value)
 
 
-def test_signup_from_lesson_returns_to_lesson_logged_in(page: Page):
-    page.goto(f"{page.base_url}/lessons/sum-and-autofill/")
-    page.get_by_role("link", name="Регистрация").click()
+def test_guest_lesson_leads_to_signup_and_back_logged_in(page: Page):
+    page.goto(f"{page.base_url}/course/")
+    expect(page.get_by_test_id("members-only")).to_be_visible()  # оглавление открыто, уроки — после регистрации
+    page.locator('[data-lesson="sum-and-autofill"] a').click()  # глава 0 раскрыта
     expect(page.get_by_role("heading", name="Регистрация")).to_be_visible()
 
     fill_signup(page)
@@ -57,7 +58,7 @@ def test_login_logout_and_forgot_password(page: Page, django_user_model):
     )
     page.goto(f"{page.base_url}/course/")
 
-    page.get_by_role("link", name="Войти").click()
+    page.get_by_test_id("members-only").get_by_role("link", name="Войти").click()
     page.get_by_label("Email", exact=True).fill("kim@example.kz")
     page.get_by_label("Пароль", exact=True).fill("wrong-password")
     page.get_by_role("button", name="Войти").click()

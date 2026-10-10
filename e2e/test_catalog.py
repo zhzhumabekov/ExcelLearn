@@ -1,7 +1,7 @@
 from playwright.sync_api import Page, expect
 
 
-def test_home_to_course_to_lesson_and_next(page: Page):
+def test_home_to_course_to_lesson_and_next(page: Page, member):
     page.goto(f"{page.base_url}/")
     page.get_by_role("link", name="Оглавление").click()
     expect(page.get_by_role("heading", level=1)).to_have_text("Анализ данных в Excel")
@@ -17,7 +17,7 @@ def test_home_to_course_to_lesson_and_next(page: Page):
     assert page.errors == []
 
 
-def test_lesson_page_plays(page: Page):
+def test_lesson_page_plays(page: Page, member):
     page.goto(f"{page.base_url}/lessons/sum-and-autofill/")
 
     page.click(".xl-start button")
@@ -27,7 +27,7 @@ def test_lesson_page_plays(page: Page):
     assert page.errors == []
 
 
-def test_lesson_file_downloads(page: Page):
+def test_lesson_file_downloads(page: Page, member):
     page.goto(f"{page.base_url}/lessons/wages-weekly-salary/")
 
     with page.expect_download() as download:
@@ -37,7 +37,7 @@ def test_lesson_file_downloads(page: Page):
     assert page.errors == []
 
 
-def test_chapter_exercises_from_course_with_task_and_solution(page: Page):
+def test_chapter_exercises_from_course_with_task_and_solution(page: Page, member):
     page.goto(f"{page.base_url}/course/")
     expect(page.locator("#ch01 [data-exercises]")).to_be_hidden()  # глава свёрнута
     page.locator("#ch01 summary").click()
@@ -89,7 +89,7 @@ def test_course_search_finds_lessons_and_chapters(page: Page):
     assert page.errors == []
 
 
-def test_course_to_theory_with_frames_and_on_to_first_lesson(page: Page):
+def test_course_to_theory_with_frames_and_on_to_first_lesson(page: Page, member):
     page.goto(f"{page.base_url}/course/")
     page.locator("#ch01 summary").click()  # глава свёрнута: раскрыта первая непройденная
     page.locator("#ch01 [data-theory]").click()

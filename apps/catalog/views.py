@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import render
@@ -32,6 +33,11 @@ HOME_STUDY_STEPS = [
     ("Скачайте таблицу", "Под уроком — файл Excel в том виде, в каком урок начинается."),
     ("Повторите сами", "Выполните шаги в своём Excel, а потом решите задания к главе и сверьтесь с решением."),
 ]
+
+
+# Уроки, теория, задания и файлы — только после регистрации; главная и оглавление открыты всем.
+# Гостя ведём на регистрацию (там же ссылка «Войти»), после неё — обратно на ту же страницу.
+members_only = login_required(login_url="accounts:signup")
 
 
 def home(request):
@@ -93,6 +99,7 @@ def course(request):
     )
 
 
+@members_only
 def lesson(request, lesson_id: str):
     registry = get_registry()
     current = registry.get(lesson_id)
@@ -129,6 +136,7 @@ def lesson(request, lesson_id: str):
     )
 
 
+@members_only
 def lesson_file(request, lesson_id: str):
     """Файл урока: лист в начальном состоянии — открыть в своём Excel и повторить шаги."""
     current = get_registry().get(lesson_id)
@@ -143,6 +151,7 @@ def xlsx_response(content: bytes, filename: str) -> HttpResponse:
     return response
 
 
+@members_only
 def theory(request, chapter_id: str):
     registry = get_registry()
     chapter = registry.chapter(chapter_id)
@@ -175,6 +184,7 @@ def theory(request, chapter_id: str):
     )
 
 
+@members_only
 def exercises(request, chapter_id: str):
     registry = get_registry()
     chapter = registry.chapter(chapter_id)
@@ -200,6 +210,7 @@ def exercises(request, chapter_id: str):
     )
 
 
+@members_only
 def exercise_file(request, chapter_id: str, exercise_id: str, kind: str):
     exercise = get_registry().exercise(chapter_id, exercise_id)
     if exercise is None:
