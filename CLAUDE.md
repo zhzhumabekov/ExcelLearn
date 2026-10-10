@@ -65,7 +65,8 @@
 
 ## Окружение (Windows)
 
-- Python: `py -m uv run …` (в активированном `.venv` — просто `python …`). Node 24, pnpm 10.
+- Python: `uv run …` (`uv` — отдельная программа в PATH, не модуль: `py -m uv` не работает; в активированном
+  `.venv` — просто `python …`). Node 24, pnpm 10.
 - Запуск: `pnpm --dir player build; pnpm css; python manage.py runserver`.
 - **Никогда не удалять `db.sqlite3`.** Для экспериментов — копия базы и `DATABASE_URL=sqlite:///…`.
 - Отвечать пользователю по-русски.
