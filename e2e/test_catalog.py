@@ -22,6 +22,10 @@ def test_lesson_page_plays(page: Page, member):
 
     page.click(".xl-start button")
     expect(page.locator(".xl-primary")).to_have_attribute("title", "Пауза")
+    # По умолчанию — пошагово: после шага урок ждёт «Дальше»; формулу вводят на шаге 3
+    for step in (2, 3):
+        page.locator(".xl-next-btn").click(timeout=30_000)
+        expect(page.locator(".xl-meta")).to_have_text(f"Шаг {step} из 9")
     expect(page.locator(".xl-editor")).to_contain_text("=СУММ(", timeout=30_000)
     assert page.errors == []
 

@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='preferences',
             name='play_mode',
-            field=models.CharField(choices=[('step', 'Пошаговый просмотр'), ('auto', 'Автоматическое воспроизведение')], default='auto', max_length=4, verbose_name='режим просмотра'),
+            field=models.CharField(choices=[('step', 'Пошаговый просмотр'), ('auto', 'Автоматическое воспроизведение')], default='step', max_length=4, verbose_name='режим просмотра'),
         ),
     ]

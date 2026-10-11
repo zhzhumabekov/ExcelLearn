@@ -18,7 +18,7 @@ class Preferences(models.Model):
     )
     function_locale = models.CharField("язык функций", max_length=2, choices=LOCALE_CHOICES, default="ru")
     autoplay_next = models.BooleanField("автопереход к следующему уроку", default=False)
-    play_mode = models.CharField("режим просмотра", max_length=4, choices=PLAY_MODE_CHOICES, default="auto")
+    play_mode = models.CharField("режим просмотра", max_length=4, choices=PLAY_MODE_CHOICES, default="step")
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

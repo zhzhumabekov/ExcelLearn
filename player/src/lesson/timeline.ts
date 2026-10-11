@@ -8,7 +8,7 @@ import { createState, type LessonState } from "./state";
 /** «waiting» — пошаговый просмотр: шаг показан, следующий начнётся по кнопке (play()). */
 export type TimelineStatus = "ready" | "playing" | "paused" | "waiting" | "done";
 
-/** auto — шаги идут подряд с паузой BETWEEN_STEPS_MS; step — остановка после каждого шага. */
+/** step (по умолчанию на сайте) — остановка после каждого шага; auto — шаги подряд с паузой BETWEEN_STEPS_MS. */
 export type PlayMode = "auto" | "step";
 
 export interface TimelineEvents {

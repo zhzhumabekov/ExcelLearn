@@ -54,6 +54,15 @@ def test_dev_player_locale_is_whitelisted(client, locale):
     assert 'functionLocale: "ru"' in response.content.decode()
 
 
+@pytest.mark.parametrize(("mode", "rendered"), [(None, "auto"), ("step", "step"), ("<script>", "auto")])
+@override_settings(DEBUG=True)
+def test_dev_player_mode_defaults_to_auto(client, mode, rendered):
+    """На сайте по умолчанию — пошагово, в песочнице — auto: e2e проигрывает уроки до конца без кнопок."""
+    response = client.get(reverse("core:dev-player"), {"mode": mode} if mode else {})
+
+    assert f'playMode: "{rendered}"' in response.content.decode()
+
+
 @override_settings(DEBUG=False)
 def test_dev_player_page_is_hidden_in_production(client):
     response = client.get(reverse("core:dev-player"))

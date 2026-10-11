@@ -30,6 +30,21 @@ describe("mount", () => {
     expect(el.querySelector<HTMLElement>(".xl-player")?.dataset.locale).toBe("en");
   });
 
+  it("по умолчанию — пошаговый просмотр; режим можно задать и сменить", () => {
+    const el = document.createElement("div");
+
+    const byDefault = mount(el, { lesson });
+    expect(byDefault.mode).toBe("step");
+    expect(el.querySelector('.xl-mode [data-mode="step"]')?.classList.contains("xl-on")).toBe(true);
+    byDefault.destroy();
+
+    const auto = mount(el, { lesson, settings: { playMode: "auto" } });
+    expect(auto.mode).toBe("auto");
+    auto.setMode("step");
+    expect(auto.mode).toBe("step");
+    expect(el.querySelector('.xl-mode [data-mode="step"]')?.classList.contains("xl-on")).toBe(true);
+  });
+
   it("removes the player on destroy", () => {
     const el = document.createElement("div");
 

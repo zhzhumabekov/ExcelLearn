@@ -12,7 +12,7 @@ export type { FunctionLocale, Lesson, PlayMode, TimelineStatus };
 export interface PlayerSettings {
   speed: number;
   functionLocale: FunctionLocale;
-  /** auto — шаги подряд; step — пауза после каждого шага, дальше по кнопке. */
+  /** step (по умолчанию) — пауза после каждого шага, дальше по кнопке; auto — шаги подряд. */
   playMode: PlayMode;
 }
 
@@ -42,7 +42,7 @@ export interface PlayerHandle {
 export const DEFAULT_SETTINGS: PlayerSettings = {
   speed: 1,
   functionLocale: "ru",
-  playMode: "auto",
+  playMode: "step",
 };
 
 export function mount(el: HTMLElement, options: MountOptions): PlayerHandle {

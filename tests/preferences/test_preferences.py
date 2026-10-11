@@ -34,7 +34,7 @@ FORM = {
     "speed": "1.5",
     "function_locale": "en",
     "autoplay_next": "on",
-    "play_mode": "step",
+    "play_mode": "auto",
 }
 
 
@@ -50,7 +50,7 @@ def test_defaults_without_saved_row(user):
         "speed": 1.0,
         "functionLocale": "ru",
         "autoplayNext": False,
-        "playMode": "auto",
+        "playMode": "step",
     }
 
 
@@ -104,9 +104,9 @@ def test_partial_update_changes_only_given_field(logged, user):
 
 def test_play_mode_from_player_panel_is_saved(logged, user):
     """Страница урока сохраняет режим, выбранный кнопками «Пошагово» / «Авто» на панели плеера."""
-    assert post_json(logged, UPDATE, {"play_mode": "step"}).json() == {"ok": True}
+    assert post_json(logged, UPDATE, {"play_mode": "auto"}).json() == {"ok": True}
 
-    assert get_preferences(user).player_settings()["playMode"] == "step"
+    assert get_preferences(user).player_settings()["playMode"] == "auto"
 
 
 @pytest.mark.parametrize("data", [{"function_locale": "de"}, {"speed": "7"}, {"play_mode": "slow"}])
@@ -150,7 +150,7 @@ def test_lesson_page_passes_player_settings(logged):
         "speed": 1.5,
         "functionLocale": "en",
         "autoplayNext": True,
-        "playMode": "step",
+        "playMode": "auto",
     }
     assert config["settingsUrl"] == UPDATE
 

@@ -6,7 +6,7 @@ window.guestSettings = (() => {
     speed: 1,
     function_locale: "ru",
     autoplay_next: false,
-    play_mode: "auto",
+    play_mode: "step",
   };
 
   function stored() {
@@ -42,7 +42,7 @@ window.guestSettings = (() => {
         speed: Number(s.speed),
         functionLocale: s.function_locale,
         autoplayNext: Boolean(s.autoplay_next),
-        playMode: s.play_mode === "step" ? "step" : "auto",
+        playMode: s.play_mode === "auto" ? "auto" : "step",
       };
     },
   };
