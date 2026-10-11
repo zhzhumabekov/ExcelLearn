@@ -25,6 +25,8 @@ import {
   typeChars,
 } from "./state";
 import {
+  applyFormatCells,
+  DATE_TYPES,
   DELIMITERS,
   type Delimiter,
   FORMAT_CATEGORIES,
@@ -322,7 +324,9 @@ export function dialogChooseOption(state: LessonState, field: string, option: st
 export function dialogItems(state: LessonState, dialog: Dialog): string[] {
   if (dialog.kind === "nameManager") return bookOf(state).names.map(nameKey);
   if (dialog.kind === "pasteName" || dialog.kind === "applyNames") return visibleNames(state).map((d) => d.name);
-  if (dialog.kind === "formatCells") return [...FORMAT_CATEGORIES];
+  if (dialog.kind === "formatCells") {
+    return dialog.category === "Дата" ? [...FORMAT_CATEGORIES, ...Object.keys(DATE_TYPES)] : [...FORMAT_CATEGORIES];
+  }
   return [];
 }
 
@@ -337,7 +341,12 @@ export function dialogPickItem(state: LessonState, item: string, add: "ctrl" | "
     return;
   }
   if (dialog.kind === "formatCells") {
-    dialog.category = found;
+    if (found in DATE_TYPES) dialog.dateType = found;
+    else {
+      dialog.category = found;
+      // Как в Excel: при выборе категории «Дата» выделен первый тип списка
+      if (found === "Дата") dialog.dateType ??= Object.keys(DATE_TYPES)[0];
+    }
     return;
   }
   if (dialog.kind !== "nameManager" && dialog.kind !== "applyNames") throw new Error("В этом окне нет списка");
@@ -551,8 +560,13 @@ export function pressDialogButton(state: LessonState, label: string): string[] {
       }
       break;
     case "formatCells":
+      if (label === "Отмена") {
+        closeTop(state);
+        return [];
+      }
       if (label !== "OK") break;
       closeTop(state);
+      applyFormatCells(state, dialog);
       return [];
   }
   throw new Error(`В окне «${DIALOG_TITLES[dialog.kind]}» нет кнопки «${label}»`);
@@ -587,6 +601,9 @@ export function partialName(text: string): string | null {
 
 const RU_FUNCTIONS: Readonly<Record<string, string>> = functionsRu.functions;
 
+/** Функции, которых нет в списке автозавершения и в мастере функций Excel (РАЗНДАТ — из Lotus 1-2-3). */
+export const HIDDEN_FUNCTIONS: ReadonlySet<string> = new Set(["DATEDIF"]);
+
 export interface Suggestion {
   /** Как показано в списке (на языке ученика). */
   label: string;
@@ -599,6 +616,7 @@ export interface Suggestion {
 export function suggestions(state: LessonState, partial: string, locale: "ru" | "en"): Suggestion[] {
   const lower = partial.toLocaleLowerCase("ru");
   const functions = Object.entries(RU_FUNCTIONS)
+    .filter(([en]) => !HIDDEN_FUNCTIONS.has(en))
     .map(([en, ru]) => ({ label: locale === "ru" ? ru : en, insert: `${en}(`, kind: "function" as const }))
     .filter((s) => s.label.toLocaleLowerCase("ru").startsWith(lower));
   const names = visibleNames(state)

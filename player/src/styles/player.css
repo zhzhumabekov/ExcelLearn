@@ -1486,3 +1486,9 @@
   background: #fafafa;
   margin-bottom: 10px;
 }
+
+/* «Формат ячеек» → «Дата»: короткий список типов под образцом */
+.xl-player .xl-dformat .xl-dtypes {
+  min-height: 0;
+  max-height: 90px;
+}

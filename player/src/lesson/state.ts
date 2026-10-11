@@ -57,6 +57,8 @@ export interface LessonState {
   nameListOpen: boolean;
   /** Открытые окна: последнее — сверху (из «Диспетчера имён» открывается «Создание имени»). */
   dialogs: Dialog[];
+  /** Контекстное меню (правая кнопка) открыто у этой ячейки. */
+  contextMenu: string | null;
 }
 
 export function createState(sheet: SheetModel): LessonState {
@@ -74,6 +76,7 @@ export function createState(sheet: SheetModel): LessonState {
     hiddenColumns: {},
     nameListOpen: false,
     dialogs: [],
+    contextMenu: null,
   };
 }
 

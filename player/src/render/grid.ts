@@ -50,7 +50,7 @@ export function formulaBarText(cell: Readonly<CellState>, locale: FunctionLocale
   const { input } = cell;
   if (input === null) return "";
   if (isFormula(input)) return localizeFormula(input, locale);
-  if (typeof input === "number") return cell.fmt === "date" ? formatDate(input, locale) : formatGeneral(input, locale);
+  if (typeof input === "number") return cell.fmt === "date" || cell.fmt === "dateLong" ? formatDate(input, locale) : formatGeneral(input, locale);
   return input;
 }
 

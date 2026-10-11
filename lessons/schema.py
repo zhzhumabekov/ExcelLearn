@@ -37,8 +37,10 @@ class Model(BaseModel):
 class CellSpec(Model):
     v: Scalar | None = None
     f: str | None = Field(default=None, pattern=r"^=", description="Формула, уже записанная в ячейке шаблона")
-    fmt: Literal["general", "number", "usd", "kzt", "percent", "date"] = Field(
-        default="general", description="date: v — дата «2025-05-01» (в листе — серийный номер Excel)"
+    fmt: Literal["general", "number", "usd", "kzt", "percent", "date", "dateLong"] = Field(
+        default="general",
+        description="date, dateLong: v — дата «2025-05-01» (в листе — серийный номер Excel); "
+        "dateLong — длинный формат «4 января 2003 г.»",
     )
     style: Literal["head", "label", "total"] | None = None
 
@@ -108,7 +110,7 @@ class Fill(Model):
 
 
 Key = Literal[
-    "Enter", "Escape", "Tab", "Delete", "F2", "F3", "F4", "Ctrl", "Alt", "Shift", "C", "V", "X", "Z", "E", "1", "="
+    "Enter", "Escape", "Tab", "Delete", "F2", "F3", "F4", "Ctrl", "Alt", "Shift", "C", "V", "X", "Z", "E", "1", "=", ";"
 ]
 
 
@@ -203,6 +205,12 @@ class Autocomplete(Model):
     autocomplete: str = Field(min_length=1)
 
 
+class ContextMenu(Model):
+    """Щелчок правой кнопкой по выделению → пункт контекстного меню («Формат ячеек…»)."""
+
+    contextMenu: Literal["formatCells"]
+
+
 class DialogTypeSpec(Model):
     field: str = Field(min_length=1, description="Подпись поля окна: «Имя», «Диапазон», «Примечание»")
     text: str
@@ -281,6 +289,7 @@ ACTION_MODELS: dict[str, type[Model]] = {
     "selectAll": SelectAll,
     "hideColumns": HideColumns,
     "autocomplete": Autocomplete,
+    "contextMenu": ContextMenu,
     "dialogType": DialogType,
     "dialogRange": DialogRange,
     "dialogCheck": DialogCheck,
@@ -320,6 +329,7 @@ Action = Annotated[
     | Annotated[SelectAll, Tag("selectAll")]
     | Annotated[HideColumns, Tag("hideColumns")]
     | Annotated[Autocomplete, Tag("autocomplete")]
+    | Annotated[ContextMenu, Tag("contextMenu")]
     | Annotated[DialogType, Tag("dialogType")]
     | Annotated[DialogRange, Tag("dialogRange")]
     | Annotated[DialogCheck, Tag("dialogCheck")]
@@ -386,6 +396,11 @@ class Lesson(Model):
     sheet: Sheet
     sheets: list[Sheet] = Field(default_factory=list, description="Другие листы книги (ярлыки справа от первого)")
     names: list[NameSpec] = Field(default_factory=list, description="Имена, определённые к началу урока")
+    today: str | None = Field(
+        default=None,
+        pattern=r"^\d{4}-\d{2}-\d{2}$",
+        description="«Сегодня» урока для СЕГОДНЯ() и Ctrl+; («2026-10-12»): анимация, перемотка и ответы совпадают",
+    )
     expect: dict[ExpectAddr, Scalar] = Field(default_factory=dict, description="Значения из исходника для сверки")
     steps: list[Step] = Field(min_length=1)
 
@@ -463,6 +478,7 @@ class Figure(Model):
     sheet: Sheet
     sheets: list[Sheet] = Field(default_factory=list)
     names: list[NameSpec] = Field(default_factory=list)
+    today: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", description="«Сегодня» кадра для СЕГОДНЯ()")
     actions: list[Action] = Field(default_factory=list, description="Что сделать на листе до снимка")
     expect: dict[ExpectAddr, Scalar] = Field(default_factory=dict, description="Значения на кадре для сверки")
 

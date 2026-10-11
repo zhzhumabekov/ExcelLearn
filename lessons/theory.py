@@ -61,7 +61,10 @@ def figure_lesson(chapter: str, figure: Figure) -> Lesson:
 
 
 def figure_hash(figure: Figure) -> str:
-    data = json.dumps(figure.model_dump(mode="json", exclude={"caption"}), ensure_ascii=False, sort_keys=True)
+    dump = figure.model_dump(mode="json", exclude={"caption"})
+    if dump.get("today") is None:
+        dump.pop("today", None)  # поле добавлено в главе 7: без него хеш прежних кадров не меняется
+    data = json.dumps(dump, ensure_ascii=False, sort_keys=True)
     return hashlib.sha256(data.encode()).hexdigest()[:16]
 
 

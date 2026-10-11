@@ -170,7 +170,7 @@ describe("Формат ячеек (Ctrl+1)", () => {
   it("«(все форматы)» показывает код формата ячейки — его вставляют в ТЕКСТ", async () => {
     const specs: ActionSpec[] = [{ click: "A1" }, { keys: ["Ctrl", "1"] }, { dialogPick: "(все форматы)" }];
     const state = await expectSame(sheet, specs);
-    expect(state.dialogs.at(-1)).toEqual({ kind: "formatCells", cell: "A1", category: "(все форматы)" });
+    expect(state.dialogs.at(-1)).toMatchObject({ kind: "formatCells", cell: "A1", category: "(все форматы)" });
 
     const { stage } = await animateAll(sheet, specs);
     expect(stage.dialogs.target('[data-field="Тип"]').textContent).toBe("ДД.ММ.ГГГГ");

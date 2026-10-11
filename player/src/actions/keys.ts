@@ -13,6 +13,7 @@ import {
 } from "../lesson/state";
 import { openPasteName } from "../lesson/dialogs";
 import { flashFill, openFormatCells } from "../lesson/text-tools";
+import { formatDate } from "../locale/format";
 import type { RibbonButton } from "../render/window";
 import type { Key } from "./key-types";
 import { type Action, type ActionSpec, UnsupportedAction } from "./types";
@@ -77,6 +78,14 @@ const HANDLERS: Record<string, KeyHandler> = {
   "Ctrl+1": {
     apply(state) {
       openFormatCells(state);
+      return undefined;
+    },
+  },
+  // Ctrl+; — сегодняшняя дата текстом в ячейке (как набранная): после Enter она уже не меняется,
+  // в отличие от СЕГОДНЯ(). Набирается по-русски, на языке ученика её покажет редактор.
+  "Ctrl+;": {
+    apply(state) {
+      typeChars(state, formatDate(state.sheet.book.today, "ru"));
       return undefined;
     },
   },

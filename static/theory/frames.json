@@ -18,5 +18,10 @@
   "ch06/clean": "969df2f64315501b",
   "ch06/join": "44698695c7a3f345",
   "ch06/positions": "de2b7a2a64e31626",
-  "ch06/split": "d5a9f5aca7187c82"
+  "ch06/split": "d5a9f5aca7187c82",
+  "ch07/date-parts": "b05a373554d8550e",
+  "ch07/datedif": "a2f9f61878ae3730",
+  "ch07/format-date": "34a92639b68ac749",
+  "ch07/typed-dates": "35e7ac4316eda4fc",
+  "ch07/workdays": "e7b6d54005fdc2a1"
 }

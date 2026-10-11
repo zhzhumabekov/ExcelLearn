@@ -1,0 +1,99 @@
+# Вводный урок главы. Собрано генератором gen_intros.py; ответы expect посчитаны независимо.
+id: intro-dates
+chapter: ch07
+order: 0
+title: 'Даты в Excel: считаем сроки'
+source: Свой пример (сроки договора)
+sheet:
+  file: Срок_договора.xlsx
+  name: Договор
+  columns:
+    A: 230
+    B: 150
+  rows: 6
+  cells:
+    A1:
+      v: Договор подписан
+      style: label
+    B1:
+      v: '2026-10-12'
+      fmt: date
+    A2:
+      v: 'Оплата: через 30 дней'
+      style: label
+    B2:
+      fmt: date
+    A3:
+      v: 'Поставка: через 30 раб. дней'
+      style: label
+    B3:
+      fmt: date
+    A4:
+      v: День недели поставки
+      style: label
+expect:
+  B1: 46307
+  B2: 46337
+  B3: 46349
+  B4: 1
+steps:
+- title: Ситуация
+  text: 'Договор с поставщиком подписан 12.10.2026. Оплата — через 30 календарных дней, поставка — через 30 рабочих. Какие
+    это даты и на какой день недели придётся поставка? Листать календарь не будем: с датами в Excel можно считать.'
+  actions:
+  - wait: 3000
+- title: Дата — это число
+  text: 'Выделите <code>B1</code>, нажмите <kbd>Ctrl</kbd>+<kbd>1</kbd> → <b>Общий</b> → OK: в ячейке <b>46307</b>. Так
+    Excel хранит дату: это номер дня, считая с 01.01.1900. Вернём формат <b>Дата</b> — и снова видна дата.'
+  actions:
+  - click: B1
+  - keys:
+    - Ctrl
+    - '1'
+  - dialogPick: Общий
+  - dialogButton: OK
+  - wait: 1200
+  - keys:
+    - Ctrl
+    - '1'
+  - dialogPick: Дата
+  - dialogButton: OK
+- title: Плюс 30 дней
+  text: 'Раз дата — число, к ней можно прибавить дни: <code>{f:=B1+30}</code> → <b>11.11.2026</b>.'
+  actions:
+  - click: B2
+  - type: '='
+  - clickRef: B1
+  - type: '+30'
+  - keys:
+    - Enter
+- title: 'Рабочие дни: {fn:WORKDAY}'
+  text: 'Для рабочих дней простое сложение не годится: оно не пропускает выходные. <code>{f:=WORKDAY(B1,30)}</code> → <b>23.11.2026</b>:
+    30 рабочих дней, суббота и воскресенье пропущены.'
+  actions:
+  - type: =WORKDAY(
+  - clickRef: B1
+  - type: ',30)'
+  - keys:
+    - Enter
+- title: 'День недели: {fn:WEEKDAY}'
+  text: '<code>{f:=WEEKDAY(B3,2)}</code> → <b>1</b>: с типом 2 понедельник — 1, воскресенье — 7. Значит, поставка выпадает
+    на будний день.'
+  actions:
+  - type: =WEEKDAY(
+  - clickRef: B3
+  - type: ',2)'
+  - keys:
+    - Enter
+- title: Что будет в главе
+  text: '<b>7.1</b> — дата — номер дня: формат «Дата» и «Общий», ввод дат, {fn:DATEVALUE}<br><b>7.2</b> — {fn:TODAY} и <kbd>Ctrl</kbd>+<kbd>;</kbd><br><b>7.3</b>
+    — {fn:YEAR}, {fn:MONTH}, {fn:DAY}, {fn:WEEKDAY} и {fn:DATE}<br><b>7.4–7.5</b> — рабочие дни и праздники: {fn:WORKDAY}
+    и {fn:NETWORKDAYS}<br><b>7.6</b> — свои выходные: {fn:WORKDAY.INTL} и {fn:NETWORKDAYS.INTL}<br><b>7.7</b> — полные годы,
+    месяцы и дни: {fn:DATEDIF}'
+  actions:
+  - wait: 4000
+- title: Что запомнить
+  text: Дата в Excel — номер дня, поэтому даты можно складывать и вычитать. Для рабочих дней есть {fn:WORKDAY}, для частей
+    даты — {fn:YEAR}, {fn:MONTH}, {fn:WEEKDAY}. <b>На работе пригодится</b> для сроков договоров, оплат, отпусков и табеля.
+  actions:
+  - click: B3

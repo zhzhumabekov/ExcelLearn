@@ -25,6 +25,10 @@ export interface Lesson {
    */
   names?: NameSpec[];
   /**
+   * «Сегодня» урока для СЕГОДНЯ() и Ctrl+; («2026-10-12»): анимация, перемотка и ответы совпадают
+   */
+  today?: string | null;
+  /**
    * Значения из исходника для сверки
    */
   expect?: {
@@ -74,9 +78,9 @@ export interface CellSpec {
    */
   f?: string | null;
   /**
-   * date: v — дата «2025-05-01» (в листе — серийный номер Excel)
+   * date, dateLong: v — дата «2025-05-01» (в листе — серийный номер Excel); dateLong — длинный формат «4 января 2003 г.»
    */
-  fmt?: "general" | "number" | "usd" | "kzt" | "percent" | "date";
+  fmt?: "general" | "number" | "usd" | "kzt" | "percent" | "date" | "dateLong";
   style?: ("head" | "label" | "total") | null;
 }
 /**
@@ -133,6 +137,7 @@ export interface Step {
       | SelectAll
       | HideColumns
       | Autocomplete
+      | ContextMenu
       | DialogType
       | DialogRange
       | DialogCheck
@@ -162,6 +167,7 @@ export interface Step {
       | SelectAll
       | HideColumns
       | Autocomplete
+      | ContextMenu
       | DialogType
       | DialogRange
       | DialogCheck
@@ -215,6 +221,7 @@ export interface Keys {
       | "E"
       | "1"
       | "="
+      | ";"
     ),
     ...(
       | "Enter"
@@ -234,6 +241,7 @@ export interface Keys {
       | "E"
       | "1"
       | "="
+      | ";"
     )[]
   ];
 }
@@ -323,6 +331,12 @@ export interface HideColumns {
  */
 export interface Autocomplete {
   autocomplete: string;
+}
+/**
+ * Щелчок правой кнопкой по выделению → пункт контекстного меню («Формат ячеек…»).
+ */
+export interface ContextMenu {
+  contextMenu: "formatCells";
 }
 /**
  * Набор текста в поле открытого окна (поле очищается).

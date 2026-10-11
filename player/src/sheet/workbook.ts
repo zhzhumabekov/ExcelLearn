@@ -1,5 +1,5 @@
 import { type CellPos, parseCell } from "./address";
-import { type CellSource, type CellValue, createEvaluator } from "./evaluator";
+import { type CellSource, type CellValue, createEvaluator, realToday } from "./evaluator";
 import type { TextLocale } from "./text-functions";
 import { expandNames, type NameDef, nameProblem, sameName } from "./names";
 import type { SheetModel, SheetSnapshot } from "./sheet-model";
@@ -34,6 +34,7 @@ export class Workbook {
   private inProgress = new Set<string>();
   private readonly evaluate: (formula: string, at: CellPos & { sheet: string }) => CellValue;
   private textLocale: TextLocale = "ru";
+  private todaySerial = realToday();
 
   constructor() {
     const source: CellSource = {
@@ -41,6 +42,7 @@ export class Workbook {
       formula: (addr, sheet) => this.sheetOrNull(sheet)?.formula(addr) ?? null,
       extent: (sheet) => this.sheetOrNull(sheet)?.extent() ?? { rows: 1, cols: 1 },
       locale: () => this.textLocale,
+      today: () => this.todaySerial,
     };
     this.evaluate = createEvaluator(source);
   }
@@ -53,6 +55,17 @@ export class Workbook {
   setLocale(locale: TextLocale): void {
     if (locale === this.textLocale) return;
     this.textLocale = locale;
+    this.recalc();
+  }
+
+  /** «Сегодня» книги — для СЕГОДНЯ() и Ctrl+;. У урока оно постоянное: анимация и перемотка совпадают. */
+  get today(): number {
+    return this.todaySerial;
+  }
+
+  setToday(serial: number): void {
+    if (serial === this.todaySerial) return;
+    this.todaySerial = serial;
     this.recalc();
   }
 
