@@ -51,8 +51,9 @@ steps:
   actions:
   - wait: 3000
 - title: '{fn:VALUE} не справляется'
-  text: '<code>{f:=VALUE(B2)}</code> и <code>{f:=VALUE(C2)}</code> — ошибка <code>#ЗНАЧ!</code>: Excel не понимает, что
-    это числа.'
+  text: '<code>{f:=VALUE(B2)}</code> и <code>{f:=VALUE(C2)}</code> — ошибка <code>#ЗНАЧ!</code>. {fn:VALUE} переводит в
+    число только текст, который целиком состоит из цифр, знаков и обычных пробелов. Невидимый символ в начале мешает: для
+    Excel это уже не «12500», а «что-то и 12500». Сначала символ нужно убрать.'
   actions:
   - click: B3
   - type: =VALUE(
