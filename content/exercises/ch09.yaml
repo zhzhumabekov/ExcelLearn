@@ -1,0 +1,1230 @@
+# Глава 9 (ВСД). Собрано генератором; ответы expect посчитаны независимо.
+chapter: ch09
+exercises:
+- id: all-irr
+  number: 1
+  title: Все ВСД проекта
+  task: 'Потоки проекта — в строке 2 (год 0 — сегодня). Знак меняется дважды: −, +, … , −. Найдите <b>все</b> ВСД: в <code>B5:B14</code>
+    посчитайте ВСД с предположениями из столбца A.'
+  explain: '<code>{f:=IRR($B$2:$H$2,A5)}</code> и протяните вниз: потоки закреплены, предположение — из своей строки. Разные
+    ответы (-50,00%, 15,24%) — это разные ВСД.'
+  mistake: 'Ограничиться одной формулой <code>{f:=IRR(B2:H2)}</code>: она покажет только одну ВСД, ту, что ближе к 10%.'
+  sheet:
+    file: Все_ВСД.xlsx
+    name: Проект
+    columns:
+      A: 160
+      B: 90
+      C: 60
+      D: 60
+      E: 60
+      F: 60
+      G: 60
+      H: 60
+    rows: 15
+    cells:
+      A1:
+        v: Год
+        style: head
+      A2: Поток, млн ₸
+      A4:
+        v: Предположение
+        style: head
+      B4:
+        v: ВСД
+        style: head
+      B1:
+        v: 0
+        style: head
+      B2: -10
+      C1:
+        v: 1
+        style: head
+      C2: 8
+      D1:
+        v: 2
+        style: head
+      D2: 1.5
+      E1:
+        v: 3
+        style: head
+      E2: 1.5
+      F1:
+        v: 4
+        style: head
+      F2: 1.5
+      G1:
+        v: 5
+        style: head
+      G2: 1.5
+      H1:
+        v: 6
+        style: head
+      H2: -1.5
+      A5:
+        v: -0.9
+        fmt: percent
+      B5:
+        fmt: percent
+      A6:
+        v: -0.7
+        fmt: percent
+      B6:
+        fmt: percent
+      A7:
+        v: -0.5
+        fmt: percent
+      B7:
+        fmt: percent
+      A8:
+        v: -0.3
+        fmt: percent
+      B8:
+        fmt: percent
+      A9:
+        v: -0.1
+        fmt: percent
+      B9:
+        fmt: percent
+      A10:
+        v: 0.1
+        fmt: percent
+      B10:
+        fmt: percent
+      A11:
+        v: 0.3
+        fmt: percent
+      B11:
+        fmt: percent
+      A12:
+        v: 0.5
+        fmt: percent
+      B12:
+        fmt: percent
+      A13:
+        v: 0.7
+        fmt: percent
+      B13:
+        fmt: percent
+      A14:
+        v: 0.9
+        fmt: percent
+      B14:
+        fmt: percent
+  solution:
+    cells:
+      B5:
+        f: =IRR($B$2:$H$2,A5)
+        fmt: percent
+    fill:
+    - source: B5
+      to: B5:B14
+  expect:
+    B5: -0.5
+    B6: -0.5
+    B7: -0.5
+    B8: 0.1524
+    B9: 0.1524
+    B10: 0.1524
+    B11: 0.1524
+    B12: 0.1524
+    B13: 0.1524
+    B14: -0.5
+- id: take-project
+  number: 2
+  title: Браться ли за проект
+  task: Потоки — в строке 4, стоимость капитала — 20%. В <code>B6</code> найдите ВСД, в <code>B7</code> формулой {fn:IF}
+    напишите «берём» или «отказываемся».
+  explain: '<code>{f:=IRR(B4:D4)}</code>; проект выгоден, если ВСД выше стоимости капитала: <code>{f:=IF(B6>B1,"берём","отказываемся")}</code>.
+    Знак меняется один раз — ВСД одна.'
+  mistake: 'Сравнить ВСД с нулём: проект с ВСД 5% при капитале под 20% уменьшает стоимость компании.'
+  sheet:
+    file: Проект.xlsx
+    name: Проект
+    columns:
+      A: 170
+      B: 100
+      C: 100
+      D: 100
+    rows: 8
+    cells:
+      A1:
+        v: Стоимость капитала
+        style: label
+      B1:
+        v: 0.2
+        fmt: percent
+      A3:
+        v: Год
+        style: head
+      A4: Поток, млн ₸
+      A6: ВСД
+      A7: Решение
+      B3:
+        v: 0
+        style: head
+      B4: -4
+      C3:
+        v: 1
+        style: head
+      C4: 2
+      D3:
+        v: 2
+        style: head
+      D4: 4
+  solution:
+    cells:
+      B6:
+        f: =IRR(B4:D4)
+        fmt: percent
+      B7:
+        f: =IF(B6>B1,"берём","отказываемся")
+  expect:
+    B6: 0.2808
+    B7: берём
+- id: no-irr
+  number: 3
+  title: 'Найдите все ВСД: а если их нет?'
+  task: 'Потоки — в строке 2: +100, −300, +250 тыс. ₸. В <code>B5:B14</code> посчитайте ВСД с предположениями из столбца
+    A. Сколько ВСД у проекта?'
+  explain: '<code>{f:=IRR($B$2:$D$2,A5)}</code> и вниз — везде <code>#ЧИСЛО!</code>. ЧПС этого проекта положительна при
+    любой ставке, и ставки, где она равна нулю, нет: ВСД у проекта нет.'
+  mistake: 'Решить, что формула написана неверно: <code>#ЧИСЛО!</code> здесь — правильный ответ «ВСД не существует».'
+  sheet:
+    file: Нет_ВСД.xlsx
+    name: Проект
+    columns:
+      A: 170
+      B: 100
+      C: 90
+      D: 90
+    rows: 15
+    cells:
+      A1:
+        v: Год
+        style: head
+      A2: Поток, тыс. ₸
+      A4:
+        v: Предположение
+        style: head
+      B4:
+        v: ВСД
+        style: head
+      B1:
+        v: 0
+        style: head
+      B2: 100
+      C1:
+        v: 1
+        style: head
+      C2: -300
+      D1:
+        v: 2
+        style: head
+      D2: 250
+      A5:
+        v: -0.9
+        fmt: percent
+      B5:
+        fmt: percent
+      A6:
+        v: -0.7
+        fmt: percent
+      B6:
+        fmt: percent
+      A7:
+        v: -0.5
+        fmt: percent
+      B7:
+        fmt: percent
+      A8:
+        v: -0.3
+        fmt: percent
+      B8:
+        fmt: percent
+      A9:
+        v: -0.1
+        fmt: percent
+      B9:
+        fmt: percent
+      A10:
+        v: 0.1
+        fmt: percent
+      B10:
+        fmt: percent
+      A11:
+        v: 0.3
+        fmt: percent
+      B11:
+        fmt: percent
+      A12:
+        v: 0.5
+        fmt: percent
+      B12:
+        fmt: percent
+      A13:
+        v: 0.7
+        fmt: percent
+      B13:
+        fmt: percent
+      A14:
+        v: 0.9
+        fmt: percent
+      B14:
+        fmt: percent
+  solution:
+    cells:
+      B5:
+        f: =IRR($B$2:$D$2,A5)
+        fmt: percent
+    fill:
+    - source: B5
+      to: B5:B14
+  expect:
+    B5: '#NUM!'
+    B6: '#NUM!'
+    B7: '#NUM!'
+    B8: '#NUM!'
+    B9: '#NUM!'
+    B10: '#NUM!'
+    B11: '#NUM!'
+    B12: '#NUM!'
+    B13: '#NUM!'
+    B14: '#NUM!'
+- id: xirr-guesses
+  number: 4
+  title: 'ЧИСТВНДОХ: все ВСД потоков с датами'
+  task: Потоки с датами — в <code>A2:B8</code>, знак меняется несколько раз. В <code>E2:E11</code> посчитайте ЧИСТВНДОХ
+    с предположениями из столбца D. Сколько ВСД у этих потоков?
+  explain: '<code>{f:=XIRR($B$2:$B$8,$A$2:$A$8,D2)}</code> и вниз, Ответ везде один — 36,06%: несколько смен знака не обязательно
+    дают несколько ВСД.'
+  mistake: 'Взять {fn:IRR}: она считает, что потоки идут ровно через год, а даты здесь неравные.'
+  sheet:
+    file: ВСД_по_датам.xlsx
+    name: Потоки
+    columns:
+      A: 120
+      B: 130
+      C: 30
+      D: 140
+      E: 130
+    rows: 11
+    cells:
+      A1:
+        v: Дата
+        style: head
+      B1:
+        v: Поток
+        style: head
+      D1:
+        v: Предположение
+        style: head
+      E1:
+        v: ЧИСТВНДОХ
+        style: head
+      A2:
+        v: '2026-01-10'
+        fmt: date
+      B2:
+        v: -1000000
+        fmt: kzt
+      A3:
+        v: '2026-07-10'
+        fmt: date
+      B3:
+        v: 900000
+        fmt: kzt
+      A4:
+        v: '2027-05-25'
+        fmt: date
+      B4:
+        v: 800000
+        fmt: kzt
+      A5:
+        v: '2027-07-18'
+        fmt: date
+      B5:
+        v: -700000
+        fmt: kzt
+      A6:
+        v: '2028-03-20'
+        fmt: date
+      B6:
+        v: 500000
+        fmt: kzt
+      A7:
+        v: '2028-04-01'
+        fmt: date
+      B7:
+        v: -500000
+        fmt: kzt
+      A8:
+        v: '2029-01-10'
+        fmt: date
+      B8:
+        v: 350000
+        fmt: kzt
+      D2:
+        v: -0.9
+        fmt: percent
+      E2:
+        fmt: percent
+      D3:
+        v: -0.7
+        fmt: percent
+      E3:
+        fmt: percent
+      D4:
+        v: -0.5
+        fmt: percent
+      E4:
+        fmt: percent
+      D5:
+        v: -0.3
+        fmt: percent
+      E5:
+        fmt: percent
+      D6:
+        v: -0.1
+        fmt: percent
+      E6:
+        fmt: percent
+      D7:
+        v: 0.1
+        fmt: percent
+      E7:
+        fmt: percent
+      D8:
+        v: 0.3
+        fmt: percent
+      E8:
+        fmt: percent
+      D9:
+        v: 0.5
+        fmt: percent
+      E9:
+        fmt: percent
+      D10:
+        v: 0.7
+        fmt: percent
+      E10:
+        fmt: percent
+      D11:
+        v: 0.9
+        fmt: percent
+      E11:
+        fmt: percent
+  solution:
+    cells:
+      E2:
+        f: =XIRR($B$2:$B$8,$A$2:$A$8,D2)
+        fmt: percent
+    fill:
+    - source: E2
+      to: E2:E11
+  expect:
+    E2: 0.3606
+    E3: 0.3606
+    E4: 0.3606
+    E5: 0.3606
+    E6: 0.3606
+    E7: 0.3606
+    E8: 0.3606
+    E9: 0.3606
+    E10: 0.3606
+    E11: 0.3606
+- id: two-projects
+  number: 5
+  title: 'Два проекта: ВСД и ЧПС'
+  task: Стоимость капитала — 15%. Для каждого проекта найдите ВСД (<code>F4:F5</code>) и ЧПС (<code>G4:G5</code>). Какие
+    проекты увеличат стоимость компании? Если можно взять только один — какой? Ответ — в <code>B7</code> формулой.
+  explain: '<code>{f:=IRR(B4:E4)}</code> и <code>{f:=B4+NPV($B$1,C4:E4)}</code>, протяните на проект 2. Оба выгодны: ВСД
+    выше 15%, ЧПС больше нуля. Один — по большей ЧПС: <code>{f:=IF(G4>G5,A4,A5)}</code>.'
+  mistake: 'Выбрать по ВСД: она не учитывает масштаб. Здесь выбор совпал, но так бывает не всегда.'
+  sheet:
+    file: Два_проекта.xlsx
+    name: Проекты
+    columns:
+      A: 170
+      B: 70
+      C: 70
+      D: 70
+      E: 70
+      F: 100
+      G: 100
+    rows: 8
+    cells:
+      A1:
+        v: Стоимость капитала
+        style: label
+      B1:
+        v: 0.15
+        fmt: percent
+      A3:
+        v: Год
+        style: head
+      F3:
+        v: ВСД
+        style: head
+      G3:
+        v: ЧПС
+        style: head
+      A4: Проект 1, млн ₸
+      A5: Проект 2, млн ₸
+      A7: Выбираем
+      B3:
+        v: 0
+        style: head
+      B4: -40
+      B5: -80
+      C3:
+        v: 1
+        style: head
+      C4: 13
+      C5: 36
+      D3:
+        v: 2
+        style: head
+      D4: 19
+      D5: 36
+      E3:
+        v: 3
+        style: head
+      E4: 26
+      E5: 36
+  solution:
+    cells:
+      F4:
+        f: =IRR(B4:E4)
+        fmt: percent
+      G4:
+        f: =B4+NPV($B$1,C4:E4)
+        fmt: number
+      B7:
+        f: =IF(G4>G5,A4,A5)
+    fill:
+    - source: F4
+      to: F4:F5
+    - source: G4
+      to: G4:G5
+  expect:
+    F4: 0.1868
+    F5: 0.1665
+    G4: 2.7665
+    G5: 2.1961
+    B7: Проект 1, млн ₸
+- id: pension
+  number: 6
+  title: 'Пенсионные накопления: доходность за 40 лет'
+  task: 'Айгерим 25 лет. В начале каждого года она кладёт на пенсионный счёт <b>1 000 000 ₸</b>, 40 лет подряд. Первые 30
+    лет счёт приносит 15% в год, последние 10 — 5% (доходность — в столбце B). В <code>C5:C44</code> посчитайте сумму на
+    счёте в конце каждого года. В <code>D5:D45</code> соберите потоки: взносы со знаком минус (сегодня и в начале каждого
+    года) и итоговую сумму в конце 40-го года. В <code>F1</code> найдите ВСД.'
+  explain: 'Счёт в конце года: (прошлый остаток + взнос) × (1 + доходность): <code>{f:=(C4+$B$1)*(1+B5)}</code>, вниз до
+    <code>C44</code>. Поток: <code>{f:=-$B$1}</code> в <code>D5:D44</code> (взнос в начале года k — это период k − 1), в
+    <code>D45</code> — <code>{f:=C44}</code>. ВСД — <code>{f:=IRR(D5:D45)}</code>: знак меняется один раз, ВСД одна — средняя
+    доходность всех взносов.'
+  mistake: 'Сложить взносы и итог без учёта времени: так видно, во сколько раз выросли деньги, но не годовую доходность.'
+  sheet:
+    file: Пенсия.xlsx
+    name: Пенсия
+    columns:
+      A: 160
+      B: 110
+      C: 170
+      D: 140
+      E: 30
+      F: 110
+    rows: 45
+    cells:
+      A1:
+        v: Взнос в начале года
+        style: label
+      B1:
+        v: 1000000
+        fmt: kzt
+      A3:
+        v: Год
+        style: head
+      B3:
+        v: Доходность
+        style: head
+      C3:
+        v: На счёте в конце года
+        style: head
+      D3:
+        v: Поток
+        style: head
+      A4: 0
+      C4:
+        v: 0
+        fmt: kzt
+      A5: 1
+      B5:
+        v: 0.15
+        fmt: percent
+      C5:
+        fmt: kzt
+      A6: 2
+      B6:
+        v: 0.15
+        fmt: percent
+      C6:
+        fmt: kzt
+      A7: 3
+      B7:
+        v: 0.15
+        fmt: percent
+      C7:
+        fmt: kzt
+      A8: 4
+      B8:
+        v: 0.15
+        fmt: percent
+      C8:
+        fmt: kzt
+      A9: 5
+      B9:
+        v: 0.15
+        fmt: percent
+      C9:
+        fmt: kzt
+      A10: 6
+      B10:
+        v: 0.15
+        fmt: percent
+      C10:
+        fmt: kzt
+      A11: 7
+      B11:
+        v: 0.15
+        fmt: percent
+      C11:
+        fmt: kzt
+      A12: 8
+      B12:
+        v: 0.15
+        fmt: percent
+      C12:
+        fmt: kzt
+      A13: 9
+      B13:
+        v: 0.15
+        fmt: percent
+      C13:
+        fmt: kzt
+      A14: 10
+      B14:
+        v: 0.15
+        fmt: percent
+      C14:
+        fmt: kzt
+      A15: 11
+      B15:
+        v: 0.15
+        fmt: percent
+      C15:
+        fmt: kzt
+      A16: 12
+      B16:
+        v: 0.15
+        fmt: percent
+      C16:
+        fmt: kzt
+      A17: 13
+      B17:
+        v: 0.15
+        fmt: percent
+      C17:
+        fmt: kzt
+      A18: 14
+      B18:
+        v: 0.15
+        fmt: percent
+      C18:
+        fmt: kzt
+      A19: 15
+      B19:
+        v: 0.15
+        fmt: percent
+      C19:
+        fmt: kzt
+      A20: 16
+      B20:
+        v: 0.15
+        fmt: percent
+      C20:
+        fmt: kzt
+      A21: 17
+      B21:
+        v: 0.15
+        fmt: percent
+      C21:
+        fmt: kzt
+      A22: 18
+      B22:
+        v: 0.15
+        fmt: percent
+      C22:
+        fmt: kzt
+      A23: 19
+      B23:
+        v: 0.15
+        fmt: percent
+      C23:
+        fmt: kzt
+      A24: 20
+      B24:
+        v: 0.15
+        fmt: percent
+      C24:
+        fmt: kzt
+      A25: 21
+      B25:
+        v: 0.15
+        fmt: percent
+      C25:
+        fmt: kzt
+      A26: 22
+      B26:
+        v: 0.15
+        fmt: percent
+      C26:
+        fmt: kzt
+      A27: 23
+      B27:
+        v: 0.15
+        fmt: percent
+      C27:
+        fmt: kzt
+      A28: 24
+      B28:
+        v: 0.15
+        fmt: percent
+      C28:
+        fmt: kzt
+      A29: 25
+      B29:
+        v: 0.15
+        fmt: percent
+      C29:
+        fmt: kzt
+      A30: 26
+      B30:
+        v: 0.15
+        fmt: percent
+      C30:
+        fmt: kzt
+      A31: 27
+      B31:
+        v: 0.15
+        fmt: percent
+      C31:
+        fmt: kzt
+      A32: 28
+      B32:
+        v: 0.15
+        fmt: percent
+      C32:
+        fmt: kzt
+      A33: 29
+      B33:
+        v: 0.15
+        fmt: percent
+      C33:
+        fmt: kzt
+      A34: 30
+      B34:
+        v: 0.15
+        fmt: percent
+      C34:
+        fmt: kzt
+      A35: 31
+      B35:
+        v: 0.05
+        fmt: percent
+      C35:
+        fmt: kzt
+      A36: 32
+      B36:
+        v: 0.05
+        fmt: percent
+      C36:
+        fmt: kzt
+      A37: 33
+      B37:
+        v: 0.05
+        fmt: percent
+      C37:
+        fmt: kzt
+      A38: 34
+      B38:
+        v: 0.05
+        fmt: percent
+      C38:
+        fmt: kzt
+      A39: 35
+      B39:
+        v: 0.05
+        fmt: percent
+      C39:
+        fmt: kzt
+      A40: 36
+      B40:
+        v: 0.05
+        fmt: percent
+      C40:
+        fmt: kzt
+      A41: 37
+      B41:
+        v: 0.05
+        fmt: percent
+      C41:
+        fmt: kzt
+      A42: 38
+      B42:
+        v: 0.05
+        fmt: percent
+      C42:
+        fmt: kzt
+      A43: 39
+      B43:
+        v: 0.05
+        fmt: percent
+      C43:
+        fmt: kzt
+      A44: 40
+      B44:
+        v: 0.05
+        fmt: percent
+      C44:
+        fmt: kzt
+      D5:
+        fmt: kzt
+      D6:
+        fmt: kzt
+      D7:
+        fmt: kzt
+      D8:
+        fmt: kzt
+      D9:
+        fmt: kzt
+      D10:
+        fmt: kzt
+      D11:
+        fmt: kzt
+      D12:
+        fmt: kzt
+      D13:
+        fmt: kzt
+      D14:
+        fmt: kzt
+      D15:
+        fmt: kzt
+      D16:
+        fmt: kzt
+      D17:
+        fmt: kzt
+      D18:
+        fmt: kzt
+      D19:
+        fmt: kzt
+      D20:
+        fmt: kzt
+      D21:
+        fmt: kzt
+      D22:
+        fmt: kzt
+      D23:
+        fmt: kzt
+      D24:
+        fmt: kzt
+      D25:
+        fmt: kzt
+      D26:
+        fmt: kzt
+      D27:
+        fmt: kzt
+      D28:
+        fmt: kzt
+      D29:
+        fmt: kzt
+      D30:
+        fmt: kzt
+      D31:
+        fmt: kzt
+      D32:
+        fmt: kzt
+      D33:
+        fmt: kzt
+      D34:
+        fmt: kzt
+      D35:
+        fmt: kzt
+      D36:
+        fmt: kzt
+      D37:
+        fmt: kzt
+      D38:
+        fmt: kzt
+      D39:
+        fmt: kzt
+      D40:
+        fmt: kzt
+      D41:
+        fmt: kzt
+      D42:
+        fmt: kzt
+      D43:
+        fmt: kzt
+      D44:
+        fmt: kzt
+      D45:
+        fmt: kzt
+  solution:
+    cells:
+      C5:
+        f: =(C4+$B$1)*(1+B5)
+        fmt: kzt
+      D5:
+        f: =-$B$1
+        fmt: kzt
+      D45:
+        f: =C44
+        fmt: kzt
+      F1:
+        f: =IRR(D5:D45)
+        fmt: percent
+    fill:
+    - source: C5
+      to: C5:C44
+    - source: D5
+      to: D5:D44
+  expect:
+    C44: 827583925.059
+    D45: 827583925.059
+    F1: 0.1187
+- id: why-fifty
+  number: 7
+  title: Почему ВСД кофейни — ровно 50%
+  task: 'Кофейня из урока 9.3: <b>−10 млн ₸</b> сегодня и <b>+15 млн ₸</b> через год. Проверьте, что ВСД — 50%: в <code>B4</code>
+    посчитайте ЧПС при ставке 50%, в <code>B5</code> — ВСД.'
+  explain: 'При ставке 50% 15 млн через год стоят сегодня 15 ÷ 1,5 = 10 млн — ровно вложение, ЧПС = 0: <code>{f:=B2+C2/(1+50%)}</code>.
+    ВСД — <code>{f:=IRR(B2:C2)}</code>. Вложили 10, вернули 15 — это и есть +50% за год.'
+  mistake: 'Посчитать (15 − 10) / 15 = 33%: доходность считают от вложенного, а не от полученного.'
+  sheet:
+    file: Кофейня.xlsx
+    name: Кофейня
+    columns:
+      A: 190
+      B: 100
+      C: 100
+    rows: 6
+    cells:
+      A1:
+        v: Год
+        style: head
+      B1:
+        v: 0
+        style: head
+      C1:
+        v: 1
+        style: head
+      A2: Поток, млн ₸
+      B2: -10
+      C2: 15
+      A4: ЧПС при 50%
+      A5: ВСД
+  solution:
+    cells:
+      B4:
+        f: =B2+C2/(1+50%)
+        fmt: number
+      B5:
+        f: =IRR(B2:C2)
+        fmt: percent
+  expect:
+    B4: 0
+    B5: 0.5
+- id: negative-irr
+  number: 8
+  title: Отрицательная ВСД
+  task: 'Проект: <b>−70 млн ₸</b> сегодня, <b>12</b> и <b>15 млн ₸</b> в следующие два года. Найдите ВСД в <code>B4</code>
+    и долю вложенного, которая вернётся, в <code>B5</code>. Как понимать отрицательную ВСД?'
+  explain: <code>{f:=IRR(B2:D2)}</code> — около −44%. Вернётся <code>{f:=(C2+D2)/-B2}</code> — меньше 40% вложенного. Отрицательная
+    ВСД значит, что проект не возвращает даже вложенные деньги. Знак меняется один раз — ВСД одна.
+  mistake: 'Решить, что отрицательная ВСД — ошибка Excel: это правильный ответ для убыточного проекта.'
+  sheet:
+    file: Убыточный.xlsx
+    name: Проект
+    columns:
+      A: 210
+      B: 100
+      C: 80
+      D: 80
+    rows: 6
+    cells:
+      A1:
+        v: Год
+        style: head
+      A2: Поток, млн ₸
+      A4: ВСД
+      A5: Вернули из вложенного
+      B1:
+        v: 0
+        style: head
+      B2: -70
+      C1:
+        v: 1
+        style: head
+      C2: 12
+      D1:
+        v: 2
+        style: head
+      D2: 15
+  solution:
+    cells:
+      B4:
+        f: =IRR(B2:D2)
+        fmt: percent
+      B5:
+        f: =(C2+D2)/-B2
+        fmt: percent
+  expect:
+    B4: -0.4435
+    B5: 0.3857
+- id: mirr-exercise
+  number: 9
+  title: МВСД вместо двух ВСД
+  task: Потоки из задания 1 (у них две ВСД). Деньги можно взять в кредит под 12%, а свободные — положить под 15%. Посчитайте
+    МВСД в <code>B7</code>.
+  explain: '<code>{f:=MIRR(B5:H5,B1,B2)}</code>: расходы дисконтируются под ставку кредита, доходы растут под ставку вклада.
+    У МВСД ответ всегда один.'
+  mistake: 'Перепутать ставки местами: вторым аргументом идёт ставка, под которую берут деньги, третьим — под которую вкладывают.'
+  sheet:
+    file: МВСД.xlsx
+    name: Проект
+    columns:
+      A: 160
+      B: 90
+      C: 60
+      D: 60
+      E: 60
+      F: 60
+      G: 60
+      H: 60
+    rows: 8
+    cells:
+      A1:
+        v: Ставка кредита
+        style: label
+      B1:
+        v: 0.12
+        fmt: percent
+      A2:
+        v: Ставка вклада
+        style: label
+      B2:
+        v: 0.15
+        fmt: percent
+      A4:
+        v: Год
+        style: head
+      A5: Поток, млн ₸
+      A7: МВСД
+      B4:
+        v: 0
+        style: head
+      B5: -10
+      C4:
+        v: 1
+        style: head
+      C5: 8
+      D4:
+        v: 2
+        style: head
+      D5: 1.5
+      E4:
+        v: 3
+        style: head
+      E5: 1.5
+      F4:
+        v: 4
+        style: head
+      F5: 1.5
+      G4:
+        v: 5
+        style: head
+      G5: 1.5
+      H4:
+        v: 6
+        style: head
+      H5: -1.5
+  solution:
+    cells:
+      B7:
+        f: =MIRR(B5:H5,B1,B2)
+        fmt: percent
+  expect:
+    B7: 0.1486
+- id: bond-yield
+  number: 10
+  title: Доходность облигации
+  task: Облигацию из задания 8 главы 8 (купон 50 000 ₸ в год 30 лет и номинал 1 000 000 ₸ в конце 30-го года) купили сегодня
+    за <b>950 000 ₸</b>. В <code>B6:B36</code> постройте потоки, в <code>E1</code> найдите ВСД — <b>доходность к погашению</b>.
+  explain: Год 0 — <code>{f:=-B1}</code>, годы 1–29 — <code>{f:=$B$2}</code>, год 30 — <code>{f:=$B$2+$B$3}</code>. Доходность
+    — <code>{f:=IRR(B6:B36)}</code>. Купили дешевле номинала — доходность выше купона 5%.
+  mistake: 'Забыть цену покупки в году 0: все потоки положительные, и {fn:IRR} вернёт <code>#ЧИСЛО!</code>.'
+  sheet:
+    file: Облигация.xlsx
+    name: Облигация
+    columns:
+      A: 150
+      B: 140
+      C: 30
+      D: 150
+      E: 110
+    rows: 36
+    cells:
+      A1:
+        v: Цена покупки
+        style: label
+      B1:
+        v: 950000
+        fmt: kzt
+      A2:
+        v: Купон в год
+        style: label
+      B2:
+        v: 50000
+        fmt: kzt
+      A3:
+        v: Номинал
+        style: label
+      B3:
+        v: 1000000
+        fmt: kzt
+      D1:
+        v: Доходность (ВСД)
+        style: label
+      A5:
+        v: Год
+        style: head
+      B5:
+        v: Поток
+        style: head
+      A6: 0
+      B6:
+        fmt: kzt
+      A7: 1
+      B7:
+        fmt: kzt
+      A8: 2
+      B8:
+        fmt: kzt
+      A9: 3
+      B9:
+        fmt: kzt
+      A10: 4
+      B10:
+        fmt: kzt
+      A11: 5
+      B11:
+        fmt: kzt
+      A12: 6
+      B12:
+        fmt: kzt
+      A13: 7
+      B13:
+        fmt: kzt
+      A14: 8
+      B14:
+        fmt: kzt
+      A15: 9
+      B15:
+        fmt: kzt
+      A16: 10
+      B16:
+        fmt: kzt
+      A17: 11
+      B17:
+        fmt: kzt
+      A18: 12
+      B18:
+        fmt: kzt
+      A19: 13
+      B19:
+        fmt: kzt
+      A20: 14
+      B20:
+        fmt: kzt
+      A21: 15
+      B21:
+        fmt: kzt
+      A22: 16
+      B22:
+        fmt: kzt
+      A23: 17
+      B23:
+        fmt: kzt
+      A24: 18
+      B24:
+        fmt: kzt
+      A25: 19
+      B25:
+        fmt: kzt
+      A26: 20
+      B26:
+        fmt: kzt
+      A27: 21
+      B27:
+        fmt: kzt
+      A28: 22
+      B28:
+        fmt: kzt
+      A29: 23
+      B29:
+        fmt: kzt
+      A30: 24
+      B30:
+        fmt: kzt
+      A31: 25
+      B31:
+        fmt: kzt
+      A32: 26
+      B32:
+        fmt: kzt
+      A33: 27
+      B33:
+        fmt: kzt
+      A34: 28
+      B34:
+        fmt: kzt
+      A35: 29
+      B35:
+        fmt: kzt
+      A36: 30
+      B36:
+        fmt: kzt
+  solution:
+    cells:
+      B6:
+        f: =-B1
+        fmt: kzt
+      B7:
+        f: =$B$2
+        fmt: kzt
+      B36:
+        f: =$B$2+$B$3
+        fmt: kzt
+      E1:
+        f: =IRR(B6:B36)
+        fmt: percent
+    fill:
+    - source: B7
+      to: B7:B35
+  expect:
+    B6: -950000
+    B35: 50000
+    B36: 1050000
+    E1: 0.0534

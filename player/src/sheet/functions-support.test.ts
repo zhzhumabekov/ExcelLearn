@@ -104,3 +104,64 @@ describe("гл. 8: ЧПС, ЧИСТНЗ, КОРЕНЬ", () => {
     expect(String(sheet.value("Z1"))).toMatch(/#NUM!|#ЧИСЛО!/);
   });
 });
+
+// Глава 9: ВСД, ЧИСТВНДОХ, МВСД. Эталоны — из книги (IRR.xlsx) и пересчёт на Python.
+describe("гл. 9: ВСД, ЧИСТВНДОХ, МВСД", () => {
+  const sheet = new SheetModel({
+    cells: {
+      // МВСД (рис. 9.6): заём 120 000 и потоки 5 лет
+      A1: -120000,
+      B1: 39000,
+      C1: 30000,
+      D1: 21000,
+      E1: 37000,
+      F1: 46000,
+      // Два корня (рис. 9.2): −20, 82, −60, 2
+      A2: -20,
+      B2: 82,
+      C2: -60,
+      D2: 2,
+      // Нет корня (рис. 9.3): +, −, +
+      A3: 10,
+      B3: -30,
+      C3: 25,
+      // ЧИСТВНДОХ: даты и потоки
+      A5: 46000,
+      A6: 46100,
+      A7: 46400,
+      B5: -1000,
+      B6: 400,
+      B7: 800,
+    },
+  });
+  const value = (formula: string) => {
+    sheet.setInput("Z1", formula);
+    return sheet.value("Z1");
+  };
+
+  it("ВСД и МВСД примера книги: 13,07% и 12,61%", () => {
+    expect(value("=IRR(A1:F1)")).toBeCloseTo(0.130736, 5);
+    expect(value("=MIRR(A1:F1,10%,12%)")).toBeCloseTo(0.126094, 5);
+  });
+
+  it.each([
+    [-0.9, -0.0959],
+    [-0.1, -0.0959],
+    [0.1, -0.0959],
+    [0.3, -0.0959],
+    [0.5, 2.1609],
+    [0.9, 2.1609],
+  ])("два корня: предположение %f → %f (как в таблице книги)", (guess, root) => {
+    expect(value(`=IRR(A2:D2,${guess})`)).toBeCloseTo(root, 3);
+  });
+
+  it("без корня — #ЧИСЛО! при любом предположении", () => {
+    for (const guess of [-0.9, -0.5, 0, 0.5, 0.9]) expect(String(value(`=IRR(A3:C3,${guess})`))).toMatch(/#NUM!/);
+  });
+
+  it("ЧИСТВНДОХ: при найденной ставке ЧИСТНЗ = 0", () => {
+    const rate = value("=XIRR(B5:B7,A5:A7)") as number;
+    expect(typeof rate).toBe("number");
+    expect(value(`=XNPV(${rate},B5:B7,A5:A7)`)).toBeCloseTo(0, 6);
+  });
+});

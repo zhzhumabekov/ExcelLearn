@@ -21,6 +21,9 @@ const SIGNATURES: Record<string, [string, string][]> = {
   NPV: [["rate", "ставка"], ["value1", "значение1"], ["[value2]", "[значение2]"], ["…", "…"]],
   XNPV: [["rate", "ставка"], ["values", "значения"], ["dates", "даты"]],
   SQRT: [["number", "число"]],
+  IRR: [["values", "значения"], ["[guess]", "[предположение]"]],
+  XIRR: [["values", "значения"], ["dates", "даты"], ["[guess]", "[предп]"]],
+  MIRR: [["values", "значения"], ["finance_rate", "ставка_финанс"], ["reinvest_rate", "ставка_реинвест"]],
   // Глава 7. РАЗНДАТ подсказки нет — её нет и в Excel
   TODAY: [],
   DATE: [["year", "год"], ["month", "месяц"], ["day", "день"]],
