@@ -68,8 +68,9 @@ steps:
   actions:
   - wait: 3000
 - title: Имя — по одному примеру
-  text: В <code>B2</code> напечатайте <b>Aigerim</b>, нажмите <kbd>Enter</kbd>, затем <kbd>Ctrl</kbd>+<kbd>E</kbd>. Excel
-    заполнил имена остальных сотрудников.
+  text: 'В <code>B2</code> напечатайте <b>Aigerim</b>, нажмите <kbd>Enter</kbd>, затем <kbd>Ctrl</kbd>+<kbd>E</kbd>. Excel
+    сравнивает ваш пример с исходной строкой и ищет правило: «Aigerim» — это часть «Aigerim Saparova» до пробела. Это правило
+    он применяет ко всем строкам ниже и заполняет имена остальных сотрудников.'
   actions:
   - click: B2
   - type: Aigerim
@@ -80,7 +81,8 @@ steps:
     - E
   - wait: 600
 - title: Фамилия
-  text: 'Так же: <b>Saparova</b> в <code>C2</code>, <kbd>Enter</kbd>, <kbd>Ctrl</kbd>+<kbd>E</kbd>.'
+  text: 'Так же: <b>Saparova</b> в <code>C2</code>, <kbd>Enter</kbd>, <kbd>Ctrl</kbd>+<kbd>E</kbd>. Теперь пример — часть
+    строки <b>после</b> пробела, и Excel берёт у каждого сотрудника его фамилию, какой бы длины ни было имя.'
   actions:
   - click: C2
   - type: Saparova
@@ -91,8 +93,9 @@ steps:
     - E
   - wait: 600
 - title: Адрес почты
-  text: 'Пример <b>saparova@company.kz</b>: фамилия строчными плюс домен. <b>Данные → Мгновенное заполнение</b> делает то
-    же, что <kbd>Ctrl</kbd>+<kbd>E</kbd>.'
+  text: 'Пример <b>saparova@company.kz</b>: Excel замечает сразу три правила — взять фамилию, сделать её строчной и дописать
+    постоянный текст «@company.kz». <b>Данные → Мгновенное заполнение</b> делает то же, что <kbd>Ctrl</kbd>+<kbd>E</kbd>.
+    Проверьте пару строк: если правило понято неверно, исправьте ещё один пример, и Excel пересчитает остальные.'
   actions:
   - click: D2
   - type: saparova@company.kz
