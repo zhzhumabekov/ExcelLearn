@@ -71,8 +71,8 @@ def get_site_registry() -> Registry:
     """Реестр для страниц сайта: YAML + действующие правки из админки."""
     base = get_registry()
     stamp = LessonText.objects.aggregate(count=Count("id"), last=Max("updated_at"))
-    key = (id(base), stamp["count"], stamp["last"])
-    if _site.get("key") != key:
+    key = (stamp["count"], stamp["last"])
+    if _site.get("base") is not base or _site.get("key") != key:  # YAML перечитан или правки изменились
         by_lesson: dict[str, list[LessonText]] = {}
         for edit in LessonText.objects.all():
             by_lesson.setdefault(edit.lesson_id, []).append(edit)
@@ -81,7 +81,7 @@ def get_site_registry() -> Registry:
             for lesson_id, edits in by_lesson.items()
             if (lesson := base.get(lesson_id)) is not None
         }
-        _site.update(key=key, registry=base.with_lessons(replaced))
+        _site.update(base=base, key=key, registry=base.with_lessons(replaced))
     return _site["registry"]
 
 

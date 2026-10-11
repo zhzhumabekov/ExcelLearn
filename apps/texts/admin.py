@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
@@ -9,6 +10,7 @@ from lessons.registry import get_registry
 
 from .models import LessonText
 from .services import ACTIVE, STALE, edit_status, field_label, lesson_texts, validate_text
+from .yaml_write import WriteError, write_to_yaml
 
 
 class LessonTextForm(forms.ModelForm):
@@ -53,6 +55,7 @@ class LessonTextAdmin(admin.ModelAdmin):
     fields = ["lesson_id", "field", "original", "text", "updated_at", "updated_by"]
     readonly_fields = ["lesson_id", "field", "original", "updated_at", "updated_by"]
     list_select_related = ["updated_by"]
+    actions = ["write_selected_to_yaml"]
 
     def has_add_permission(self, request):
         return False  # правки создаёт страница урока: «Исправить тексты урока»
@@ -73,6 +76,35 @@ class LessonTextAdmin(admin.ModelAdmin):
         obj.updated_by = request.user
         super().save_model(request, obj, form, change)
 
+    @admin.action(description="Записать в YAML (все действующие правки этих уроков)")
+    def write_selected_to_yaml(self, request, queryset):
+        for lesson_id in sorted(set(queryset.values_list("lesson_id", flat=True))):
+            self._write_to_yaml(request, lesson_id)
+
+    def _write_to_yaml(self, request, lesson_id: str) -> None:
+        if not settings.TEXTS_WRITE_YAML:
+            messages.error(request, "Запись в YAML выключена на этом сервере (TEXTS_WRITE_YAML)")
+            return
+        try:
+            written = write_to_yaml(lesson_id)
+        except WriteError as exc:
+            messages.error(request, f"{lesson_id}: {exc}")
+            return
+        if written is None:
+            messages.info(request, f"{lesson_id}: действующих правок нет")
+            return
+        files = written.path.name + (f" и text_edits.yaml (для {written.generator})" if written.generator else "")
+        messages.success(
+            request, f"{lesson_id}: записано полей — {len(written.fields)} в {files}. Закоммитьте изменения."
+        )
+
+    def write_yaml_view(self, request, lesson_id: str):
+        if not self.has_change_permission(request):
+            raise PermissionDenied
+        if request.method == "POST":
+            self._write_to_yaml(request, lesson_id)
+        return redirect("admin:texts_lesson_edit", lesson_id=lesson_id)
+
     def get_urls(self):
         own = [
             path("lessons/", self.admin_site.admin_view(self.lesson_list_view), name="texts_lesson_list"),
@@ -80,6 +112,11 @@ class LessonTextAdmin(admin.ModelAdmin):
                 "lessons/<slug:lesson_id>/",
                 self.admin_site.admin_view(self.lesson_edit_view),
                 name="texts_lesson_edit",
+            ),
+            path(
+                "lessons/<slug:lesson_id>/write-yaml/",
+                self.admin_site.admin_view(self.write_yaml_view),
+                name="texts_lesson_write_yaml",
             ),
         ]
         return own + super().get_urls()
@@ -155,5 +192,7 @@ class LessonTextAdmin(admin.ModelAdmin):
             "form": form,
             "title_row": rows[0],
             "steps": [rows[i : i + 2] for i in range(1, len(rows), 2)],
+            "active_count": sum(status == ACTIVE for status in statuses.values()),
+            "can_write_yaml": settings.TEXTS_WRITE_YAML,
         }
         return render(request, "admin/texts/lesson_edit.html", context)
