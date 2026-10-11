@@ -24,6 +24,10 @@ describe("parseInput", () => {
     [" 3.5 ", 3.5],
     ["Luka", "Luka"],
     ["", null],
+    ["2%", 0.02], // процент — число, делённое на 100
+    ["12,5%", 0.125],
+    ["5 %", 0.05],
+    ["2%%", "2%%"],
   ])("%j → %j", (raw, parsed) => {
     expect(parseInput(raw)).toEqual(parsed);
   });

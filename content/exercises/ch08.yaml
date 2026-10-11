@@ -1,0 +1,959 @@
+# Глава 8 (ЧПС). Собрано генератором; ответы expect посчитаны независимо.
+chapter: ch08
+exercises:
+- id: hockey-bonus
+  number: 1
+  title: Бонус по годам или 600 млн ₸ сразу
+  task: 'Хоккеисту предлагают бонус за контракт: <b>100 млн ₸</b> сейчас и по <b>200 млн ₸</b> через год, через два и через
+    три года. Или <b>600 млн ₸</b> сразу. Ставка — 10%, налоги не учитываем. В <code>B6</code> посчитайте ЧПС бонуса по
+    годам, в <code>B8</code> — формулой {fn:IF} напишите, что выгоднее: «бонус по годам» или «600 млн сразу».'
+  explain: 'Сегодняшние 100 млн ₸ — снаружи {fn:NPV}: <code>{f:=B4+NPV(B1,C4:E4)}</code>. Сравнение — <code>{f:=IF(B6>B7,"бонус
+    по годам","600 млн сразу")}</code>.'
+  mistake: 'Подать в {fn:NPV} все четыре потока: сегодняшние 100 млн тоже продисконтируются на год, и ЧПС выйдет на 10%
+    меньше.'
+  sheet:
+    file: Бонус.xlsx
+    name: Бонус
+    columns:
+      A: 190
+      B: 150
+      C: 130
+      D: 130
+      E: 130
+    rows: 9
+    cells:
+      A1:
+        v: Ставка
+        style: label
+      B1:
+        v: 0.1
+        fmt: percent
+      A3:
+        v: Год
+        style: head
+      A4: Бонус
+      B3:
+        v: 0
+        style: head
+      B4:
+        v: 100000000
+        fmt: kzt
+      C3:
+        v: 1
+        style: head
+      C4:
+        v: 200000000
+        fmt: kzt
+      D3:
+        v: 2
+        style: head
+      D4:
+        v: 200000000
+        fmt: kzt
+      E3:
+        v: 3
+        style: head
+      E4:
+        v: 200000000
+        fmt: kzt
+      A6: ЧПС бонуса по годам
+      A7: Если сразу
+      B7:
+        v: 600000000
+        fmt: kzt
+      A8: Что выгоднее
+  solution:
+    cells:
+      B6:
+        f: =B4+NPV(B1,C4:E4)
+        fmt: kzt
+      B8:
+        f: =IF(B6>B7,"бонус по годам","600 млн сразу")
+  expect:
+    B6: 597370398.1968
+    B8: 600 млн сразу
+- id: reject-project
+  number: 2
+  title: Отказаться от проекта?
+  task: 'Проект: <b>−4 млн ₸</b> сегодня, <b>+4 млн ₸</b> через год и через два, <b>−3 млн ₸</b> через три года (ликвидация
+    оборудования). Стоимость капитала — 15%. В <code>B6</code> посчитайте ЧПС, в <code>B7</code> формулой {fn:IF} напишите
+    «вкладывать» или «отказаться».'
+  explain: ЧПС больше нуля — проект увеличивает стоимость компании. <code>{f:=B4+NPV(B1,C4:E4)}</code>, затем <code>{f:=IF(B6>0,"вкладывать","отказаться")}</code>.
+  mistake: 'Решить по простой сумме: 4 + 4 − 4 − 3 = 1 млн ₸ «в плюс» — но так тенге разных лет складываются как одинаковые.'
+  sheet:
+    file: Проект.xlsx
+    name: Проект
+    columns:
+      A: 150
+      B: 130
+      C: 130
+      D: 130
+      E: 130
+    rows: 8
+    cells:
+      A1:
+        v: Ставка
+        style: label
+      B1:
+        v: 0.15
+        fmt: percent
+      A3:
+        v: Год
+        style: head
+      A4: Поток
+      B3:
+        v: 0
+        style: head
+      B4:
+        v: -4000000
+        fmt: kzt
+      C3:
+        v: 1
+        style: head
+      C4:
+        v: 4000000
+        fmt: kzt
+      D3:
+        v: 2
+        style: head
+      D4:
+        v: 4000000
+        fmt: kzt
+      E3:
+        v: 3
+        style: head
+      E4:
+        v: -3000000
+        fmt: kzt
+      A6: ЧПС проекта
+      A7: Решение
+  solution:
+    cells:
+      B6:
+        f: =B4+NPV(B1,C4:E4)
+        fmt: kzt
+      B7:
+        f: =IF(B6>0,"вкладывать","отказаться")
+  expect:
+    B6: 530286.8415
+    B7: вкладывать
+- id: isp-midyear
+  number: 3
+  title: 'Абонент провайдера: деньги в середине года'
+  task: Абонент интернет-провайдера в Астане платит <b>5 000 ₸</b> в месяц пять лет. Будем считать, что выручка каждого
+    года приходит в его середине. Ставка — 15%. В <code>B5:F5</code> посчитайте выручку за год, в <code>B7</code> — ЧПС.
+  explain: 'Выручка за год — <code>{f:=$B$2*12}</code>, протяните вправо. ЧПС для середины года — <code>{f:=SQRT(1+B1)*NPV(B1,B5:F5)}</code>:
+    {fn:NPV} считает деньги в конце года, а корень сдвигает их на полгода раньше.'
+  mistake: Умножить на (1 + ставка) — это сдвиг на целый год, к началу года. Для середины нужен корень.
+  sheet:
+    file: Провайдер.xlsx
+    name: Абонент
+    columns:
+      A: 170
+      B: 110
+      C: 110
+      D: 110
+      E: 110
+      F: 110
+    rows: 8
+    cells:
+      A1:
+        v: Ставка
+        style: label
+      B1:
+        v: 0.15
+        fmt: percent
+      A2:
+        v: Платёж в месяц
+        style: label
+      B2:
+        v: 5000
+        fmt: kzt
+      A4:
+        v: Год
+        style: head
+      A5: Выручка за год
+      A7: ЧПС (середина года)
+      B4:
+        v: 1
+        style: head
+      B5:
+        fmt: kzt
+      C4:
+        v: 2
+        style: head
+      C5:
+        fmt: kzt
+      D4:
+        v: 3
+        style: head
+      D5:
+        fmt: kzt
+      E4:
+        v: 4
+        style: head
+      E5:
+        fmt: kzt
+      F4:
+        v: 5
+        style: head
+      F5:
+        fmt: kzt
+  solution:
+    cells:
+      B5:
+        f: =$B$2*12
+        fmt: kzt
+      B7:
+        f: =SQRT(1+B1)*NPV(B1,B5:F5)
+        fmt: kzt
+    fill:
+    - source: B5
+      to: B5:F5
+  expect:
+    B5: 60000
+    F5: 60000
+    B7: 215687.1515
+- id: isp-xnpv
+  number: 4
+  title: 'Абонент провайдера: точно по месяцам'
+  task: 'Тот же абонент: <b>5 000 ₸</b> в начале каждого месяца, первый платёж — через месяц после сегодняшнего дня (12.10.2026
+    в <code>A4</code>), всего 60 платежей. Ставка — 15%. В <code>A5:A64</code> постройте даты платежей, в <code>B5:B64</code>
+    — платежи, в <code>E1</code> посчитайте ЧПС на сегодня функцией {fn:XNPV}.'
+  explain: 'Дата через месяц — <code>{f:=DATE(YEAR(A4),MONTH(A4)+1,DAY(A4))}</code>, протяните вниз. Платёж — <code>{f:=$B$2}</code>.
+    Сегодняшняя строка с потоком 0 — первая в диапазоне, тогда {fn:XNPV} считает в деньгах сегодняшнего дня: <code>{f:=XNPV(B1,B4:B64,A4:A64)}</code>.'
+  mistake: 'Начать диапазон с первого платежа (<code>A5</code>): ЧПС будет на дату первого платежа, а не на сегодня.'
+  sheet:
+    file: Провайдер_по_месяцам.xlsx
+    name: Платежи
+    columns:
+      A: 130
+      B: 110
+      C: 30
+      D: 150
+      E: 130
+    rows: 64
+    cells:
+      A1:
+        v: Ставка
+        style: label
+      B1:
+        v: 0.15
+        fmt: percent
+      A2:
+        v: Платёж в месяц
+        style: label
+      B2:
+        v: 5000
+        fmt: kzt
+      D1:
+        v: ЧПС на сегодня
+        style: label
+      A3:
+        v: Дата
+        style: head
+      B3:
+        v: Платёж
+        style: head
+      A4:
+        v: '2026-10-12'
+        fmt: date
+      B4:
+        v: 0
+        fmt: kzt
+      A5:
+        fmt: date
+      B5:
+        fmt: kzt
+      A6:
+        fmt: date
+      B6:
+        fmt: kzt
+      A7:
+        fmt: date
+      B7:
+        fmt: kzt
+      A8:
+        fmt: date
+      B8:
+        fmt: kzt
+      A9:
+        fmt: date
+      B9:
+        fmt: kzt
+      A10:
+        fmt: date
+      B10:
+        fmt: kzt
+      A11:
+        fmt: date
+      B11:
+        fmt: kzt
+      A12:
+        fmt: date
+      B12:
+        fmt: kzt
+      A13:
+        fmt: date
+      B13:
+        fmt: kzt
+      A14:
+        fmt: date
+      B14:
+        fmt: kzt
+      A15:
+        fmt: date
+      B15:
+        fmt: kzt
+      A16:
+        fmt: date
+      B16:
+        fmt: kzt
+      A17:
+        fmt: date
+      B17:
+        fmt: kzt
+      A18:
+        fmt: date
+      B18:
+        fmt: kzt
+      A19:
+        fmt: date
+      B19:
+        fmt: kzt
+      A20:
+        fmt: date
+      B20:
+        fmt: kzt
+      A21:
+        fmt: date
+      B21:
+        fmt: kzt
+      A22:
+        fmt: date
+      B22:
+        fmt: kzt
+      A23:
+        fmt: date
+      B23:
+        fmt: kzt
+      A24:
+        fmt: date
+      B24:
+        fmt: kzt
+      A25:
+        fmt: date
+      B25:
+        fmt: kzt
+      A26:
+        fmt: date
+      B26:
+        fmt: kzt
+      A27:
+        fmt: date
+      B27:
+        fmt: kzt
+      A28:
+        fmt: date
+      B28:
+        fmt: kzt
+      A29:
+        fmt: date
+      B29:
+        fmt: kzt
+      A30:
+        fmt: date
+      B30:
+        fmt: kzt
+      A31:
+        fmt: date
+      B31:
+        fmt: kzt
+      A32:
+        fmt: date
+      B32:
+        fmt: kzt
+      A33:
+        fmt: date
+      B33:
+        fmt: kzt
+      A34:
+        fmt: date
+      B34:
+        fmt: kzt
+      A35:
+        fmt: date
+      B35:
+        fmt: kzt
+      A36:
+        fmt: date
+      B36:
+        fmt: kzt
+      A37:
+        fmt: date
+      B37:
+        fmt: kzt
+      A38:
+        fmt: date
+      B38:
+        fmt: kzt
+      A39:
+        fmt: date
+      B39:
+        fmt: kzt
+      A40:
+        fmt: date
+      B40:
+        fmt: kzt
+      A41:
+        fmt: date
+      B41:
+        fmt: kzt
+      A42:
+        fmt: date
+      B42:
+        fmt: kzt
+      A43:
+        fmt: date
+      B43:
+        fmt: kzt
+      A44:
+        fmt: date
+      B44:
+        fmt: kzt
+      A45:
+        fmt: date
+      B45:
+        fmt: kzt
+      A46:
+        fmt: date
+      B46:
+        fmt: kzt
+      A47:
+        fmt: date
+      B47:
+        fmt: kzt
+      A48:
+        fmt: date
+      B48:
+        fmt: kzt
+      A49:
+        fmt: date
+      B49:
+        fmt: kzt
+      A50:
+        fmt: date
+      B50:
+        fmt: kzt
+      A51:
+        fmt: date
+      B51:
+        fmt: kzt
+      A52:
+        fmt: date
+      B52:
+        fmt: kzt
+      A53:
+        fmt: date
+      B53:
+        fmt: kzt
+      A54:
+        fmt: date
+      B54:
+        fmt: kzt
+      A55:
+        fmt: date
+      B55:
+        fmt: kzt
+      A56:
+        fmt: date
+      B56:
+        fmt: kzt
+      A57:
+        fmt: date
+      B57:
+        fmt: kzt
+      A58:
+        fmt: date
+      B58:
+        fmt: kzt
+      A59:
+        fmt: date
+      B59:
+        fmt: kzt
+      A60:
+        fmt: date
+      B60:
+        fmt: kzt
+      A61:
+        fmt: date
+      B61:
+        fmt: kzt
+      A62:
+        fmt: date
+      B62:
+        fmt: kzt
+      A63:
+        fmt: date
+      B63:
+        fmt: kzt
+      A64:
+        fmt: date
+      B64:
+        fmt: kzt
+  solution:
+    cells:
+      A5:
+        f: =DATE(YEAR(A4),MONTH(A4)+1,DAY(A4))
+        fmt: date
+      B5:
+        f: =$B$2
+        fmt: kzt
+      E1:
+        f: =XNPV(B1,B4:B64,A4:A64)
+        fmt: kzt
+    fill:
+    - source: A5
+      to: A5:A64
+    - source: B5
+      to: B5:B64
+  expect:
+    A5: 46338
+    A64: 48133
+    B64: 5000
+    E1: 214556.3882
+- id: four-years
+  number: 5
+  title: 'Четыре года: потоки в конце года'
+  task: 'Потоки проекта приходят в конце каждого года: <b>−600 000</b>, <b>550 000</b>, <b>−680 000</b> и <b>1 000 000 ₸</b>.
+    Ставка — 15%. Посчитайте ЧПС в <code>B6</code>.'
+  explain: 'Все потоки — в конце года, сегодняшнего потока нет. Значит, всё внутри {fn:NPV}: <code>{f:=NPV(B1,B4:E4)}</code>.'
+  mistake: 'Вынести первый поток наружу «по привычке»: тогда −600 000 ₸ не продисконтируются, хотя приходят через год.'
+  sheet:
+    file: Четыре_года.xlsx
+    name: Потоки
+    columns:
+      A: 120
+      B: 120
+      C: 120
+      D: 120
+      E: 120
+    rows: 7
+    cells:
+      A1:
+        v: Ставка
+        style: label
+      B1:
+        v: 0.15
+        fmt: percent
+      A3:
+        v: Год
+        style: head
+      A4: Поток
+      A6: ЧПС
+      B3:
+        v: 1
+        style: head
+      B4:
+        v: -600000
+        fmt: kzt
+      C3:
+        v: 2
+        style: head
+      C4:
+        v: 550000
+        fmt: kzt
+      D3:
+        v: 3
+        style: head
+      D4:
+        v: -680000
+        fmt: kzt
+      E3:
+        v: 4
+        style: head
+      E4:
+        v: 1000000
+        fmt: kzt
+  solution:
+    cells:
+      B6:
+        f: =NPV(B1,B4:E4)
+        fmt: kzt
+  expect:
+    B6: 18782.0941
+- id: dated-flows
+  number: 6
+  title: 'Потоки по датам: ЧПС на сегодня'
+  task: Сегодня 01.11.2026. Потоки проекта — в строках 5–8, с датами. Ставка — 15%. Посчитайте ЧПС в деньгах сегодняшнего
+    дня в <code>B10</code>.
+  explain: 'В строке 4 уже стоит сегодняшняя дата с потоком 0 — включите её в диапазон первой: <code>{f:=XNPV(B1,B4:B8,A4:A8)}</code>.'
+  mistake: 'Взять {fn:NPV}: она считает потоки через ровные годы, а здесь между датами от месяца до полутора лет.'
+  sheet:
+    file: Потоки_по_датам.xlsx
+    name: Потоки
+    columns:
+      A: 150
+      B: 140
+    rows: 11
+    cells:
+      A1:
+        v: Ставка
+        style: label
+      B1:
+        v: 0.15
+        fmt: percent
+      A3:
+        v: Дата
+        style: head
+      B3:
+        v: Поток
+        style: head
+      A4:
+        v: '2026-11-01'
+        fmt: date
+      B4:
+        v: 0
+        fmt: kzt
+      A10: ЧПС на сегодня
+      A5:
+        v: '2026-12-15'
+        fmt: date
+      B5:
+        v: -1000000
+        fmt: kzt
+      A6:
+        v: '2027-01-11'
+        fmt: date
+      B6:
+        v: 300000
+        fmt: kzt
+      A7:
+        v: '2028-04-07'
+        fmt: date
+      B7:
+        v: 600000
+        fmt: kzt
+      A8:
+        v: '2029-07-15'
+        fmt: date
+      B8:
+        v: 925000
+        fmt: kzt
+  solution:
+    cells:
+      B10:
+        f: =XNPV(B1,B4:B8,A4:A8)
+        fmt: kzt
+  expect:
+    B10: 433652.287
+- id: graduate-salary
+  number: 7
+  title: Сколько сегодня стоит заработок за 30 лет
+  task: Выпускник получает <b>6 млн ₸</b> за первый год работы, дальше зарплата растёт на 5% в год, работать — 30 лет. Зарплату
+    за год он получает в конце года. Ставка — 8%. В <code>B5:B34</code> постройте зарплаты, в <code>E1</code> посчитайте
+    ЧПС всего заработка.
+  explain: 'Первый год — <code>{f:=B2}</code>, дальше — прошлый год × (1 + рост): <code>{f:=B5*(1+$B$3)}</code> в <code>B6</code>
+    и вниз. ЧПС — <code>{f:=NPV(B1,B5:B34)}</code>: все зарплаты приходят в конце года.'
+  mistake: 'Не закрепить <code>$B$3</code>: при протягивании ссылка на рост уедет вниз, на пустые ячейки, и рост станет
+    нулём.'
+  sheet:
+    file: Заработок.xlsx
+    name: Заработок
+    columns:
+      A: 170
+      B: 140
+      C: 30
+      D: 130
+      E: 150
+    rows: 34
+    cells:
+      A1:
+        v: Ставка
+        style: label
+      B1:
+        v: 0.08
+        fmt: percent
+      A2:
+        v: Зарплата 1-го года
+        style: label
+      B2:
+        v: 6000000
+        fmt: kzt
+      A3:
+        v: Рост в год
+        style: label
+      B3:
+        v: 0.05
+        fmt: percent
+      D1:
+        v: ЧПС заработка
+        style: label
+      A4:
+        v: Год
+        style: head
+      B4:
+        v: Зарплата
+        style: head
+      A5: 1
+      B5:
+        fmt: kzt
+      A6: 2
+      B6:
+        fmt: kzt
+      A7: 3
+      B7:
+        fmt: kzt
+      A8: 4
+      B8:
+        fmt: kzt
+      A9: 5
+      B9:
+        fmt: kzt
+      A10: 6
+      B10:
+        fmt: kzt
+      A11: 7
+      B11:
+        fmt: kzt
+      A12: 8
+      B12:
+        fmt: kzt
+      A13: 9
+      B13:
+        fmt: kzt
+      A14: 10
+      B14:
+        fmt: kzt
+      A15: 11
+      B15:
+        fmt: kzt
+      A16: 12
+      B16:
+        fmt: kzt
+      A17: 13
+      B17:
+        fmt: kzt
+      A18: 14
+      B18:
+        fmt: kzt
+      A19: 15
+      B19:
+        fmt: kzt
+      A20: 16
+      B20:
+        fmt: kzt
+      A21: 17
+      B21:
+        fmt: kzt
+      A22: 18
+      B22:
+        fmt: kzt
+      A23: 19
+      B23:
+        fmt: kzt
+      A24: 20
+      B24:
+        fmt: kzt
+      A25: 21
+      B25:
+        fmt: kzt
+      A26: 22
+      B26:
+        fmt: kzt
+      A27: 23
+      B27:
+        fmt: kzt
+      A28: 24
+      B28:
+        fmt: kzt
+      A29: 25
+      B29:
+        fmt: kzt
+      A30: 26
+      B30:
+        fmt: kzt
+      A31: 27
+      B31:
+        fmt: kzt
+      A32: 28
+      B32:
+        fmt: kzt
+      A33: 29
+      B33:
+        fmt: kzt
+      A34: 30
+      B34:
+        fmt: kzt
+  solution:
+    cells:
+      B5:
+        f: =B2
+        fmt: kzt
+      B6:
+        f: =B5*(1+$B$3)
+        fmt: kzt
+      E1:
+        f: =NPV(B1,B5:B34)
+        fmt: kzt
+    fill:
+    - source: B6
+      to: B6:B34
+  expect:
+    B34: 24696813.5723
+    E1: 114099379.0647
+- id: bond-price
+  number: 8
+  title: Справедливая цена облигации
+  task: 'Облигация на 30 лет: купон <b>50 000 ₸</b> в конце каждого года, в конце 30-го года — ещё и номинал <b>1 000 000
+    ₸</b>. Ставка — 5% в год. В <code>B5:B34</code> постройте выплаты, в <code>E1</code> посчитайте справедливую цену —
+    ЧПС выплат.'
+  explain: Годы 1–29 — купон <code>{f:=$B$2}</code>, год 30 — <code>{f:=$B$2+$B$3}</code>. Цена — <code>{f:=NPV(B1,B5:B34)}</code>.
+    Купон 5% от номинала и ставка 5% — поэтому цена ровно равна номиналу.
+  mistake: 'Забыть номинал в последнем году: останутся одни купоны, около 768 600 ₸ вместо 1 000 000 ₸.'
+  sheet:
+    file: Облигация.xlsx
+    name: Облигация
+    columns:
+      A: 150
+      B: 140
+      C: 30
+      D: 140
+      E: 150
+    rows: 34
+    cells:
+      A1:
+        v: Ставка
+        style: label
+      B1:
+        v: 0.05
+        fmt: percent
+      A2:
+        v: Купон в год
+        style: label
+      B2:
+        v: 50000
+        fmt: kzt
+      A3:
+        v: Номинал
+        style: label
+      B3:
+        v: 1000000
+        fmt: kzt
+      D1:
+        v: Цена облигации
+        style: label
+      A4:
+        v: Год
+        style: head
+      B4:
+        v: Выплата
+        style: head
+      A5: 1
+      B5:
+        fmt: kzt
+      A6: 2
+      B6:
+        fmt: kzt
+      A7: 3
+      B7:
+        fmt: kzt
+      A8: 4
+      B8:
+        fmt: kzt
+      A9: 5
+      B9:
+        fmt: kzt
+      A10: 6
+      B10:
+        fmt: kzt
+      A11: 7
+      B11:
+        fmt: kzt
+      A12: 8
+      B12:
+        fmt: kzt
+      A13: 9
+      B13:
+        fmt: kzt
+      A14: 10
+      B14:
+        fmt: kzt
+      A15: 11
+      B15:
+        fmt: kzt
+      A16: 12
+      B16:
+        fmt: kzt
+      A17: 13
+      B17:
+        fmt: kzt
+      A18: 14
+      B18:
+        fmt: kzt
+      A19: 15
+      B19:
+        fmt: kzt
+      A20: 16
+      B20:
+        fmt: kzt
+      A21: 17
+      B21:
+        fmt: kzt
+      A22: 18
+      B22:
+        fmt: kzt
+      A23: 19
+      B23:
+        fmt: kzt
+      A24: 20
+      B24:
+        fmt: kzt
+      A25: 21
+      B25:
+        fmt: kzt
+      A26: 22
+      B26:
+        fmt: kzt
+      A27: 23
+      B27:
+        fmt: kzt
+      A28: 24
+      B28:
+        fmt: kzt
+      A29: 25
+      B29:
+        fmt: kzt
+      A30: 26
+      B30:
+        fmt: kzt
+      A31: 27
+      B31:
+        fmt: kzt
+      A32: 28
+      B32:
+        fmt: kzt
+      A33: 29
+      B33:
+        fmt: kzt
+      A34: 30
+      B34:
+        fmt: kzt
+  solution:
+    cells:
+      B5:
+        f: =$B$2
+        fmt: kzt
+      B34:
+        f: =$B$2+$B$3
+        fmt: kzt
+      E1:
+        f: =NPV(B1,B5:B34)
+        fmt: kzt
+    fill:
+    - source: B5
+      to: B5:B33
+  expect:
+    B33: 50000
+    B34: 1050000
+    E1: 1000000.0
