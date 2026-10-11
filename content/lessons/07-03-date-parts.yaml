@@ -1,0 +1,176 @@
+# Глава 7 (даты). Собрано генератором; ответы expect посчитаны независимо.
+id: date-parts
+chapter: ch07
+order: 3
+title: ГОД, МЕСЯЦ, ДЕНЬ, ДЕНЬНЕД и ДАТА
+source: Dates.xlsx, лист date format (рис. 7.3)
+sheet:
+  file: Заказы_по_датам.xlsx
+  name: Заказы
+  columns:
+    A: 110
+    B: 60
+    C: 70
+    D: 60
+    E: 110
+    F: 110
+    G: 90
+  rows: 7
+  cells:
+    A1:
+      v: Дата заказа
+      style: head
+    B1:
+      v: Год
+      style: head
+    C1:
+      v: Месяц
+      style: head
+    D1:
+      v: День
+      style: head
+    E1:
+      v: День недели
+      style: head
+    F1:
+      v: Из частей
+      style: head
+    G1:
+      v: Без типа
+      style: head
+    A2:
+      v: '2026-01-05'
+      fmt: date
+    F2:
+      fmt: date
+    A3:
+      v: '2026-02-14'
+      fmt: date
+    F3:
+      fmt: date
+    A4:
+      v: '2026-03-22'
+      fmt: date
+    F4:
+      fmt: date
+    A5:
+      v: '2026-05-01'
+      fmt: date
+    F5:
+      fmt: date
+    A6:
+      v: '2026-12-16'
+      fmt: date
+    F6:
+      fmt: date
+expect:
+  B2: 2026
+  C2: 1
+  D2: 5
+  E2: 1
+  F2: 46027
+  G2: 2
+  B3: 2026
+  C3: 2
+  D3: 14
+  E3: 6
+  F3: 46067
+  G3: 7
+  B4: 2026
+  C4: 3
+  D4: 22
+  E4: 7
+  F4: 46103
+  G4: 1
+  B5: 2026
+  C5: 5
+  D5: 1
+  E5: 5
+  F5: 46143
+  G5: 6
+  B6: 2026
+  C6: 12
+  D6: 16
+  E6: 3
+  F6: 46372
+  G6: 4
+steps:
+- title: Ситуация
+  text: Интернет-магазин в Шымкенте хочет понять, в какие месяцы и дни недели заказывают больше. Для сводки по месяцам и
+    дням недели из даты нужно достать её части.
+  actions:
+  - wait: 3000
+- title: '{fn:YEAR}, {fn:MONTH}, {fn:DAY}'
+  text: <code>{f:=YEAR(A2)}</code> — год, <code>{f:=MONTH(A2)}</code> — номер месяца (1 — январь), <code>{f:=DAY(A2)}</code>
+    — число месяца. <kbd>Tab</kbd> переходит в соседнюю ячейку справа. Протяните все три формулы вниз.
+  actions:
+  - click: B2
+  - type: =YEAR(
+  - clickRef: A2
+  - type: )
+  - keys:
+    - Tab
+  - type: =MONTH(
+  - clickRef: A2
+  - type: )
+  - keys:
+    - Tab
+  - type: =DAY(
+  - clickRef: A2
+  - type: )
+  - keys:
+    - Enter
+  - click: B2
+  - fill: B2:B6
+  - click: C2
+  - fill: C2:C6
+  - click: D2
+  - fill: D2:D6
+- title: '{fn:WEEKDAY}: день недели числом'
+  text: '<code>{f:=WEEKDAY(A2,2)}</code> — номер дня недели. Второй аргумент 2 — неделя с понедельника: пн — 1, …, вс —
+    7. Понедельник 05.01.2026 дал 1, суббота 14.02 — 6. По числу легко отобрать выходные (6 и 7) или посчитать заказы по
+    дням недели.'
+  actions:
+  - click: E2
+  - type: =WEEKDAY(
+  - clickRef: A2
+  - type: ',2)'
+  - keys:
+    - Enter
+  - click: E2
+  - fill: E2:E6
+- title: '{fn:DATE}: собрать дату из частей'
+  text: 'Обратная задача: год, месяц и день лежат в разных ячейках. <code>{f:=DATE(B2,C2,D2)}</code> собирает из них дату.
+    Столбец F заранее в формате «Дата». {fn:DATE} понимает и «лишние» числа: <code>{f:=DATE(2026,13,1)}</code> — это 01.01.2027.'
+  actions:
+  - click: F2
+  - type: =DATE(
+  - clickRef: B2
+  - type: ','
+  - clickRef: C2
+  - type: ','
+  - clickRef: D2
+  - type: )
+  - keys:
+    - Enter
+  - click: F2
+  - fill: F2:F6
+- title: 'Частая ошибка: {fn:WEEKDAY} без типа'
+  text: '<code>{f:=WEEKDAY(A2)}</code> без второго аргумента считает неделю с <b>воскресенья</b>: вс — 1, пн — 2, …, сб
+    — 7. Понедельник получил 2, а воскресенье 22.03 — 1. Сравните со столбцом E. Указывайте тип явно: 2 — пн = 1, 3 — пн
+    = 0.'
+  actions:
+  - click: G2
+  - type: =WEEKDAY(
+  - clickRef: A2
+  - type: )
+  - keys:
+    - Enter
+  - click: G2
+  - fill: G2:G6
+- title: Что запомнить
+  text: '{fn:YEAR}, {fn:MONTH}, {fn:DAY} разбирают дату, {fn:DATE} собирает. <code>{f:=WEEKDAY(A2,2)}</code> — день недели
+    с понедельника. <b>На работе пригодится</b> для сводок продаж по месяцам и дням недели и для проверки, не выпал ли срок
+    на выходной.'
+  actions:
+  - click: E2

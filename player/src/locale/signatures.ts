@@ -19,6 +19,19 @@ const SIGNATURES: Record<string, [string, string][]> = {
   SUMPRODUCT: [["array1", "массив1"], ["[array2]", "[массив2]"], ["…", "…"]],
   PMT: [["rate", "ставка"], ["nper", "кпер"], ["pv", "пс"], ["[fv]", "[бс]"], ["[type]", "[тип]"]],
   NPV: [["rate", "ставка"], ["value1", "значение1"], ["[value2]", "[значение2]"], ["…", "…"]],
+  // Глава 7. РАЗНДАТ подсказки нет — её нет и в Excel
+  TODAY: [],
+  DATE: [["year", "год"], ["month", "месяц"], ["day", "день"]],
+  DATEVALUE: [["date_text", "дата_как_текст"]],
+  YEAR: [["serial_number", "дата_в_числовом_формате"]],
+  MONTH: [["serial_number", "дата_в_числовом_формате"]],
+  DAY: [["serial_number", "дата_в_числовом_формате"]],
+  WEEKDAY: [["serial_number", "дата_в_числовом_формате"], ["[return_type]", "[тип]"]],
+  WORKDAY: [["start_date", "нач_дата"], ["days", "число_дней"], ["[holidays]", "[праздники]"]],
+  "WORKDAY.INTL": [["start_date", "нач_дата"], ["days", "число_дней"], ["[weekend]", "[выходной]"], ["[holidays]", "[праздники]"]],
+  NETWORKDAYS: [["start_date", "нач_дата"], ["end_date", "кон_дата"], ["[holidays]", "[праздники]"]],
+  "NETWORKDAYS.INTL": [["start_date", "нач_дата"], ["end_date", "кон_дата"], ["[weekend]", "[выходные]"], ["[holidays]", "[праздники]"]],
+  EOMONTH: [["start_date", "нач_дата"], ["months", "число_месяцев"]],
 };
 
 export interface Signature {

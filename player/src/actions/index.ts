@@ -1,4 +1,5 @@
 import { click, select, showRefs, wait } from "./basic";
+import { contextMenu } from "./context";
 import { clickRef, dragRef, type } from "./editing";
 import { keys } from "./keys";
 import { dragSelect, fill } from "./mouse";
@@ -42,6 +43,7 @@ export function createAction(spec: ActionSpec): Action {
   if ("selectAll" in spec) return selectAll();
   if ("hideColumns" in spec) return hideColumnsAction(spec.hideColumns);
   if ("autocomplete" in spec) return autocomplete(spec.autocomplete);
+  if ("contextMenu" in spec) return contextMenu(spec.contextMenu);
   if ("dialogType" in spec) return dialogType(spec.dialogType.field, spec.dialogType.text);
   if ("dialogRange" in spec) return dialogRange(spec.dialogRange.field, spec.dialogRange.range);
   if ("dialogCheck" in spec) return dialogCheck(spec.dialogCheck);

@@ -1,6 +1,7 @@
 import type { CellSpec, Sheet } from "../generated/lesson";
 
 import { parseCell } from "./address";
+import { isoToSerial, parseDateText } from "./dates";
 import type { CellValue } from "./evaluator";
 import { Workbook } from "./workbook";
 
@@ -29,17 +30,18 @@ export function parseInput(raw: string | number | null): number | string | null 
   if (raw.startsWith("=")) return raw;
   if (raw.trim() === "") return null;
   const n = /^ *[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)? *$/.test(raw) ? Number(raw) : NaN;
-  return Number.isFinite(n) ? n : raw;
+  return Number.isFinite(n) ? n : (parseDateText(raw) ?? raw);
 }
 
-const EXCEL_EPOCH = Date.UTC(1899, 11, 30);
+/** Набранный текст — дата («04.01.2003», «4 янв 2004»)? Excel тогда сам ставит ячейке формат даты. */
+export function isDateText(raw: string | number | null): boolean {
+  return typeof raw === "string" && !raw.startsWith("=") && parseDateText(raw) !== null;
+}
 
 /** Дата «2025-05-01» → серийный номер Excel (45778); числа и прочее — как есть. */
 export function dateInput(v: CellSpec["v"]): number | string | null {
   if (typeof v !== "string") return v ?? null;
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
-  if (!m) return v;
-  return Math.round((Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])) - EXCEL_EPOCH) / 86_400_000);
+  return isoToSerial(v) ?? v;
 }
 
 export function isFormula(input: CellState["input"]): input is string {
@@ -117,7 +119,14 @@ export class SheetModel {
   /** Ввод в ячейку (как набор текста + Enter). Формат и стиль ячейки сохраняются. */
   setInput(addr: string, raw: string | number | null): void {
     const current = this.get(addr);
-    this.cells.set(addr, { ...current, input: parseInput(raw) });
+    const fmt = current.fmt === "general" && isDateText(raw) ? "date" : current.fmt;
+    this.cells.set(addr, { ...current, input: parseInput(raw), fmt });
+    this.recalc();
+  }
+
+  /** Формат ячейки (окно «Формат ячеек»): значение то же, меняется только вид. */
+  setFormat(addr: string, fmt: Fmt): void {
+    this.cells.set(addr, { ...this.get(addr), fmt });
     this.recalc();
   }
 

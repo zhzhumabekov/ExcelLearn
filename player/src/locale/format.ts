@@ -2,6 +2,7 @@
 // английском виде (=SUM(C4:C11), 449.63); русский вид — только при отображении.
 
 import type { Fmt } from "../sheet/sheet-model";
+import { localizeDateText, parseDateText, serialToYmd } from "../sheet/dates";
 import { type CellValue, ExcelError } from "../sheet/evaluator";
 import dictionary from "./functions-ru.json";
 
@@ -54,9 +55,23 @@ function isTextFormatArg(tokens: readonly string[], i: number): boolean {
   return false;
 }
 
-/** =SUM(B2:D2,1.5) → =СУММ(B2:D2;1,5) для ru; для en — без изменений. */
+/** Строка в кавычках — аргумент ДАТАЗНАЧ? Тогда это дата и её пишут на языке Excel ученика. */
+function isDateValueArg(tokens: readonly string[], i: number): boolean {
+  return tokens[i - 1] === "(" && (tokens[i - 2] ?? "").toUpperCase() === "DATEVALUE";
+}
+
+/**
+ * =SUM(B2:D2,1.5) → =СУММ(B2:D2;1,5) для ru. Даты в уроке записаны по-русски («04.01.2003») — и набранные
+ * в ячейку, и в ДАТАЗНАЧ; для en они становятся «1/4/2003», остальное для en без изменений.
+ */
 export function localizeFormula(formula: string, locale: FunctionLocale): string {
-  if (locale === "en") return formula;
+  if (!formula.startsWith("=") && parseDateText(formula) !== null) return localizeDateText(formula, locale);
+  if (locale === "en") {
+    const tokens = formula.match(TOKEN_RE) ?? [];
+    return tokens
+      .map((t, i) => (t.startsWith('"') && isDateValueArg(tokens, i) ? `"${localizeDateText(t.slice(1, -1), locale)}"` : t))
+      .join("");
+  }
   const tokens = formula.match(TOKEN_RE) ?? [];
   return tokens
     .map((token, i) => {
@@ -102,9 +117,21 @@ function decimalComma(text: string, locale: FunctionLocale): string {
 
 /** Серийный номер Excel → «01.05.2025» (ru) или «5/1/2025» (en). */
 export function formatDate(serial: number, locale: FunctionLocale): string {
-  const d = new Date(Date.UTC(1899, 11, 30) + Math.floor(serial) * 86_400_000);
-  const [day, month, year] = [d.getUTCDate(), d.getUTCMonth() + 1, d.getUTCFullYear()];
+  if (Math.floor(serial) === 0) return locale === "ru" ? "00.01.1900" : "1/0/1900"; // нулевой день Excel
+  const { day, month, year } = serialToYmd(serial);
   return locale === "ru" ? `${String(day).padStart(2, "0")}.${String(month).padStart(2, "0")}.${year}` : `${month}/${day}/${year}`;
+}
+
+const MONTHS_GENITIVE = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+const MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const WEEKDAYS_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+/** Длинный формат даты Windows: «4 января 2003 г.» (ru), «Saturday, January 4, 2003» (en). */
+export function formatLongDate(serial: number, locale: FunctionLocale): string {
+  const { day, month, year } = serialToYmd(serial);
+  if (locale === "ru") return `${day} ${MONTHS_GENITIVE[month - 1]} ${year} г.`;
+  const weekday = WEEKDAYS_EN[(((Math.floor(serial) + 6) % 7) + 7) % 7];
+  return `${weekday}, ${MONTHS_EN[month - 1]} ${day}, ${year}`;
 }
 
 /** «Общий» формат Excel: целые как есть, дробные — до precision значащих цифр без хвостовых нулей. */
@@ -119,7 +146,7 @@ export function formatGeneral(n: number, locale: FunctionLocale, precision = 10)
  * в «общем» формате он сокращает дробную часть, а если не помогает или формат фиксированный — «#####».
  */
 function fitNumber(value: number, display: DisplayValue, fmt: Fmt, locale: FunctionLocale, fits: Fits): DisplayValue {
-  if (fits(display)) return display;
+  if (fits(display) && !display.text.startsWith("#")) return display; // решётки отрицательной даты — во всю ширину
   if (fmt === "general" && !Number.isInteger(value)) {
     for (let precision = 9; precision >= 1; precision--) {
       const shorter = { ...display, text: formatGeneral(value, locale, precision) };
@@ -127,7 +154,8 @@ function fitNumber(value: number, display: DisplayValue, fmt: Fmt, locale: Funct
     }
   }
   let hashes = "#";
-  while (fits({ text: hashes + "#", align: display.align })) hashes += "#";
+  // Предел — на случай, когда ширину не измерить (тесты без раскладки): там «помещается» всё
+  while (hashes.length < 40 && fits({ text: hashes + "#", align: display.align })) hashes += "#";
   return { text: hashes, align: display.align };
 }
 
@@ -156,7 +184,10 @@ function formatPlain(value: CellValue, fmt: Fmt, locale: FunctionLocale): Displa
       // Денежный формат Казахстана: «174 720 ₸» — тенге без тиынов, знак после числа
       return { text: `${KZT_FORMATS[locale].format(value)} ₸`, align: "right" };
     case "date":
-      return { text: formatDate(value, locale), align: "right" };
+    case "dateLong":
+      // Отрицательной даты не бывает: Excel заполняет ячейку решётками при любой ширине
+      if (value < 0) return { text: "#".repeat(12), align: "right" };
+      return { text: fmt === "date" ? formatDate(value, locale) : formatLongDate(value, locale), align: "right" };
     case "number":
       return { text: NUMBER_FORMATS[locale].format(value), align: "right" };
     case "percent": {

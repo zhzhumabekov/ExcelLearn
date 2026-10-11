@@ -3,7 +3,7 @@
 
 import { cellName, cellsInRange, parseCell, parseRange } from "../sheet/address";
 import type { Fmt } from "../sheet/sheet-model";
-import { type LessonState, rememberForUndo, selectRange } from "./state";
+import { type LessonState, rememberForUndo, selectionAreas, selectRange } from "./state";
 
 // ---------- Найти и заменить ----------
 
@@ -297,10 +297,18 @@ export const FORMAT_CATEGORIES = [
   "(все форматы)",
 ] as const;
 
+/** Типы категории «Дата» — системные форматы Windows (со звёздочкой, как в окне Excel): строка списка → формат. */
+export const DATE_TYPES: Record<string, { fmt: Fmt; en: string }> = {
+  "*14.03.2012": { fmt: "date", en: "*3/14/2012" },
+  "*14 марта 2012 г.": { fmt: "dateLong", en: "*Wednesday, March 14, 2012" },
+};
+
 export interface FormatCellsDialog {
   kind: "formatCells";
   cell: string;
   category: string;
+  /** Выбранный тип в категории «Дата» (строка списка «Тип»). */
+  dateType?: string;
 }
 
 const CATEGORY_OF: Record<Fmt, (typeof FORMAT_CATEGORIES)[number]> = {
@@ -310,7 +318,32 @@ const CATEGORY_OF: Record<Fmt, (typeof FORMAT_CATEGORIES)[number]> = {
   kzt: "(все форматы)",
   percent: "Процентный",
   date: "Дата",
+  dateLong: "Дата",
 };
+
+/** Формат, который даст OK в окне: категория (и тип даты). null — категория формат не меняет. */
+export function chosenFormat(dialog: FormatCellsDialog): Fmt | null {
+  switch (dialog.category) {
+    case "Общий":
+      return "general";
+    case "Числовой":
+      return "number";
+    case "Процентный":
+      return "percent";
+    case "Дата":
+      return DATE_TYPES[dialog.dateType ?? ""]?.fmt ?? "date";
+    default:
+      return null;
+  }
+}
+
+/** OK в «Формате ячеек»: формат — всем ячейкам выделения; значения не меняются, меняется только вид. */
+export function applyFormatCells(state: LessonState, dialog: FormatCellsDialog): void {
+  const fmt = chosenFormat(dialog);
+  if (fmt === null) return;
+  rememberForUndo(state);
+  for (const range of selectionAreas(state)) for (const addr of cellsInRange(range)) state.sheet.setFormat(addr, fmt);
+}
 
 /** Код формата ячейки в каноническом (английском) виде — его подставляют в ТЕКСТ. */
 export function formatCode(fmt: Fmt, locale: "ru" | "en"): string {
@@ -325,11 +358,15 @@ export function formatCode(fmt: Fmt, locale: "ru" | "en"): string {
       return "0%";
     case "date":
       return locale === "ru" ? "dd.mm.yyyy" : "m/d/yyyy";
+    case "dateLong":
+      return locale === "ru" ? '[$-F800]d mmmm yyyy "г."' : "[$-F800]dddd, mmmm d, yyyy";
     default:
       return "General";
   }
 }
 
 export function openFormatCells(state: LessonState): void {
-  state.dialogs.push({ kind: "formatCells", cell: state.active, category: CATEGORY_OF[state.sheet.get(state.active).fmt] });
+  const fmt = state.sheet.get(state.active).fmt;
+  const dateType = Object.entries(DATE_TYPES).find(([, t]) => t.fmt === fmt)?.[0];
+  state.dialogs.push({ kind: "formatCells", cell: state.active, category: CATEGORY_OF[fmt], ...(dateType ? { dateType } : {}) });
 }

@@ -1,0 +1,968 @@
+# Глава 7 (даты). Собрано генератором; ответы expect посчитаны независимо.
+chapter: ch07
+exercises:
+- id: serial-numbers
+  number: 1
+  title: Номер даты и дата по номеру
+  task: В <code>A2:A4</code> — даты. Покажите в <code>B2:B4</code> их номера в Excel. В <code>A6:A8</code> — номера; покажите
+    в <code>B6:B8</code> даты, которые за ними стоят. Какой номер у 16 декабря 1991 года?
+  explain: Значение то же — меняется формат. <code>{f:=A2}</code> и <b>Формат ячеек → Общий</b> покажут номер; <code>{f:=A6}</code>
+    и <b>Формат ячеек → Дата</b> — дату. Окно — правой кнопкой или <kbd>Ctrl</kbd>+<kbd>1</kbd>.
+  mistake: 'Excel часто сам ставит формуле формат ячейки, на которую она ссылается: <code>{f:=A2}</code> покажет дату. Это
+    не ошибка формулы — поменяйте формат.'
+  sheet:
+    file: Номера_дат.xlsx
+    name: Даты
+    columns:
+      A: 110
+      B: 110
+    cells:
+      A1:
+        v: Дата
+        style: head
+      B1:
+        v: Номер
+        style: head
+      A5:
+        v: Номер
+        style: head
+      B5:
+        v: Дата
+        style: head
+      A2:
+        v: '1991-12-16'
+        fmt: date
+      A3:
+        v: '2006-01-25'
+        fmt: date
+      A4:
+        v: '1950-02-14'
+        fmt: date
+      A6: 4526
+      A7: 45000
+      A8: 46000
+  solution:
+    cells:
+      B2:
+        f: =A2
+      B6:
+        f: =A6
+        fmt: date
+    fill:
+    - source: B2
+      to: B2:B4
+    - source: B6
+      to: B6:B8
+  expect:
+    B2: 33588
+    B3: 38742
+    B4: 18308
+    B6: 4526
+    B7: 45000
+    B8: 46000
+- id: deadline-74
+  number: 2
+  title: Срок через 74 рабочих дня
+  task: Тендерная комиссия ответит через 74 рабочих дня. Найдите дату ответа без учёта праздников (<code>B2</code>) и с
+    праздниками из <code>D2:D4</code> (<code>B3</code>).
+  explain: <code>{f:=WORKDAY(B1,74)}</code> и <code>{f:=WORKDAY(B1,74,D2:D4)}</code>. На работе вместо <code>B1</code> можно
+    поставить <code>{f:=TODAY()}</code> — срок будет считаться от сегодняшней даты.
+  mistake: Посчитать <code>{f:=B1+74}</code> — это календарные дни, ответ выйдет на месяц раньше.
+  sheet:
+    file: Срок_ответа.xlsx
+    name: Срок
+    columns:
+      A: 150
+      B: 110
+      C: 30
+      D: 100
+    cells:
+      A1:
+        v: Сегодня
+        style: label
+      B1:
+        v: '2026-11-02'
+        fmt: date
+      A2:
+        v: Через 74 раб. дня
+        style: label
+      A3:
+        v: С праздниками
+        style: label
+      D1:
+        v: Праздники
+        style: head
+      D2:
+        v: '2026-12-16'
+        fmt: date
+      D3:
+        v: '2027-01-01'
+        fmt: date
+      D4:
+        v: '2027-01-07'
+        fmt: date
+  solution:
+    cells:
+      B2:
+        f: =WORKDAY(B1,74)
+        fmt: date
+      B3:
+        f: =WORKDAY(B1,74,D2:D4)
+        fmt: date
+  expect:
+    B2: 46430
+    B3: 46435
+- id: workdays-between
+  number: 3
+  title: Рабочие дни между датами
+  task: Проект идёт с 10.07.2026 по 15.08.2027. Сколько в нём рабочих дней (пн–пт, <code>B3</code>) и сколько, если не считать
+    праздники из столбца D (<code>B4</code>)?
+  explain: <code>{f:=NETWORKDAYS(B1,B2)}</code> и <code>{f:=NETWORKDAYS(B1,B2,D2:D6)}</code>. Обе даты входят в счёт.
+  mistake: 'Поставить даты в другом порядке: функция вернёт то же число, но с минусом.'
+  sheet:
+    file: Рабочие_дни.xlsx
+    name: Проект
+    columns:
+      A: 130
+      B: 110
+      C: 30
+      D: 100
+    cells:
+      A1:
+        v: Начало
+        style: label
+      B1:
+        v: '2026-07-10'
+        fmt: date
+      A2:
+        v: Конец
+        style: label
+      B2:
+        v: '2027-08-15'
+        fmt: date
+      A3:
+        v: Рабочих дней
+        style: label
+      A4:
+        v: Без праздников
+        style: label
+      D1:
+        v: Праздники
+        style: head
+      D2:
+        v: '2026-12-16'
+        fmt: date
+      D3:
+        v: '2027-01-01'
+        fmt: date
+      D4:
+        v: '2027-01-07'
+        fmt: date
+      D5:
+        v: '2027-03-08'
+        fmt: date
+      D6:
+        v: '2027-07-06'
+        fmt: date
+  solution:
+    cells:
+      B3:
+        f: =NETWORKDAYS(B1,B2)
+      B4:
+        f: =NETWORKDAYS(B1,B2,D2:D6)
+  expect:
+    B3: 286
+    B4: 281
+- id: date-parts
+  number: 4
+  title: Год, месяц, день и день недели
+  task: Для каждой даты продажи найдите год, номер месяца, число месяца, день недели (понедельник — 1) и номер даты в Excel.
+  explain: <code>{f:=YEAR(A2)}</code>, <code>{f:=MONTH(A2)}</code>, <code>{f:=DAY(A2)}</code>, <code>{f:=WEEKDAY(A2,2)}</code>,
+    а номер — <code>{f:=A2}</code> в формате «Общий». Протяните вниз.
+  mistake: '{fn:WEEKDAY} без второго аргумента начинает неделю с воскресенья: понедельник будет 2.'
+  sheet:
+    file: Продажи_даты.xlsx
+    name: Продажи
+    columns:
+      A: 120
+      B: 60
+      C: 70
+      D: 60
+      E: 110
+      F: 80
+    cells:
+      A1:
+        v: Дата продажи
+        style: head
+      B1:
+        v: Год
+        style: head
+      C1:
+        v: Месяц
+        style: head
+      D1:
+        v: День
+        style: head
+      E1:
+        v: День недели
+        style: head
+      F1:
+        v: Номер
+        style: head
+      A2:
+        v: '2026-01-03'
+        fmt: date
+      A3:
+        v: '2026-03-22'
+        fmt: date
+      A4:
+        v: '2026-06-06'
+        fmt: date
+      A5:
+        v: '2026-08-30'
+        fmt: date
+      A6:
+        v: '2026-10-25'
+        fmt: date
+  solution:
+    cells:
+      B2:
+        f: =YEAR(A2)
+      C2:
+        f: =MONTH(A2)
+      D2:
+        f: =DAY(A2)
+      E2:
+        f: =WEEKDAY(A2,2)
+      F2:
+        f: =A2
+    fill:
+    - source: B2
+      to: B2:B6
+    - source: C2
+      to: C2:C6
+    - source: D2
+      to: D2:D6
+    - source: E2
+      to: E2:E6
+    - source: F2
+      to: F2:F6
+  expect:
+    B2: 2026
+    C2: 1
+    D2: 3
+    E2: 6
+    F2: 46025
+    B3: 2026
+    C3: 3
+    D3: 22
+    E3: 7
+    F3: 46103
+    B4: 2026
+    C4: 6
+    D4: 6
+    E4: 6
+    F4: 46179
+    B5: 2026
+    C5: 8
+    D5: 30
+    E5: 7
+    F5: 46264
+    B6: 2026
+    C6: 10
+    D6: 25
+    E6: 7
+    F6: 46320
+- id: project-phases
+  number: 5
+  title: Когда закончится каждый этап
+  task: Проект стартует в день из <code>B1</code> и состоит из трёх этапов; длительность в календарных днях — в столбце
+    B. Этап начинается на следующий день после конца предыдущего, первый — в день старта; день начала входит в длительность.
+    Найдите начало и конец каждого этапа, месяц и год окончания.
+  explain: 'Конец = начало + дни − 1: <code>{f:=C4+B4-1}</code>. Начало следующего — <code>{f:=D4+1}</code>, первого — <code>{f:=B1}</code>.
+    Месяц и год — {fn:MONTH} и {fn:YEAR}. Поменяйте длительность — все даты пересчитаются.'
+  mistake: 'Забыть «−1»: каждый этап выйдет на день длиннее.'
+  sheet:
+    file: Этапы_проекта.xlsx
+    name: Этапы
+    columns:
+      A: 80
+      B: 110
+      C: 100
+      D: 100
+      E: 70
+      F: 60
+    cells:
+      A1:
+        v: Старт
+        style: label
+      B1:
+        v: '2026-12-04'
+        fmt: date
+      A3:
+        v: Этап
+        style: head
+      B3:
+        v: Дней
+        style: head
+      C3:
+        v: Начало
+        style: head
+      D3:
+        v: Конец
+        style: head
+      E3:
+        v: Месяц
+        style: head
+      F3:
+        v: Год
+        style: head
+      A4: Этап 1
+      B4: 45
+      A5: Этап 2
+      B5: 60
+      A6: Этап 3
+      B6: 30
+  solution:
+    cells:
+      C4:
+        f: =B1
+        fmt: date
+      D4:
+        f: =C4+B4-1
+        fmt: date
+      C5:
+        f: =D4+1
+        fmt: date
+      E4:
+        f: =MONTH(D4)
+      F4:
+        f: =YEAR(D4)
+    fill:
+    - source: D4
+      to: D4:D6
+    - source: C5
+      to: C5:C6
+    - source: E4
+      to: E4:E6
+    - source: F4
+      to: F4:F6
+  expect:
+    C4: 46360
+    D4: 46404
+    E4: 1
+    F4: 2027
+    C5: 46405
+    D5: 46464
+    E5: 3
+    F5: 2027
+    C6: 46465
+    D6: 46494
+    E6: 4
+    F6: 2027
+- id: trading-days
+  number: 6
+  title: Торговые дни после покупки акций
+  task: Акции куплены 01.12.2026. Составьте список первых 20 торговых дней после покупки (<code>A4:A23</code>). Биржа не
+    работает в субботу, воскресенье и в дни из столбца D.
+  explain: 'Первый торговый день — <code>{f:=WORKDAY(B1,1,$D$2:$D$4)}</code>, каждый следующий — <code>{f:=WORKDAY(A4,1,$D$2:$D$4)}</code>:
+    «следующий рабочий день после предыдущего». Протяните вниз.'
+  mistake: Без $ диапазон праздников съедет при протягивании, и 16 декабря станет «торговым».
+  sheet:
+    file: Торговые_дни.xlsx
+    name: Биржа
+    columns:
+      A: 130
+      B: 110
+      C: 30
+      D: 120
+    cells:
+      A1:
+        v: Куплены
+        style: label
+      B1:
+        v: '2026-12-01'
+        fmt: date
+      A3:
+        v: Торговый день
+        style: head
+      D1:
+        v: Биржа закрыта
+        style: head
+      D2:
+        v: '2026-12-16'
+        fmt: date
+      D3:
+        v: '2027-01-01'
+        fmt: date
+      D4:
+        v: '2027-01-07'
+        fmt: date
+  solution:
+    cells:
+      A4:
+        f: =WORKDAY(B1,1,$D$2:$D$4)
+        fmt: date
+      A5:
+        f: =WORKDAY(A4,1,$D$2:$D$4)
+        fmt: date
+    fill:
+    - source: A5
+      to: A5:A23
+  expect:
+    A4: 46358
+    A5: 46359
+    A6: 46360
+    A7: 46363
+    A8: 46364
+    A9: 46365
+    A10: 46366
+    A11: 46367
+    A12: 46370
+    A13: 46371
+    A14: 46373
+    A15: 46374
+    A16: 46377
+    A17: 46378
+    A18: 46379
+    A19: 46380
+    A20: 46381
+    A21: 46384
+    A22: 46385
+    A23: 46386
+- id: experience
+  number: 7
+  title: 'Стаж: полные годы и месяцы'
+  task: Для надбавки за стаж найдите, сколько полных лет и сколько месяцев сверх них проработал каждый сотрудник на дату
+    расчёта <code>B1</code>.
+  explain: '<code>{f:=DATEDIF(B4,$B$1,"y")}</code> — полные годы, <code>{f:=DATEDIF(B4,$B$1,"ym")}</code> — месяцы сверх
+    полных лет. Excel не подсказывает {fn:DATEDIF}: набирайте имя целиком. На работе вместо <code>$B$1</code> — <code>{f:=TODAY()}</code>.'
+  mistake: '"m" вместо "ym" даст все месяцы стажа (у Ахметовой — больше сотни), а не остаток после лет.'
+  sheet:
+    file: Стаж.xlsx
+    name: Стаж
+    columns:
+      A: 130
+      B: 110
+      C: 100
+      D: 120
+    cells:
+      A1:
+        v: Дата расчёта
+        style: label
+      B1:
+        v: '2026-12-31'
+        fmt: date
+      A3:
+        v: Сотрудник
+        style: head
+      B3:
+        v: Принят
+        style: head
+      C3:
+        v: Полных лет
+        style: head
+      D3:
+        v: Месяцев сверх
+        style: head
+      A4: Ахметова А.
+      B4:
+        v: '2015-03-02'
+        fmt: date
+      A5: Ким О.
+      B5:
+        v: '2021-09-15'
+        fmt: date
+      A6: Сапаров Д.
+      B6:
+        v: '2024-12-31'
+        fmt: date
+      A7: Нурланова С.
+      B7:
+        v: '2026-02-10'
+        fmt: date
+  solution:
+    cells:
+      C4:
+        f: =DATEDIF(B4,$B$1,"y")
+      D4:
+        f: =DATEDIF(B4,$B$1,"ym")
+    fill:
+    - source: C4
+      to: C4:C7
+    - source: D4
+      to: D4:D7
+  expect:
+    C4: 11
+    D4: 9
+    C5: 5
+    D5: 3
+    C6: 2
+    D6: 0
+    C7: 0
+    D7: 10
+- id: first-weekday
+  number: 8
+  title: С какого дня недели начинается месяц
+  task: Для каждой даты найдите первое число её месяца (<code>B</code>) и день недели этого числа, понедельник — 1 (<code>C</code>).
+  explain: Первое число — <code>{f:=DATE(YEAR(A2),MONTH(A2),1)}</code>, день недели — <code>{f:=WEEKDAY(B2,2)}</code>.
+  mistake: Взять {fn:DAY}(A2) вместо 1 — получится сама дата, а не начало месяца.
+  sheet:
+    file: Начало_месяца.xlsx
+    name: Месяцы
+    columns:
+      A: 110
+      B: 110
+      C: 150
+    cells:
+      A1:
+        v: Дата
+        style: head
+      B1:
+        v: 1-е число
+        style: head
+      C1:
+        v: День недели 1-го
+        style: head
+      A2:
+        v: '2026-10-12'
+        fmt: date
+      A3:
+        v: '2026-02-27'
+        fmt: date
+      A4:
+        v: '2027-05-09'
+        fmt: date
+      A5:
+        v: '2027-08-31'
+        fmt: date
+  solution:
+    cells:
+      B2:
+        f: =DATE(YEAR(A2),MONTH(A2),1)
+        fmt: date
+      C2:
+        f: =WEEKDAY(B2,2)
+    fill:
+    - source: B2
+      to: B2:B5
+    - source: C2
+      to: C2:C5
+  expect:
+    B2: 46296
+    C2: 4
+    B3: 46054
+    C3: 7
+    B4: 46508
+    C4: 6
+    B5: 46600
+    C5: 7
+- id: month-end
+  number: 9
+  title: Последний день месяца
+  task: Счета выставляют последним днём месяца. Для каждой даты найдите последний день её месяца и сколько дней в этом месяце.
+  explain: '{fn:DATE} понимает «нулевой» день: <code>{f:=DATE(2026,11,0)}</code> — 31.10.2026, последний день октября. Значит,
+    <code>{f:=DATE(YEAR(A2),MONTH(A2)+1,0)}</code> — конец месяца, а <code>{f:=DAY(B2)}</code> — число дней в нём. То же
+    делает <code>{f:=EOMONTH(A2,0)}</code>.'
+  mistake: 'Прибавить 30 дней: в феврале и в месяцах на 31 день ответ будет неверным.'
+  sheet:
+    file: Конец_месяца.xlsx
+    name: Месяцы
+    columns:
+      A: 110
+      B: 140
+      C: 130
+    cells:
+      A1:
+        v: Дата
+        style: head
+      B1:
+        v: Последний день
+        style: head
+      C1:
+        v: Дней в месяце
+        style: head
+      A2:
+        v: '2026-10-12'
+        fmt: date
+      A3:
+        v: '2026-02-27'
+        fmt: date
+      A4:
+        v: '2027-05-09'
+        fmt: date
+      A5:
+        v: '2027-08-31'
+        fmt: date
+  solution:
+    cells:
+      B2:
+        f: =DATE(YEAR(A2),MONTH(A2)+1,0)
+        fmt: date
+      C2:
+        f: =DAY(B2)
+    fill:
+    - source: B2
+      to: B2:B5
+    - source: C2
+      to: C2:C5
+  expect:
+    B2: 46326
+    C2: 31
+    B3: 46081
+    C3: 28
+    B4: 46538
+    C4: 31
+    B5: 46630
+    C5: 31
+- id: day-of-year
+  number: 10
+  title: Какой по счёту день года
+  task: Найдите, каким по счёту днём своего года является каждая дата (1 января — 1-й день).
+  explain: '<code>{f:=DATE(YEAR(A2),1,0)}</code> — «нулевое января», то есть 31 декабря прошлого года. Разность с датой
+    — номер дня: <code>{f:=A2-DATE(YEAR(A2),1,0)}</code>.'
+  mistake: 'Если вместо числа ячейка показала дату вида «15.04.1900», поставьте формат «Общий»: Excel взял формат у ячейки
+    с датой.'
+  sheet:
+    file: День_года.xlsx
+    name: Даты
+    columns:
+      A: 110
+      B: 110
+    cells:
+      A1:
+        v: Дата
+        style: head
+      B1:
+        v: День года
+        style: head
+      A2:
+        v: '2026-01-01'
+        fmt: date
+      A3:
+        v: '2026-04-15'
+        fmt: date
+      A4:
+        v: '2028-12-31'
+        fmt: date
+      A5:
+        v: '2027-03-22'
+        fmt: date
+  solution:
+    cells:
+      B2:
+        f: =A2-DATE(YEAR(A2),1,0)
+    fill:
+    - source: B2
+      to: B2:B5
+  expect:
+    B2: 1
+    B3: 105
+    B4: 366
+    B5: 81
+- id: weekend-tue-wed
+  number: 11
+  title: Выходные во вторник и среду
+  task: Аквапарк открыт в субботу и воскресенье, а закрыт по вторникам и средам. Какой день будет 200-м рабочим днём после
+    открытия? Найдите ответ кодом выходных (<code>B2</code>) и строкой (<code>B3</code>).
+  explain: '<code>{f:=WORKDAY.INTL(B1,200,4)}</code> — код 4: вторник и среда. Строкой: <code>{f:=WORKDAY.INTL(B1,200,"0110000")}</code>
+    — семь знаков с понедельника, 1 — выходной.'
+  mistake: '{fn:WORKDAY} без .МЕЖД считает выходными субботу и воскресенье — ответ будет другим.'
+  sheet:
+    file: Аквапарк.xlsx
+    name: График
+    columns:
+      A: 180
+      B: 110
+    cells:
+      A1:
+        v: Открытие
+        style: label
+      B1:
+        v: '2027-05-03'
+        fmt: date
+      A2:
+        v: 200-й рабочий день
+        style: label
+      A3:
+        v: То же строкой
+        style: label
+  solution:
+    cells:
+      B2:
+        f: =WORKDAY.INTL(B1,200,4)
+        fmt: date
+      B3:
+        f: =WORKDAY.INTL(B1,200,"0110000")
+        fmt: date
+  expect:
+    B2: 46790
+    B3: 46790
+- id: weekend-fri-sat
+  number: 12
+  title: 'Рабочие дни партнёра: выходные пятница и суббота'
+  task: Партнёр из Саудовской Аравии работает с воскресенья по четверг; выходные — пятница и суббота. Сколько у него рабочих
+    дней с 10.01.2026 по 31.05.2027, если не считать праздники из столбца D (для примера взяты только праздники с постоянной
+    датой)?
+  explain: '<code>{f:=NETWORKDAYS.INTL(B1,B2,7,D2:D4)}</code>: код 7 — пятница и суббота, четвёртый аргумент — праздники.'
+  mistake: Праздник, выпавший на пятницу или субботу, функция и так не считает — вычитать его отдельно не нужно.
+  sheet:
+    file: Партнёр.xlsx
+    name: Партнёр
+    columns:
+      A: 130
+      B: 110
+      C: 30
+      D: 100
+    cells:
+      A1:
+        v: Начало
+        style: label
+      B1:
+        v: '2026-01-10'
+        fmt: date
+      A2:
+        v: Конец
+        style: label
+      B2:
+        v: '2027-05-31'
+        fmt: date
+      A3:
+        v: Рабочих дней
+        style: label
+      D1:
+        v: Праздники
+        style: head
+      D2:
+        v: '2026-02-22'
+        fmt: date
+      D3:
+        v: '2026-09-23'
+        fmt: date
+      D4:
+        v: '2027-02-22'
+        fmt: date
+  solution:
+    cells:
+      B3:
+        f: =NETWORKDAYS.INTL(B1,B2,7,D2:D4)
+  expect:
+    B3: 359
+- id: quarter
+  number: 13
+  title: Начало квартала и конец предыдущего
+  task: 'Квартал — три месяца: январь–март, апрель–июнь и так далее. Для каждой даты найдите первый день её квартала (<code>B</code>)
+    и последний день предыдущего квартала (<code>C</code>) — на эту дату сдают отчёт.'
+  explain: 'Первый месяц квартала — <code>{f:=INT((MONTH(A2)-1)/3)*3+1}</code>: 1, 4, 7 или 10. Начало квартала — <code>{f:=DATE(YEAR(A2),INT((MONTH(A2)-1)/3)*3+1,1)}</code>,
+    конец прошлого — на день раньше: <code>{f:=B2-1}</code>.'
+  mistake: Без «−1» внутри {fn:INT} март попадёт во второй квартал, а июнь — в третий.
+  sheet:
+    file: Кварталы.xlsx
+    name: Кварталы
+    columns:
+      A: 110
+      B: 140
+      C: 140
+    cells:
+      A1:
+        v: Дата
+        style: head
+      B1:
+        v: Начало квартала
+        style: head
+      C1:
+        v: Конец прошлого
+        style: head
+      A2:
+        v: '2026-02-14'
+        fmt: date
+      A3:
+        v: '2026-06-30'
+        fmt: date
+      A4:
+        v: '2026-07-01'
+        fmt: date
+      A5:
+        v: '2026-11-20'
+        fmt: date
+  solution:
+    cells:
+      B2:
+        f: =DATE(YEAR(A2),INT((MONTH(A2)-1)/3)*3+1,1)
+        fmt: date
+      C2:
+        f: =B2-1
+        fmt: date
+    fill:
+    - source: B2
+      to: B2:B5
+    - source: C2
+      to: C2:C5
+  expect:
+    B2: 46023
+    C2: 46022
+    B3: 46113
+    C3: 46112
+    B4: 46204
+    C4: 46203
+    B5: 46296
+    C5: 46295
+- id: age
+  number: 14
+  title: Возраст по дате рождения
+  task: Найдите полный возраст каждого человека на дату <code>B1</code>. Обратите внимание на тех, кто родился 12 и 13 октября
+    1990 года.
+  explain: <code>{f:=DATEDIF(A4,$B$1,"y")}</code> — полные годы. На работе вместо <code>$B$1</code> — <code>{f:=TODAY()}</code>.
+  mistake: 'Делить разность дат на 365: високосные годы накапливают ошибку, и в день рождения возраст выйдет на год меньше
+    или больше.'
+  sheet:
+    file: Возраст.xlsx
+    name: Возраст
+    columns:
+      A: 130
+      B: 110
+    cells:
+      A1:
+        v: На дату
+        style: label
+      B1:
+        v: '2026-10-12'
+        fmt: date
+      A3:
+        v: Дата рождения
+        style: head
+      B3:
+        v: Возраст
+        style: head
+      A4:
+        v: '1990-10-12'
+        fmt: date
+      A5:
+        v: '1990-10-13'
+        fmt: date
+      A6:
+        v: '2004-02-29'
+        fmt: date
+      A7:
+        v: '1975-01-01'
+        fmt: date
+  solution:
+    cells:
+      B4:
+        f: =DATEDIF(A4,$B$1,"y")
+    fill:
+    - source: B4
+      to: B4:B7
+  expect:
+    B4: 36
+    B5: 35
+    B6: 22
+    B7: 51
+- id: last-monday
+  number: 15
+  title: Последний понедельник месяца
+  task: Инвентаризация на складе — в последний понедельник месяца. Найдите её дату для каждого года и месяца.
+  explain: 'Последний день месяца — <code>{f:=DATE(A2,B2+1,0)}</code>. <code>{f:=WEEKDAY(дата,3)}</code> даёт 0 для понедельника,
+    1 для вторника… — столько дней и надо отступить назад: <code>{f:=DATE(A2,B2+1,0)-WEEKDAY(DATE(A2,B2+1,0),3)}</code>.'
+  mistake: 'Тип 2 вместо 3 сдвинет ответ на день: у типа 2 понедельник — 1, а не 0.'
+  sheet:
+    file: Инвентаризация.xlsx
+    name: Даты
+    columns:
+      A: 70
+      B: 80
+      C: 130
+    cells:
+      A1:
+        v: Год
+        style: head
+      B1:
+        v: Месяц
+        style: head
+      C1:
+        v: Последний пн
+        style: head
+      A2: 2026
+      B2: 5
+      A3: 2026
+      B3: 11
+      A4: 2027
+      B4: 2
+      A5: 2027
+      B5: 5
+  solution:
+    cells:
+      C2:
+        f: =DATE(A2,B2+1,0)-WEEKDAY(DATE(A2,B2+1,0),3)
+        fmt: date
+    fill:
+    - source: C2
+      to: C2:C5
+  expect:
+    C2: 46167
+    C3: 46356
+    C4: 46440
+    C5: 46538
+- id: four-day-week
+  number: 16
+  title: Рабочие дни при четырёхдневке
+  task: Сотрудник работает с понедельника по четверг; пятница, суббота и воскресенье — выходные. Составьте список его рабочих
+    дней в январе 2027 года с учётом праздников из столбца D (<code>A4:A18</code>).
+  explain: 'Первый рабочий день — <code>{f:=WORKDAY.INTL(B1-1,1,"0000111",$D$2:$D$3)}</code>: «следующий рабочий день после
+    31 декабря». Дальше — <code>{f:=WORKDAY.INTL(A4,1,"0000111",$D$2:$D$3)}</code>, протянуть вниз.'
+  mistake: 'Начать с <code>B1</code>, а не с <code>B1-1</code>: функция ищет день <b>после</b> даты, и первый рабочий день
+    месяца пропадёт, если он — 1-е число.'
+  sheet:
+    file: Четырёхдневка.xlsx
+    name: Январь
+    columns:
+      A: 130
+      B: 110
+      C: 30
+      D: 100
+    cells:
+      A1:
+        v: Месяц с
+        style: label
+      B1:
+        v: '2027-01-01'
+        fmt: date
+      A3:
+        v: Рабочий день
+        style: head
+      D1:
+        v: Праздники
+        style: head
+      D2:
+        v: '2027-01-01'
+        fmt: date
+      D3:
+        v: '2027-01-07'
+        fmt: date
+  solution:
+    cells:
+      A4:
+        f: =WORKDAY.INTL(B1-1,1,"0000111",$D$2:$D$3)
+        fmt: date
+      A5:
+        f: =WORKDAY.INTL(A4,1,"0000111",$D$2:$D$3)
+        fmt: date
+    fill:
+    - source: A5
+      to: A5:A18
+  expect:
+    A4: 46391
+    A5: 46392
+    A6: 46393
+    A7: 46398
+    A8: 46399
+    A9: 46400
+    A10: 46401
+    A11: 46405
+    A12: 46406
+    A13: 46407
+    A14: 46408
+    A15: 46412
+    A16: 46413
+    A17: 46414
+    A18: 46415

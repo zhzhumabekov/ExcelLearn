@@ -1,0 +1,159 @@
+# Глава 7 (даты). Собрано генератором; ответы expect посчитаны независимо.
+id: datedif
+chapter: ch07
+order: 7
+title: 'РАЗНДАТ: сколько полных лет, месяцев и дней'
+source: Datedif.xlsx (рис. 7.5)
+sheet:
+  file: Стоянка_авто.xlsx
+  name: Стоянка
+  columns:
+    A: 140
+    B: 100
+    C: 100
+    D: 60
+    E: 80
+    F: 70
+    G: 120
+  rows: 7
+  cells:
+    A1:
+      v: Автомобиль
+      style: head
+    B1:
+      v: Поступил
+      style: head
+    C1:
+      v: Продан
+      style: head
+    D1:
+      v: Лет
+      style: head
+    E1:
+      v: Месяцев
+      style: head
+    F1:
+      v: Дней
+      style: head
+    G1:
+      v: Лет и месяцев
+      style: head
+    A2: Toyota Camry
+    B2:
+      v: '2024-10-15'
+      fmt: date
+    C2:
+      v: '2026-04-10'
+      fmt: date
+    A3: Hyundai Tucson
+    B3:
+      v: '2025-02-03'
+      fmt: date
+    C3:
+      v: '2026-02-28'
+      fmt: date
+    A4: Lada Vesta
+    B4:
+      v: '2025-06-20'
+      fmt: date
+    C4:
+      v: '2026-06-19'
+      fmt: date
+    A5: Kia Rio
+    B5:
+      v: '2026-01-31'
+      fmt: date
+    C5:
+      v: '2026-03-01'
+      fmt: date
+    A6: Chevrolet Cobalt
+    B6:
+      v: '2026-05-12'
+      fmt: date
+    C6:
+      v: '2025-11-05'
+      fmt: date
+expect:
+  D2: 1
+  E2: 17
+  F2: 542
+  G2: 1 г. 5 мес.
+  D3: 1
+  E3: 12
+  F3: 390
+  G3: 1 г. 0 мес.
+  D4: 0
+  E4: 11
+  F4: 364
+  G4: 0 г. 11 мес.
+  D5: 0
+  E5: 1
+  F5: 29
+  G5: 0 г. 1 мес.
+  D6: '#NUM!'
+  E6: '#NUM!'
+  F6: '#NUM!'
+  G6: '#NUM!'
+steps:
+- title: Ситуация
+  text: Автосалон с пробегом в Караганде даёт скидку на машины, которые долго стоят на площадке. Нужно знать, сколько <b>полных</b>
+    месяцев каждая машина простояла от поступления до продажи.
+  actions:
+  - wait: 3000
+- title: '{fn:DATEDIF}: полные годы'
+  text: '<code>{f:=DATEDIF(B2,C2,"y")}</code>: начало, конец и единица в кавычках. "y" — полные годы. Excel <b>не подсказывает</b>
+    эту функцию: её нет ни в списке при наборе, ни в мастере функций. Набирайте имя целиком.'
+  actions:
+  - click: D2
+  - type: =DATEDIF(
+  - clickRef: B2
+  - type: ','
+  - clickRef: C2
+  - type: ',"y")'
+  - keys:
+    - Tab
+- title: Месяцы и дни
+  text: '"m" — полные месяцы, "d" — дни. Camry простояла <b>17</b> полных месяцев, или 542 дней. Lada — 364 дней, почти
+    год, но полных лет <b>0</b>: до годовщины не хватило дня. Протяните формулы до 6-й строки.'
+  actions:
+  - type: =DATEDIF(
+  - clickRef: B2
+  - type: ','
+  - clickRef: C2
+  - type: ',"m")'
+  - keys:
+    - Tab
+  - type: =DATEDIF(
+  - clickRef: B2
+  - type: ','
+  - clickRef: C2
+  - type: ',"d")'
+  - keys:
+    - Enter
+  - click: D2
+  - fill: D2:D6
+  - click: E2
+  - fill: E2:E6
+  - click: F2
+  - fill: F2:F6
+- title: Годы и месяцы в одной ячейке
+  text: '"ym" — месяцы сверх полных лет. Подпись «1 г. 5 мес.» собирают знаком &: <code>{f:=DATEDIF(B2,C2,"y")&" г. "&DATEDIF(B2,C2,"ym")&"
+    мес."}</code>.'
+  actions:
+  - click: G2
+  - type: =DATEDIF(B2,C2,"y")&" г. "&DATEDIF(B2,C2,"ym")&" мес."
+  - keys:
+    - Enter
+  - click: G2
+  - fill: G2:G6
+- title: 'Частая ошибка: #ЧИСЛО!'
+  text: У Chevrolet в 6-й строке дата продажи <b>раньше</b> даты поступления — при вводе перепутали. {fn:DATEDIF} тогда
+    возвращает <code>#ЧИСЛО!</code>. Начальная дата всегда первая.
+  actions:
+  - click: D6
+  - wait: 2500
+- title: Что запомнить
+  text: <code>{f:=DATEDIF(начало,конец,"m")}</code> — полные месяцы; "y" — годы, "d" — дни, "ym" — месяцы сверх лет. Функции
+    нет в подсказках Excel, но она работает. <b>На работе пригодится</b> для стажа, возраста, сроков хранения и аренды.
+  actions:
+  - click: E2

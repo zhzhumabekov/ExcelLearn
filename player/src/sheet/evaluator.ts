@@ -1,6 +1,7 @@
 import FormulaParser, { type CellRef, type FunctionArg, type RangeRef } from "fast-formula-parser";
 
 import { cellName, MAX_COL, MAX_ROW } from "./address";
+import { dateFunctions } from "./dates";
 import { installFormulajs, PARSER_ERRORS } from "./formulajs-bridge";
 import { LOOKUP_FUNCTIONS } from "./lookup";
 import { type TextLocale, textFunctions } from "./text-functions";
@@ -25,6 +26,8 @@ export interface CellSource {
   extent?(sheet?: string): { rows: number; cols: number };
   /** Язык книги — для ТЕКСТ (названия месяцев, разделители). По умолчанию русский. */
   locale?(): TextLocale;
+  /** «Сегодня» для СЕГОДНЯ() — серийный номер даты. По умолчанию — настоящая дата. */
+  today?(): number;
 }
 
 // Функции, которым нужна ссылка, а не значение аргумента. В fast-formula-parser нет публичной настройки
@@ -51,6 +54,12 @@ function fromParserResult(result: unknown): CellValue {
   if (typeof result === "object" && "error" in result) return new ExcelError(String(result.error));
   if (typeof result === "number" || typeof result === "string" || typeof result === "boolean") return result;
   return new ExcelError("#VALUE!");
+}
+
+/** Настоящая сегодняшняя дата — серийный номер Excel. */
+export function realToday(): number {
+  const now = new Date();
+  return Math.round((Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) - Date.UTC(1899, 11, 30)) / 86_400_000);
 }
 
 function createParser(source: CellSource): FormulaParser {
@@ -99,6 +108,14 @@ function createParser(source: CellSource): FormulaParser {
   installFormulajs(parser, [...PRESERVE_REF, ...Object.keys(LOOKUP_FUNCTIONS)]);
   // Текстовые функции, где formulajs расходится с Excel, и ТЕКСТ — свои (text-functions.ts)
   Object.assign(parser.functions, textFunctions(() => source.locale?.() ?? "ru"));
+  // Даты — свои (dates.ts): 29.02.1900, строка выходных РАБДЕНЬ.МЕЖД, «04.01.2003» в ДАТАЗНАЧ
+  Object.assign(
+    parser.functions,
+    dateFunctions(
+      () => source.today?.() ?? realToday(),
+      () => source.locale?.() ?? "ru",
+    ),
+  );
   return parser;
 }
 

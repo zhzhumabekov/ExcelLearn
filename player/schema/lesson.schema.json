@@ -65,14 +65,15 @@
         },
         "fmt": {
           "default": "general",
-          "description": "date: v — дата «2025-05-01» (в листе — серийный номер Excel)",
+          "description": "date, dateLong: v — дата «2025-05-01» (в листе — серийный номер Excel); dateLong — длинный формат «4 января 2003 г.»",
           "enum": [
             "general",
             "number",
             "usd",
             "kzt",
             "percent",
-            "date"
+            "date",
+            "dateLong"
           ],
           "type": "string"
         },
@@ -148,6 +149,21 @@
         "clickRibbon"
       ],
       "title": "ClickRibbon",
+      "type": "object"
+    },
+    "ContextMenu": {
+      "additionalProperties": false,
+      "description": "Щелчок правой кнопкой по выделению → пункт контекстного меню («Формат ячеек…»).",
+      "properties": {
+        "contextMenu": {
+          "const": "formatCells",
+          "type": "string"
+        }
+      },
+      "required": [
+        "contextMenu"
+      ],
+      "title": "ContextMenu",
       "type": "object"
     },
     "DialogButton": {
@@ -409,7 +425,8 @@
               "Z",
               "E",
               "1",
-              "="
+              "=",
+              ";"
             ],
             "type": "string"
           },
@@ -765,6 +782,9 @@
                 "$ref": "#/$defs/Autocomplete"
               },
               {
+                "$ref": "#/$defs/ContextMenu"
+              },
+              {
                 "$ref": "#/$defs/DialogType"
               },
               {
@@ -875,6 +895,19 @@
         "$ref": "#/$defs/NameSpec"
       },
       "type": "array"
+    },
+    "today": {
+      "anyOf": [
+        {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "«Сегодня» урока для СЕГОДНЯ() и Ctrl+; («2026-10-12»): анимация, перемотка и ответы совпадают"
     },
     "expect": {
       "description": "Значения из исходника для сверки",

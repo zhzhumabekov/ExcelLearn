@@ -61,6 +61,7 @@ export class Stage {
     window.showSheet(state.sheet.name);
     window.showTab(state.ribbonTab);
     window.showMenu(state.menu);
+    window.showContextMenu(state.contextMenu);
     window.grid.setHidden(state.hiddenColumns[state.sheet.name] ?? []);
     window.showNameList(state.nameListOpen ? visibleNames(state).map((d) => d.name) : null);
     window.grid.renderAll();
@@ -126,6 +127,10 @@ export class Stage {
 
   menuPoint(id: MenuItem): Point {
     return this.point(this.window.menuItem(id));
+  }
+
+  contextItemPoint(id: string): Point {
+    return this.point(this.window.contextItem(id));
   }
 
   sheetTabPoint(name: string): Point {

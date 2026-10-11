@@ -32,6 +32,19 @@ export type MenuItem =
 
 export type MenuState = "defineName" | "format" | "format-hide" | "find" | null;
 
+/** Пункты контекстного меню ячейки (правая кнопка мыши); id — те, по которым щёлкает урок. */
+const CONTEXT_ITEMS: [string | null, string][] = [
+  [null, "Вырезать"],
+  [null, "Копировать"],
+  [null, "Специальная вставка…"],
+  [null, "Вставить…"],
+  [null, "Удалить…"],
+  [null, "Очистить содержимое"],
+  [null, "Сортировка ▸"],
+  ["formatCells", "Формат ячеек…"],
+  [null, "Присвоить имя…"],
+];
+
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, className = "", text = ""): HTMLElementTagNameMap[K] {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -93,6 +106,7 @@ export class WindowView {
   private readonly formatMenu: HTMLElement;
   private readonly hideMenu: HTMLElement;
   private readonly findMenu: HTMLElement;
+  private readonly contextMenu: HTMLElement;
   private current: GridView;
 
   constructor(
@@ -193,7 +207,14 @@ export class WindowView {
     for (const sheet of book.sheets) this.grids.set(sheet.name, new GridView(sheet, locale));
     this.current = this.grids.get(first.name) as GridView;
     this.gridWrap = el("div", "xl-grid-wrap");
-    this.gridWrap.append(this.current.table);
+    this.contextMenu = el("div", "xl-menu xl-context");
+    this.contextMenu.hidden = true;
+    for (const [id, label] of CONTEXT_ITEMS) {
+      const item = el("div", "xl-menu-item", label);
+      if (id) item.dataset.context = id;
+      this.contextMenu.append(item);
+    }
+    this.gridWrap.append(this.current.table, this.contextMenu);
 
     const sheets = el("div", "xl-sheets");
     for (const sheet of book.sheets) {
@@ -260,6 +281,26 @@ export class WindowView {
     this.formatMenu.hidden = open !== "format" && open !== "format-hide";
     this.hideMenu.hidden = open !== "format-hide";
     this.findMenu.hidden = open !== "find";
+  }
+
+  contextItem(id: string): HTMLElement {
+    const item = this.contextMenu.querySelector<HTMLElement>(`[data-context="${id}"]`);
+    if (!item) throw new Error(`Нет пункта контекстного меню ${id}`);
+    return item;
+  }
+
+  /** Контекстное меню у ячейки (правее и ниже её середины, но в пределах сетки) или скрыть (null). */
+  showContextMenu(addr: string | null): void {
+    this.contextMenu.hidden = addr === null;
+    if (addr === null) return;
+    const wrap = this.gridWrap.getBoundingClientRect();
+    const cell = this.current.cell(addr).getBoundingClientRect();
+    const width = this.contextMenu.offsetWidth || 180;
+    const height = this.contextMenu.offsetHeight || 260;
+    const left = Math.max(0, Math.min(cell.left + cell.width / 2 - wrap.left, this.gridWrap.clientWidth - width - 4));
+    const top = Math.max(0, Math.min(cell.top + cell.height / 2 - wrap.top, this.gridWrap.clientHeight - height - 4));
+    this.contextMenu.style.left = `${left}px`;
+    this.contextMenu.style.top = `${top}px`;
   }
 
   showNameList(names: readonly string[] | null): void {

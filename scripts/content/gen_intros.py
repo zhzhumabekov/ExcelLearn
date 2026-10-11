@@ -1,4 +1,4 @@
-"""Генератор вводных уроков глав 1–6 (order: 0 — первый урок главы, в оглавлении «N.0»).
+"""Генератор вводных уроков глав 1–7 (order: 0 — первый урок главы, в оглавлении «N.0»).
 
 Вводный урок: рабочая задача → короткая анимация главной идеи главы → «Что будет в главе» → «Что запомнить».
 Ответы expect считаются здесь, на Python, независимо от движка плеера (lessons:verify сверяет их с ним).
@@ -731,6 +731,117 @@ def ch06():
     )
 
 
+# ---------- Глава 7. Даты: номер дня и рабочие дни ----------
+
+
+def ch07():
+    import datetime as dt
+
+    signed = dt.date(2026, 10, 12)
+    epoch = dt.date(1899, 12, 30)
+    plus30 = signed + dt.timedelta(days=30)
+    work30, left = signed, 30
+    while left:
+        work30 += dt.timedelta(days=1)
+        if work30.isoweekday() < 6:
+            left -= 1
+    sheet = {
+        "file": "Срок_договора.xlsx",
+        "name": "Договор",
+        "columns": {"A": 230, "B": 150},
+        "rows": 6,
+        "cells": {
+            "A1": label("Договор подписан"),
+            "B1": {"v": signed.isoformat(), "fmt": "date"},
+            "A2": label("Оплата: через 30 дней"),
+            "B2": {"fmt": "date"},
+            "A3": label("Поставка: через 30 раб. дней"),
+            "B3": {"fmt": "date"},
+            "A4": label("День недели поставки"),
+        },
+    }
+    expect = {
+        "B1": (signed - epoch).days,
+        "B2": (plus30 - epoch).days,
+        "B3": (work30 - epoch).days,
+        "B4": work30.isoweekday(),
+    }
+    ru = "%d.%m.%Y"
+    steps = [
+        step(
+            "Ситуация",
+            f"Договор с поставщиком подписан {signed.strftime(ru)}. Оплата — через 30 календарных дней, поставка — "
+            "через 30 рабочих. Какие это даты и на какой день недели придётся поставка? Листать календарь не "
+            "будем: с датами в Excel можно считать.",
+            [{"wait": 3000}],
+        ),
+        step(
+            "Дата — это число",
+            "Выделите <code>B1</code>, нажмите <kbd>Ctrl</kbd>+<kbd>1</kbd> → <b>Общий</b> → OK: в ячейке "
+            f"<b>{expect['B1']}</b>. Так Excel хранит дату: это номер дня, считая с 01.01.1900. Вернём формат "
+            "<b>Дата</b> — и снова видна дата.",
+            [
+                {"click": "B1"},
+                {"keys": ["Ctrl", "1"]},
+                {"dialogPick": "Общий"},
+                {"dialogButton": "OK"},
+                {"wait": 1200},
+                {"keys": ["Ctrl", "1"]},
+                {"dialogPick": "Дата"},
+                {"dialogButton": "OK"},
+            ],
+        ),
+        step(
+            "Плюс 30 дней",
+            f"Раз дата — число, к ней можно прибавить дни: <code>{{f:=B1+30}}</code> → <b>{plus30.strftime(ru)}</b>.",
+            [{"click": "B2"}, {"type": "="}, {"clickRef": "B1"}, {"type": "+30"}, enter()],
+        ),
+        step(
+            "Рабочие дни: {fn:WORKDAY}",
+            "Для рабочих дней простое сложение не годится: оно не пропускает выходные. "
+            f"<code>{{f:=WORKDAY(B1,30)}}</code> → <b>{work30.strftime(ru)}</b>: 30 рабочих дней, суббота и "
+            "воскресенье пропущены.",
+            [{"type": "=WORKDAY("}, {"clickRef": "B1"}, {"type": ",30)"}, enter()],
+        ),
+        step(
+            "День недели: {fn:WEEKDAY}",
+            f"<code>{{f:=WEEKDAY(B3,2)}}</code> → <b>{expect['B4']}</b>: с типом 2 понедельник — 1, воскресенье — 7. "
+            "Значит, поставка выпадает на будний день.",
+            [{"type": "=WEEKDAY("}, {"clickRef": "B3"}, {"type": ",2)"}, enter()],
+        ),
+        step(
+            "Что будет в главе",
+            chapter_map(
+                [
+                    ("7.1", "дата — номер дня: формат «Дата» и «Общий», ввод дат, {fn:DATEVALUE}"),
+                    ("7.2", "{fn:TODAY} и <kbd>Ctrl</kbd>+<kbd>;</kbd>"),
+                    ("7.3", "{fn:YEAR}, {fn:MONTH}, {fn:DAY}, {fn:WEEKDAY} и {fn:DATE}"),
+                    ("7.4–7.5", "рабочие дни и праздники: {fn:WORKDAY} и {fn:NETWORKDAYS}"),
+                    ("7.6", "свои выходные: {fn:WORKDAY.INTL} и {fn:NETWORKDAYS.INTL}"),
+                    ("7.7", "полные годы, месяцы и дни: {fn:DATEDIF}"),
+                ]
+            ),
+            [{"wait": 4000}],
+        ),
+        step(
+            "Что запомнить",
+            "Дата в Excel — номер дня, поэтому даты можно складывать и вычитать. Для рабочих дней есть "
+            "{fn:WORKDAY}, для частей даты — {fn:YEAR}, {fn:MONTH}, {fn:WEEKDAY}. <b>На работе пригодится</b> для "
+            "сроков договоров, оплат, отпусков и табеля.",
+            [{"click": "B3"}],
+        ),
+    ]
+    return lesson(
+        "ch07",
+        "intro-dates",
+        "Даты в Excel: считаем сроки",
+        "Свой пример (сроки договора)",
+        sheet,
+        expect,
+        steps,
+    )
+
+
 def dump(path, data):
     text = yaml.safe_dump(data, allow_unicode=True, sort_keys=False, width=118)
     path.write_text(
@@ -741,7 +852,7 @@ def dump(path, data):
 
 
 if __name__ == "__main__":
-    lessons = [ch01(), ch02(), ch03(), ch04(), ch05(), ch06()]
+    lessons = [ch01(), ch02(), ch03(), ch04(), ch05(), ch06(), ch07()]
     for les in lessons:
         n = les["chapter"][2:]
         dump(ROOT / "lessons" / f"{n}-00-{les['id']}.yaml", les)

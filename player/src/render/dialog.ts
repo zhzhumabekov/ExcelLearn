@@ -13,6 +13,8 @@ import {
 } from "../lesson/dialogs";
 import { bookOf, type LessonState } from "../lesson/state";
 import {
+  chosenFormat,
+  DATE_TYPES,
   DELIMITERS,
   FORMAT_CATEGORIES,
   formatCode,
@@ -176,16 +178,25 @@ export class DialogView {
       }
       case "formatCells": {
         const cell = state.sheet.get(dialog.cell);
-        const sample = formatValue(state.sheet.value(dialog.cell), cell.fmt, locale).text;
+        // Образец — значение активной ячейки в выбранном формате (как в окне Excel до нажатия OK)
+        const sample = formatValue(state.sheet.value(dialog.cell), chosenFormat(dialog) ?? cell.fmt, locale).text;
         const code = formatCode(cell.fmt, locale);
         const shown = locale === "ru" ? (code === "General" ? "Основной" : localizeFormatCode(code)) : code;
         const list = FORMAT_CATEGORIES.map(
           (c) => `<div data-item="${attr(c)}"${dialog.category === c ? ' class="xl-on"' : ""}>${escapeHtml(c)}</div>`,
         ).join("");
+        const types = Object.entries(DATE_TYPES)
+          .map(
+            ([key, t]) =>
+              `<div data-item="${attr(key)}"${dialog.dateType === key ? ' class="xl-on"' : ""}>${escapeHtml(locale === "ru" ? key : t.en)}</div>`,
+          )
+          .join("");
         const custom =
           dialog.category === "(все форматы)"
             ? `<label class="xl-dfield"><span>Тип:</span><span class="xl-dinput" data-field="Тип">${escapeHtml(shown)}</span></label>`
-            : "";
+            : dialog.category === "Дата"
+              ? `<p>Тип:</p><div class="xl-dlist xl-dtypes">${types}</div>`
+              : "";
         return `<div class="xl-dtabs"><span class="xl-on">Число</span><span>Выравнивание</span><span>Шрифт</span><span>Граница</span><span>Заливка</span></div>
           <div class="xl-dformat"><div><p>Числовые форматы:</p><div class="xl-dlist">${list}</div></div>
           <div><p>Образец</p><div class="xl-dsample">${escapeHtml(sample)}</div>${custom}</div></div>`;

@@ -25,6 +25,8 @@ NUMBER_FORMATS = {
     "kzt": '#,##0 "₸"',
     "number": "0.00",
     "date": "dd.mm.yyyy",
+    # Системный длинный формат даты: русский Excel покажет «4 января 2003 г.», английский — «Saturday, January 4, 2003»
+    "dateLong": "[$-F800]dddd, mmmm dd, yyyy",
 }
 HEAD_FILL = PatternFill("solid", fgColor="E8F3EC")  # --xl-green-soft плеера
 TOTAL_BORDER = Border(top=Side(style="double", color="999999"))
@@ -129,7 +131,7 @@ def fill_worksheet(ws, sheet: Sheet, answers: frozenset[str] = frozenset()) -> N
             cell.value = spec.f
         elif spec.v is not None:
             cell.value = spec.v
-            if spec.fmt == "date" and isinstance(spec.v, str):
+            if spec.fmt in ("date", "dateLong") and isinstance(spec.v, str):
                 cell.value = date.fromisoformat(spec.v)  # в Excel — настоящая дата, а не текст
             elif isinstance(spec.v, str) and spec.v.startswith("="):
                 cell.data_type = "s"  # текст, похожий на формулу, остаётся текстом
