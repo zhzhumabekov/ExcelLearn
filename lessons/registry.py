@@ -109,6 +109,19 @@ class Registry:
         index = self._index.get(lesson_id)
         return None if index is None else self.lessons[index]
 
+    def with_lessons(self, replaced: dict[str, Lesson]) -> "Registry":
+        """Копия реестра, где часть уроков заменена (тот же id, порядок и шаги — меняются только тексты)."""
+        if not replaced:
+            return self
+        copy = object.__new__(Registry)
+        copy.__dict__.update(self.__dict__)
+        copy.chapters = tuple(
+            ChapterEntry(entry.chapter, tuple(replaced.get(lesson.id, lesson) for lesson in entry.lessons))
+            for entry in self.chapters
+        )
+        copy.lessons = tuple(lesson for entry in copy.chapters for lesson in entry.lessons)
+        return copy
+
     def neighbors(self, lesson_id: str) -> tuple[Lesson | None, Lesson | None]:
         """Предыдущий и следующий урок по всему курсу, через границы глав."""
         index = self._index[lesson_id]

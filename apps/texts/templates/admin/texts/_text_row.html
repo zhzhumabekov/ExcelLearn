@@ -1,0 +1,19 @@
+<div class="form-row{% if row.field.errors %} errors{% endif %}">
+  {{ row.field.errors }}
+  <div style="display: block">
+    <label for="{{ row.field.id_for_label }}" style="width: auto; float: none; display: block; margin-bottom: 4px">
+      <b>{{ row.field.label }}</b>
+      {% if row.status == "действует" %}
+        <span style="color: var(--message-success-bg, green)">— исправлено{% if row.edit.updated_by %} ({{ row.edit.updated_by }}, {{ row.edit.updated_at|date:"d.m.Y H:i" }}){% endif %}</span>
+      {% elif row.status == "устарела" %}
+        <span style="color: var(--error-fg)">— правка устарела: текст в YAML изменился, правка не показывается</span>
+      {% endif %}
+    </label>
+    {{ row.field }}
+    {% if row.status == "действует" %}
+      <details style="margin-top: 4px"><summary class="help">Текст из YAML</summary><pre style="white-space: pre-wrap">{{ row.yaml }}</pre></details>
+    {% elif row.status == "устарела" %}
+      <details open style="margin-top: 4px"><summary class="help">Ваша правка (не действует)</summary><pre style="white-space: pre-wrap">{{ row.edit.text }}</pre></details>
+    {% endif %}
+  </div>
+</div>

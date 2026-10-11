@@ -8,7 +8,7 @@ from django.utils.http import content_disposition_header
 
 from apps.preferences.services import get_preferences
 from apps.progress.services import progress_by_lesson, start_step
-from lessons.registry import get_registry
+from apps.texts.services import get_site_registry
 from lessons.theory import frame_path, png_size
 from lessons.xlsx_export import XLSX_CONTENT_TYPE, exercise_filename, exercise_xlsx, lesson_filename, lesson_xlsx
 
@@ -53,7 +53,7 @@ def locked(request, chapter):
 
 
 def home(request):
-    registry = get_registry()
+    registry = get_site_registry()
     return render(
         request,
         "catalog/home.html",
@@ -70,7 +70,7 @@ def home(request):
 
 
 def course(request):
-    registry = get_registry()
+    registry = get_site_registry()
     progress = progress_by_lesson(request.user)
     chapters = []
     for entry in registry.chapters:
@@ -116,7 +116,7 @@ def course(request):
 
 @members_only
 def lesson(request, lesson_id: str):
-    registry = get_registry()
+    registry = get_site_registry()
     current = registry.get(lesson_id)
     if current is None:
         raise Http404(f"Нет урока {lesson_id}")
@@ -155,7 +155,7 @@ def lesson(request, lesson_id: str):
 @members_only
 def lesson_file(request, lesson_id: str):
     """Файл урока: лист в начальном состоянии — открыть в своём Excel и повторить шаги."""
-    registry = get_registry()
+    registry = get_site_registry()
     current = registry.get(lesson_id)
     if current is None:
         raise Http404(f"Нет урока {lesson_id}")
@@ -173,7 +173,7 @@ def xlsx_response(content: bytes, filename: str) -> HttpResponse:
 
 @members_only
 def theory(request, chapter_id: str):
-    registry = get_registry()
+    registry = get_site_registry()
     chapter = registry.chapter(chapter_id)
     item = registry.theory.get(chapter_id)
     if chapter is None or item is None:
@@ -208,7 +208,7 @@ def theory(request, chapter_id: str):
 
 @members_only
 def exercises(request, chapter_id: str):
-    registry = get_registry()
+    registry = get_site_registry()
     chapter = registry.chapter(chapter_id)
     items = registry.exercises.get(chapter_id)
     if chapter is None or not items:
@@ -236,7 +236,7 @@ def exercises(request, chapter_id: str):
 
 @members_only
 def exercise_file(request, chapter_id: str, exercise_id: str, kind: str):
-    registry = get_registry()
+    registry = get_site_registry()
     exercise = registry.exercise(chapter_id, exercise_id)
     if exercise is None:
         raise Http404(f"Нет задания {chapter_id}/{exercise_id}")

@@ -6,7 +6,7 @@ from django.urls import reverse
 
 
 @pytest.fixture
-def home(client):
+def home(client, db):
     return client.get(reverse("catalog:home")).content.decode()
 
 
