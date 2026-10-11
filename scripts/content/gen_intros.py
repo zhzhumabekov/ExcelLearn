@@ -8,6 +8,7 @@
 from pathlib import Path
 
 import yaml
+from text_edits import apply_text_edits
 
 ROOT = Path("content")
 
@@ -843,7 +844,7 @@ def ch07():
 
 
 def dump(path, data):
-    text = yaml.safe_dump(data, allow_unicode=True, sort_keys=False, width=118)
+    text = yaml.safe_dump(apply_text_edits(data), allow_unicode=True, sort_keys=False, width=118)
     path.write_text(
         f"# Вводный урок главы. Собрано генератором gen_intros.py; ответы expect посчитаны независимо.\n{text}",
         encoding="utf-8",

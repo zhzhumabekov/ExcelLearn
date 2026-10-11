@@ -8,6 +8,7 @@ import datetime as dt
 from pathlib import Path
 
 import yaml
+from text_edits import apply_text_edits
 
 ROOT = Path("content")
 EPOCH = dt.date(1899, 12, 30)
@@ -910,7 +911,7 @@ LESSONS.append(
 
 
 def dump(path, data):
-    text = yaml.safe_dump(data, allow_unicode=True, sort_keys=False, width=118)
+    text = yaml.safe_dump(apply_text_edits(data), allow_unicode=True, sort_keys=False, width=118)
     path.write_text(
         f"# Глава 7 (даты). Собрано генератором; ответы expect посчитаны независимо.\n{text}",
         encoding="utf-8",

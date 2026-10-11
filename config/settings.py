@@ -109,6 +109,10 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Курс и уроки в YAML (content-as-code)
 CONTENT_DIR = BASE_DIR / "content"
+# Кнопка «Записать в YAML» в админке текстов: только на копии проекта с git, не на сервере
+# (там YAML — часть Docker-образа). Правки уроков из генераторов — ещё и в TEXT_EDITS_PATH.
+TEXTS_WRITE_YAML = env.bool("TEXTS_WRITE_YAML", default=not PRODUCTION)
+TEXT_EDITS_PATH = BASE_DIR / "scripts" / "content" / "text_edits.yaml"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

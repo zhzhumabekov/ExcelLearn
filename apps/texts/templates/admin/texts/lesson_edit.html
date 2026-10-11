@@ -41,4 +41,26 @@
     <input type="submit" value="Сохранить" class="default">
   </div>
 </form>
+
+{% if active_count %}
+  <fieldset class="module">
+    <h2>Перенести в YAML</h2>
+    {% if can_write_yaml %}
+      <form method="post" action="{% url 'admin:texts_lesson_write_yaml' lesson_id=lesson.id %}" style="padding: 10px">
+        {% csrf_token %}
+        <p>
+          Действующие правки ({{ active_count }}) запишутся в YAML урока, а из базы удалятся. Если урок собирает
+          генератор — правки сохранятся и для него (<code>scripts/content/text_edits.yaml</code>). Несохранённые
+          изменения в полях выше сначала сохраните. После записи — закоммитьте файлы.
+        </p>
+        <input type="submit" value="Записать в YAML">
+      </form>
+    {% else %}
+      <p style="padding: 10px">
+        На сервере запись в YAML выключена: файлы урока — часть образа и пропадут при деплое. Перенесите правки на
+        копии проекта: <code>uv run python manage.py lesson_texts {{ lesson.id }}</code>.
+      </p>
+    {% endif %}
+  </fieldset>
+{% endif %}
 {% endblock %}
