@@ -48,6 +48,23 @@
       </fieldset>
 
       <fieldset class="p-6">
+        <legend class="sr-only">Режим просмотра</legend>
+        <h2 class="font-semibold">Режим просмотра</h2>
+        <p class="mt-1 text-sm text-slate-500">Его можно переключить и прямо в уроке — кнопками «Пошагово» и «Авто».</p>
+        <div class="mt-3 grid gap-3 sm:grid-cols-2">
+          {% for choice in form.play_mode %}
+            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 p-3 transition hover:border-brand-300 has-checked:border-brand-500 has-checked:bg-mint">
+              {{ choice.tag }}
+              <span>
+                <span class="block font-medium">{{ choice.choice_label }}</span>
+                <span class="text-sm text-slate-500">{% if choice.data.value == "step" %}После каждого шага — пауза, дальше по кнопке{% else %}Шаги идут подряд, без нажатий{% endif %}</span>
+              </span>
+            </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      <fieldset class="p-6">
         <legend class="sr-only">Автопереход</legend>
         <label class="flex items-start gap-3">
           <input type="checkbox" name="autoplay_next" {% if form.autoplay_next.value %}checked{% endif %} class="mt-1 size-4 accent-brand-600">

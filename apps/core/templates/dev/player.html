@@ -30,7 +30,7 @@
     <script>
       const player = ExcelLearnPlayer.mount(document.getElementById("player"), {
         lesson: JSON.parse(document.getElementById("lesson-data").textContent),
-        settings: { functionLocale: "{{ locale }}", speed: {{ speed|stringformat:"g" }} },
+        settings: { functionLocale: "{{ locale }}", speed: {{ speed|stringformat:"g" }}, playMode: "{{ mode }}" },
       });
       {% if demo %}player.play().then(() => { window.demoDone = true; });{% endif %}
     </script>

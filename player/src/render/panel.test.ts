@@ -39,7 +39,14 @@ describe("sanitizeHtml", () => {
 });
 
 describe("PanelView", () => {
-  const handlers = { onPlayPause: vi.fn(), onRestart: vi.fn(), onSpeed: vi.fn(), onSeek: vi.fn() };
+  const handlers = {
+    onPlayPause: vi.fn(),
+    onRestart: vi.fn(),
+    onSpeed: vi.fn(),
+    onSeek: vi.fn(),
+    onMode: vi.fn(),
+    onNext: vi.fn(),
+  };
 
   it("показывает шаг на языке ученика", () => {
     const panel = new PanelView(lesson, "ru", handlers, 1);
@@ -141,7 +148,7 @@ describe("mount", () => {
 
 describe("пауза между шагами", () => {
   it("показывает кольцо и следующий шаг, null — скрывает", () => {
-    const panel = new PanelView(lesson, "ru", { onPlayPause() {}, onRestart() {}, onSpeed() {}, onSeek() {} }, 1);
+    const panel = new PanelView(lesson, "ru", { onPlayPause() {}, onRestart() {}, onSpeed() {}, onSeek() {}, onMode() {}, onNext() {} }, 1);
     const next = panel.el.querySelector<HTMLElement>(".xl-next");
     expect(next?.hidden).toBe(true);
 
@@ -152,5 +159,52 @@ describe("пауза между шагами", () => {
 
     panel.showWaitNext(null, 1);
     expect(next?.hidden).toBe(true);
+  });
+});
+
+describe("PanelView: режим просмотра", () => {
+  const handlers = () => ({
+    onPlayPause: vi.fn(),
+    onRestart: vi.fn(),
+    onSpeed: vi.fn(),
+    onSeek: vi.fn(),
+    onMode: vi.fn(),
+    onNext: vi.fn(),
+  });
+  const modeButton = (panel: PanelView, mode: string) =>
+    panel.el.querySelector<HTMLButtonElement>(`.xl-mode [data-mode="${mode}"]`);
+
+  it("две кнопки режима: выбранная подсвечена, клик сообщает режим", () => {
+    const h = handlers();
+    const panel = new PanelView(lesson, "ru", h, 1, "step");
+
+    expect(modeButton(panel, "step")?.textContent).toBe("Пошагово");
+    expect(modeButton(panel, "step")?.classList.contains("xl-on")).toBe(true);
+    expect(modeButton(panel, "auto")?.textContent).toBe("Авто");
+    expect(modeButton(panel, "auto")?.getAttribute("aria-pressed")).toBe("false");
+
+    modeButton(panel, "auto")?.click();
+    expect(h.onMode).toHaveBeenCalledWith("auto");
+    panel.setMode("auto");
+    expect(modeButton(panel, "auto")?.classList.contains("xl-on")).toBe(true);
+    expect(modeButton(panel, "step")?.classList.contains("xl-on")).toBe(false);
+  });
+
+  it("в ожидании — кнопка «Дальше» со следующим шагом; клик — onNext", () => {
+    const h = handlers();
+    const panel = new PanelView(lesson, "ru", h, 1, "step");
+    const next = () => panel.el.querySelector<HTMLButtonElement>(".xl-next-btn");
+
+    panel.showStep(0, "playing");
+    expect(next()?.hidden).toBe(true);
+
+    panel.showStep(0, "waiting");
+    panel.showStatus("waiting");
+    expect(next()?.hidden).toBe(false);
+    expect(next()?.textContent).toBe("Дальше: 2. Второй →");
+    expect(panel.el.querySelector<HTMLButtonElement>(".xl-primary")?.title).toBe("Следующий шаг");
+
+    next()?.click();
+    expect(h.onNext).toHaveBeenCalledOnce();
   });
 });

@@ -1,17 +1,19 @@
 import "./styles/player.css";
 
 import type { Lesson } from "./generated/lesson";
-import { Timeline, type TimelineStatus } from "./lesson/timeline";
+import { type PlayMode, Timeline, type TimelineStatus } from "./lesson/timeline";
 import type { FunctionLocale } from "./locale/format";
 import { PanelView } from "./render/panel";
 import { Stage } from "./render/stage";
 import { createBook } from "./lesson/book";
 
-export type { FunctionLocale, Lesson, TimelineStatus };
+export type { FunctionLocale, Lesson, PlayMode, TimelineStatus };
 
 export interface PlayerSettings {
   speed: number;
   functionLocale: FunctionLocale;
+  /** step (по умолчанию) — пауза после каждого шага, дальше по кнопке; auto — шаги подряд. */
+  playMode: PlayMode;
 }
 
 export interface MountOptions {
@@ -21,6 +23,8 @@ export interface MountOptions {
   startStep?: number;
   onStepChange?: (step: number) => void;
   onComplete?: () => void;
+  /** Ученик выбрал режим просмотра на панели — сайт сохраняет его в настройках. */
+  onModeChange?: (mode: PlayMode) => void;
 }
 
 export interface PlayerHandle {
@@ -28,6 +32,8 @@ export interface PlayerHandle {
   play(): Promise<void>;
   pause(): void;
   seek(step: number): void;
+  setMode(mode: PlayMode): void;
+  readonly mode: PlayMode;
   readonly step: number;
   readonly status: TimelineStatus;
   destroy(): void;
@@ -36,6 +42,7 @@ export interface PlayerHandle {
 export const DEFAULT_SETTINGS: PlayerSettings = {
   speed: 1,
   functionLocale: "ru",
+  playMode: "step",
 };
 
 export function mount(el: HTMLElement, options: MountOptions): PlayerHandle {
@@ -77,8 +84,14 @@ export function mount(el: HTMLElement, options: MountOptions): PlayerHandle {
         panel.setSpeed(speed);
       },
       onSeek: (step) => timeline.seek(step),
+      onMode: (mode) => {
+        setMode(mode);
+        options.onModeChange?.(mode);
+      },
+      onNext: () => void handle.play(),
     },
     settings.speed,
+    settings.playMode,
   );
 
   layout.append(stage.el, panel.el);
@@ -86,21 +99,31 @@ export function mount(el: HTMLElement, options: MountOptions): PlayerHandle {
   // Сначала на страницу, потом таймлайн: координаты рамок и курсора — по реальной раскладке
   el.replaceChildren(root);
 
-  const timeline: Timeline = new Timeline(lesson, stage, {
-    onStepChange: (step) => {
-      panel.showStep(step, timeline.status);
-      options.onStepChange?.(step);
+  const timeline: Timeline = new Timeline(
+    lesson,
+    stage,
+    {
+      onStepChange: (step) => {
+        panel.showStep(step, timeline.status);
+        options.onStepChange?.(step);
+      },
+      onStatusChange: (status) => {
+        panel.showStatus(status);
+        panel.showStep(timeline.step, status);
+        // Стартовый экран — только до первого запуска: в конце урока он закрыл бы итоговую таблицу
+        if (status === "playing") start.hidden = true;
+      },
+      onStepProgress: (step, progress) => panel.showStepProgress(step, progress),
+      onWaitNext: (progress, nextStep) => panel.showWaitNext(progress, nextStep),
+      onComplete: () => options.onComplete?.(),
     },
-    onStatusChange: (status) => {
-      panel.showStatus(status);
-      panel.showStep(timeline.step, status);
-      // Стартовый экран — только до первого запуска: в конце урока он закрыл бы итоговую таблицу
-      if (status === "playing") start.hidden = true;
-    },
-    onStepProgress: (step, progress) => panel.showStepProgress(step, progress),
-    onWaitNext: (progress, nextStep) => panel.showWaitNext(progress, nextStep),
-    onComplete: () => options.onComplete?.(),
-  });
+    settings.playMode,
+  );
+
+  function setMode(mode: PlayMode): void {
+    panel.setMode(mode);
+    timeline.setMode(mode);
+  }
   const firstStep = options.startStep ?? 0;
   timeline.seek(firstStep);
   go.textContent = firstStep > 0 ? `▶ Продолжить с шага ${firstStep + 1}` : "▶ Начать урок";
@@ -120,6 +143,10 @@ export function mount(el: HTMLElement, options: MountOptions): PlayerHandle {
     play: () => timeline.play(),
     pause: () => timeline.pause(),
     seek: (step) => timeline.seek(step),
+    setMode,
+    get mode() {
+      return timeline.mode;
+    },
     get step() {
       return timeline.step;
     },

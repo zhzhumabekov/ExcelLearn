@@ -139,6 +139,8 @@ def lesson(request, lesson_id: str):
             "page_config": {
                 "progressUrl": reverse("progress:save", args=[current.id]) if request.user.is_authenticated else None,
                 "csrfToken": get_token(request),
+                # Куда сохранять режим просмотра, выбранный на панели плеера (гость — в браузер)
+                "settingsUrl": reverse("preferences:update") if request.user.is_authenticated else None,
                 "startStep": start_step(request.user, current.id),
                 # У гостя настройки — в браузере (guest-settings.js)
                 "settings": get_preferences(request.user).player_settings() if request.user.is_authenticated else None,

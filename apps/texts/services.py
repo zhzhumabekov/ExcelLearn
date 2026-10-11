@@ -3,7 +3,6 @@
 from html.parser import HTMLParser
 
 from django.core.exceptions import ValidationError
-from django.db.models import Count, Max
 
 from lessons.placeholders import PLACEHOLDER_RE
 from lessons.registry import Registry, get_registry
@@ -70,12 +69,13 @@ _site: dict = {}
 def get_site_registry() -> Registry:
     """Реестр для страниц сайта: YAML + действующие правки из админки."""
     base = get_registry()
-    stamp = LessonText.objects.aggregate(count=Count("id"), last=Max("updated_at"))
-    key = (stamp["count"], stamp["last"])
+    # Ключ — сами правки (их немного): метка времени на Windows идёт шагами ~15 мс и может совпасть у разных правок
+    key = tuple(LessonText.objects.order_by("lesson_id", "field").values_list("lesson_id", "field", "original", "text"))
     if _site.get("base") is not base or _site.get("key") != key:  # YAML перечитан или правки изменились
         by_lesson: dict[str, list[LessonText]] = {}
-        for edit in LessonText.objects.all():
-            by_lesson.setdefault(edit.lesson_id, []).append(edit)
+        for lesson_id, field, original, text in key:
+            edit = LessonText(lesson_id=lesson_id, field=field, original=original, text=text)
+            by_lesson.setdefault(lesson_id, []).append(edit)
         replaced = {
             lesson_id: apply_edits(lesson, edits)
             for lesson_id, edits in by_lesson.items()

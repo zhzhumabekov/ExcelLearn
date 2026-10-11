@@ -1,3 +1,4 @@
+import re
 from decimal import Decimal
 
 from playwright.sync_api import Page, expect
@@ -60,4 +61,18 @@ def test_autoplay_opens_and_starts_next_lesson(page: Page, django_user_model):
 
     page.wait_for_url("**/lessons/intro-model/?autoplay=1", timeout=15_000)
     expect(page.locator(".xl-primary")).to_have_attribute("title", "Пауза")  # урок запустился сам
+    assert page.errors == []
+
+
+def test_play_mode_chosen_in_player_is_saved(page: Page, member):
+    page.goto(f"{page.base_url}/lessons/wages-weekly-salary/")
+
+    # По умолчанию — пошагово; выбор «Авто» сохраняется и действует после перезагрузки
+    expect(page.locator('.xl-mode [data-mode="step"]')).to_have_class(re.compile("xl-on"))
+    with page.expect_response(lambda r: r.url.endswith("/api/settings/") and r.request.method == "POST"):
+        page.click(".xl-mode >> text=Авто")
+    assert Preferences.objects.get(user=member).play_mode == "auto"
+
+    page.reload()
+    expect(page.locator('.xl-mode [data-mode="auto"]')).to_have_class(re.compile("xl-on"))
     assert page.errors == []

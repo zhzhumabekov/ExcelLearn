@@ -9,7 +9,8 @@ def dev_player(request):
     """Песочница плеера для разработки; в проде (DEBUG=False) недоступна.
 
     ?lesson=<id> — какой урок (по умолчанию первый), ?locale=ru|en — язык функций,
-    ?demo=1 — сразу запустить урок (для проверок в браузере), ?speed=16 — скорость (e2e-тесты).
+    ?demo=1 — сразу запустить урок (для проверок в браузере), ?speed=16 — скорость (e2e-тесты),
+    ?mode=step|auto — режим просмотра (по умолчанию auto: e2e проигрывает урок до конца без кнопок).
     """
     if not settings.DEBUG:
         raise Http404
@@ -20,6 +21,7 @@ def dev_player(request):
     if lesson_id and lesson is None:
         raise Http404(f"Нет урока {lesson_id}")
     locale = "en" if request.GET.get("locale") == "en" else "ru"
+    mode = "step" if request.GET.get("mode") == "step" else "auto"
     try:
         speed = min(max(float(request.GET.get("speed", 1)), 0.25), 32)
     except ValueError:
@@ -35,5 +37,6 @@ def dev_player(request):
             "locale": locale,
             "demo": request.GET.get("demo") == "1",
             "speed": speed,
+            "mode": mode,
         },
     )
