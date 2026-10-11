@@ -34,6 +34,7 @@ FORM = {
     "speed": "1.5",
     "function_locale": "en",
     "autoplay_next": "on",
+    "play_mode": "step",
 }
 
 
@@ -49,6 +50,7 @@ def test_defaults_without_saved_row(user):
         "speed": 1.0,
         "functionLocale": "ru",
         "autoplayNext": False,
+        "playMode": "auto",
     }
 
 
@@ -100,7 +102,14 @@ def test_partial_update_changes_only_given_field(logged, user):
     assert prefs.function_locale == "ru" and prefs.speed == Decimal("1.5") and prefs.autoplay_next
 
 
-@pytest.mark.parametrize("data", [{"function_locale": "de"}, {"speed": "7"}])
+def test_play_mode_from_player_panel_is_saved(logged, user):
+    """Страница урока сохраняет режим, выбранный кнопками «Пошагово» / «Авто» на панели плеера."""
+    assert post_json(logged, UPDATE, {"play_mode": "step"}).json() == {"ok": True}
+
+    assert get_preferences(user).player_settings()["playMode"] == "step"
+
+
+@pytest.mark.parametrize("data", [{"function_locale": "de"}, {"speed": "7"}, {"play_mode": "slow"}])
 def test_partial_update_validates(logged, data):
     assert post_json(logged, UPDATE, data).status_code == 400
 
@@ -141,7 +150,9 @@ def test_lesson_page_passes_player_settings(logged):
         "speed": 1.5,
         "functionLocale": "en",
         "autoplayNext": True,
+        "playMode": "step",
     }
+    assert config["settingsUrl"] == UPDATE
 
 
 def test_settings_page_has_no_narration(logged):

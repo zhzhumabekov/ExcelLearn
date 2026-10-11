@@ -13,6 +13,7 @@ class PreferencesForm(forms.ModelForm):
         widgets = {
             "speed": forms.RadioSelect,
             "function_locale": forms.RadioSelect,
+            "play_mode": forms.RadioSelect,
         }
 
 

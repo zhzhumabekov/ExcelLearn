@@ -3,7 +3,7 @@
 // Плеер о сайте не знает — связь только через колбэки onStepChange / onComplete.
 (() => {
   const json = (id) => JSON.parse(document.getElementById(id).textContent);
-  const page = json("lesson-page"); // { progressUrl, csrfToken, startStep, settings }
+  const page = json("lesson-page"); // { progressUrl, csrfToken, startStep, settings, settingsUrl }
   const lesson = json("lesson-data");
   const next = document.getElementById("next-lesson");
   const guest = !page.progressUrl;
@@ -23,6 +23,23 @@
       keepalive: true, // долетит, даже если ученик сразу ушёл со страницы
     }).catch(() => {
       // нет сети — прогресс сохранится при следующем шаге
+    });
+  }
+
+  // Режим просмотра, выбранный на панели плеера, — в настройки: следующий урок откроется в нём же
+  function saveMode(mode) {
+    settings.playMode = mode;
+    if (guest) {
+      window.guestSettings.save({ play_mode: mode });
+      return;
+    }
+    fetch(page.settingsUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-CSRFToken": page.csrfToken },
+      body: JSON.stringify({ play_mode: mode }),
+      credentials: "same-origin",
+    }).catch(() => {
+      // нет сети — режим действует до перезагрузки
     });
   }
 
@@ -74,6 +91,7 @@
       save(current, true);
       goNext();
     },
+    onModeChange: saveMode,
   });
   mounted = true;
   window.lessonPlayer = player;

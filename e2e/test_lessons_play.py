@@ -74,3 +74,30 @@ def test_plan_toggles_and_seeks(page: Page):
     expect(page.locator(".xl-meta")).to_have_text("Шаг 6 из 9")
     expect(page.locator('td[data-addr="E2"]')).to_have_text("15410")
     assert page.errors == []
+
+
+def test_step_mode_waits_for_next_button(page: Page):
+    open_lesson(page, "wages-weekly-salary", speed="16")
+    page.click(".xl-mode >> text=Пошагово")
+    expect(page.locator('.xl-mode [data-mode="step"]')).to_have_class(re.compile("xl-on"))
+
+    page.click(".xl-start button")
+    next_button = page.locator(".xl-next-btn")
+    expect(next_button).to_be_visible(timeout=20_000)
+    expect(next_button).to_contain_text("Дальше: 2.")
+    expect(page.locator(".xl-meta")).to_have_text("Шаг 1 из 10")
+    expect(page.locator(".xl-primary")).to_have_attribute("title", "Следующий шаг")
+    page.wait_for_timeout(1500)  # сам дальше не идёт
+    expect(page.locator(".xl-meta")).to_have_text("Шаг 1 из 10")
+
+    next_button.click()
+    expect(page.locator(".xl-meta")).to_have_text("Шаг 2 из 10")
+    expect(next_button).to_contain_text("Дальше: 3.", timeout=20_000)
+
+    page.keyboard.press("Space")  # пробел — тоже «Дальше»
+    expect(page.locator(".xl-meta")).to_have_text("Шаг 3 из 10")
+
+    page.click(".xl-mode >> text=Авто")  # дальше — без остановок до конца
+    expect(page.locator(".xl-primary")).to_have_attribute("title", "Ещё раз", timeout=60_000)
+    expect(page.locator('td[data-addr="D12"]')).to_have_text(re.compile(r"^80\s463 ₸$"))
+    assert page.errors == []

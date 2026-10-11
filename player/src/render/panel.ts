@@ -1,15 +1,23 @@
 import type { Lesson } from "../generated/lesson";
-import type { TimelineStatus } from "../lesson/timeline";
+import type { PlayMode, TimelineStatus } from "../lesson/timeline";
 import { type FunctionLocale, renderPlaceholders } from "../locale/format";
 import { sanitizeHtml } from "./sanitize";
 
 export const SPEEDS = [0.5, 1, 1.5, 2] as const;
+
+const MODES: [PlayMode, string, string][] = [
+  ["step", "Пошагово", "Пошаговый просмотр: пауза после каждого шага, дальше — по кнопке"],
+  ["auto", "Авто", "Автоматическое воспроизведение: шаги идут подряд"],
+];
 
 export interface PanelHandlers {
   onPlayPause(): void;
   onRestart(): void;
   onSpeed(speed: number): void;
   onSeek(step: number): void;
+  onMode(mode: PlayMode): void;
+  /** «Дальше» в пошаговом просмотре: следующий шаг. */
+  onNext(): void;
 }
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, className = "", text = ""): HTMLElementTagNameMap[K] {
@@ -46,10 +54,12 @@ export class PanelView {
   private readonly next = el("div", "xl-next");
   private readonly nextRing = el("span", "xl-ring");
   private readonly nextLabel = el("span");
+  private readonly nextButton: HTMLButtonElement;
   private readonly playButton: HTMLButtonElement;
   private readonly progress = el("div", "xl-progress");
   private readonly segments: HTMLButtonElement[];
   private readonly speedButtons: HTMLButtonElement[];
+  private readonly modeButtons: HTMLButtonElement[];
   private readonly plan: HTMLElement;
   private readonly items: HTMLLIElement[];
 
@@ -58,6 +68,7 @@ export class PanelView {
     private readonly locale: FunctionLocale,
     handlers: PanelHandlers,
     speed: number,
+    mode: PlayMode = "auto",
   ) {
     this.el = el("div", "xl-panel");
 
@@ -67,7 +78,10 @@ export class PanelView {
     head.append(this.counter, this.title);
     this.next.hidden = true;
     this.next.append(this.nextRing, this.nextLabel);
-    caption.append(head, this.text, this.next);
+    // Пошаговый просмотр: шаг показан — следующий по кнопке
+    this.nextButton = button("xl-next-btn", "", () => handlers.onNext());
+    this.nextButton.hidden = true;
+    caption.append(head, this.text, this.next, this.nextButton);
 
     // Управление
     this.playButton = button("xl-ctl xl-primary", "", () => handlers.onPlayPause());
@@ -83,9 +97,16 @@ export class PanelView {
       return b;
     });
     speeds.append(...this.speedButtons);
+    const modes = el("div", "xl-mode");
+    this.modeButtons = MODES.map(([m, label, title]) => {
+      const b = button("", label, () => handlers.onMode(m), title);
+      b.dataset.mode = m;
+      return b;
+    });
+    modes.append(...this.modeButtons);
     const planToggle = button("xl-ctl", "☰ План", () => this.togglePlan());
     const controls = el("div", "xl-controls");
-    controls.append(this.playButton, restart, this.progress, speeds, planToggle);
+    controls.append(this.playButton, restart, this.progress, modes, speeds, planToggle);
 
     // План урока (свёрнут)
     this.plan = el("div", "xl-plan");
@@ -106,6 +127,7 @@ export class PanelView {
     body.append(caption, controls, this.plan);
     this.el.append(body);
     this.setSpeed(speed);
+    this.setMode(mode);
   }
 
   showStep(i: number, status: TimelineStatus): void {
@@ -121,6 +143,12 @@ export class PanelView {
     };
     this.segments.forEach(mark);
     this.items.forEach(mark);
+
+    const next = this.lesson.steps[i + 1];
+    this.nextButton.hidden = status !== "waiting" || !next;
+    if (next && status === "waiting") {
+      this.nextButton.replaceChildren(`Дальше: ${i + 2}. `, stepHtml(next.title, this.locale), " →");
+    }
   }
 
   showStatus(status: TimelineStatus): void {
@@ -129,9 +157,11 @@ export class PanelView {
         ? ["⏸", "Пауза"]
         : status === "paused"
           ? ["▶", "Продолжить"]
-          : status === "done"
-            ? ["↻", "Ещё раз"]
-            : ["▶", "Смотреть"];
+          : status === "waiting"
+            ? ["⏭", "Следующий шаг"]
+            : status === "done"
+              ? ["↻", "Ещё раз"]
+              : ["▶", "Смотреть"];
     this.playButton.textContent = icon;
     this.playButton.title = label;
     // Текущий отрезок шкалы «дышит», пока урок играет
@@ -161,6 +191,13 @@ export class PanelView {
     for (const b of this.speedButtons) b.classList.toggle("xl-on", Number(b.dataset.speed) === speed);
   }
 
+  setMode(mode: PlayMode): void {
+    for (const b of this.modeButtons) {
+      const on = b.dataset.mode === mode;
+      b.classList.toggle("xl-on", on);
+      b.setAttribute("aria-pressed", String(on));
+    }
+  }
 
   togglePlan(): void {
     this.plan.hidden = !this.plan.hidden;

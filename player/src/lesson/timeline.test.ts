@@ -10,7 +10,7 @@ import { Stage } from "../render/stage";
 import { fakeClock, finish } from "../test/fake-clock";
 import { createBook } from "./book";
 import { createState, type LessonState } from "./state";
-import { ACTIONS_SHARE, Timeline } from "./timeline";
+import { ACTIONS_SHARE, type PlayMode, Timeline } from "./timeline";
 
 const LESSONS_DIR = join(__dirname, "../../../content/lessons");
 const lessons = readdirSync(LESSONS_DIR)
@@ -19,10 +19,10 @@ const lessons = readdirSync(LESSONS_DIR)
 const sumLesson = lessons.find((l) => l.id === "sum-and-autofill");
 if (!sumLesson) throw new Error("нет урока sum-and-autofill");
 
-function setup(lesson: Lesson, events = {}) {
+function setup(lesson: Lesson, events = {}, mode: PlayMode = "auto") {
   const { clock, advance } = fakeClock();
   const stage = new Stage(createBook(lesson), "ru", clock);
-  return { timeline: new Timeline(lesson, stage, events), advance };
+  return { timeline: new Timeline(lesson, stage, events, mode), advance };
 }
 
 /** Эталон: состояние после мгновенного применения шагов 0…n−1. */
@@ -176,5 +176,94 @@ describe("воспроизведение", () => {
 
     expect(timeline.status).toBe("playing");
     expect(timeline.step).toBe(0);
+  });
+});
+
+describe("пошаговый просмотр", () => {
+  const last = sumLesson.steps.length - 1;
+
+  it("после каждого шага ждёт кнопку; состояние на каждой остановке ≡ перемотке", async () => {
+    const onComplete = vi.fn();
+    const onWaitNext = vi.fn();
+    const { timeline, advance } = setup(sumLesson, { onComplete, onWaitNext }, "step");
+
+    for (let i = 0; i < last; i++) {
+      await finish(timeline.play(), advance);
+      expect(timeline.status).toBe("waiting");
+      expect(timeline.step).toBe(i);
+      expect(comparable(timeline.state)).toEqual(comparable(appliedUpTo(sumLesson, i + 1)));
+      await advance(60_000); // ждёт сколько угодно
+      expect(timeline.step).toBe(i);
+    }
+    await finish(timeline.play(), advance);
+
+    expect(timeline.status).toBe("done");
+    expect(onComplete).toHaveBeenCalledOnce();
+    expect(onWaitNext).not.toHaveBeenCalled(); // без кольца «Дальше» — переход только по кнопке
+    expect(comparable(timeline.state)).toEqual(comparable(appliedUpTo(sumLesson, sumLesson.steps.length)));
+  });
+
+  it("шкала шага заполняется действиями до конца", async () => {
+    const progress: number[] = [];
+    const { timeline, advance } = setup(
+      sumLesson,
+      {
+        onStepProgress: (step: number, p: number) => step === 0 && progress.push(p),
+      },
+      "step",
+    );
+
+    await finish(timeline.play(), advance);
+
+    expect(progress.at(-1)).toBe(1);
+  });
+
+  it("переключение на «Авто» в ожидании продолжает урок до конца", async () => {
+    const { timeline, advance } = setup(sumLesson, {}, "step");
+    await finish(timeline.play(), advance);
+
+    timeline.setMode("auto");
+
+    expect(timeline.status).toBe("playing");
+    for (let i = 0; i < 2000 && timeline.status !== "done"; i++) await advance(100);
+    expect(timeline.status).toBe("done");
+  });
+
+  it("переключение на «Пошагово» во время урока останавливает его в конце текущего шага", async () => {
+    const { timeline, advance } = setup(sumLesson);
+    const run = timeline.play();
+    await advance(500);
+    const step = timeline.step;
+
+    timeline.setMode("step");
+    await finish(run, advance);
+
+    expect(timeline.status).toBe("waiting");
+    expect(timeline.step).toBe(step);
+    expect(comparable(timeline.state)).toEqual(comparable(appliedUpTo(sumLesson, step + 1)));
+  });
+
+  it("переключение на «Пошагово» в паузе между шагами — следующий шаг по кнопке", async () => {
+    const { timeline, advance } = setup(sumLesson, {
+      onWaitNext: (p: number | null) => p !== null && p > 0.5 && timeline.setMode("step"),
+    });
+
+    await finish(timeline.play(), advance);
+
+    expect(timeline.status).toBe("waiting");
+    expect(timeline.step).toBe(0);
+  });
+
+  it("перемотка в ожидании показывает выбранный шаг и снова ждёт", async () => {
+    const { timeline, advance } = setup(sumLesson, {}, "step");
+    await finish(timeline.play(), advance);
+
+    timeline.seek(2);
+    expect(timeline.status).toBe("playing");
+    for (let i = 0; i < 2000 && timeline.status === "playing"; i++) await advance(100);
+
+    expect(timeline.status).toBe("waiting");
+    expect(timeline.step).toBe(2);
+    expect(comparable(timeline.state)).toEqual(comparable(appliedUpTo(sumLesson, 3)));
   });
 });

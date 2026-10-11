@@ -5,7 +5,11 @@ import type { Stage } from "../render/stage";
 import type { WorkbookSnapshot } from "../sheet/workbook";
 import { createState, type LessonState } from "./state";
 
-export type TimelineStatus = "ready" | "playing" | "paused" | "done";
+/** «waiting» — пошаговый просмотр: шаг показан, следующий начнётся по кнопке (play()). */
+export type TimelineStatus = "ready" | "playing" | "paused" | "waiting" | "done";
+
+/** auto — шаги идут подряд с паузой BETWEEN_STEPS_MS; step — остановка после каждого шага. */
+export type PlayMode = "auto" | "step";
 
 export interface TimelineEvents {
   /** Начался шаг (при воспроизведении или после перемотки). */
@@ -44,6 +48,7 @@ export class Timeline {
     readonly lesson: Lesson,
     private readonly stage: Stage,
     private readonly events: TimelineEvents = {},
+    private playMode: PlayMode = "auto",
   ) {
     this.steps = lesson.steps.map((step) => step.actions.map((spec) => createAction(spec as ActionSpec)));
     this.initial = stage.sheet.book.snapshot();
@@ -63,26 +68,44 @@ export class Timeline {
     return this.steps.length;
   }
 
+  get mode(): PlayMode {
+    return this.playMode;
+  }
+
+  /** Сменить режим. Переход на «auto», пока урок ждёт кнопку, — сразу продолжает воспроизведение. */
+  setMode(mode: PlayMode): void {
+    this.playMode = mode;
+    if (mode === "auto" && this.currentStatus === "waiting") void this.play();
+  }
+
   /**
-   * Воспроизводить с текущего шага до конца. Promise завершается в конце урока или при перемотке;
-   * после паузы play() просто снимает её.
+   * Воспроизводить с текущего шага до конца (в пошаговом режиме — до конца шага). Promise завершается
+   * в конце урока, в конце шага (пошагово) или при перемотке; после паузы play() просто снимает её,
+   * в ожидании кнопки — начинает следующий шаг.
    */
   async play(): Promise<void> {
     if (this.currentStatus === "playing") return;
     if (this.currentStatus === "paused") return this.resume();
     if (this.currentStatus === "done") this.seek(0);
+    const from = this.currentStatus === "waiting" ? this.stepIndex + 1 : this.stepIndex;
     const run = ++this.run;
     this.setStatus("playing");
     try {
-      for (let i = this.stepIndex; i < this.steps.length; i++) {
+      for (let i = from; i < this.steps.length; i++) {
         this.enterStep(i);
         const actions = this.steps[i] ?? [];
         const last = i === this.steps.length - 1;
-        const share = last ? 1 : ACTIONS_SHARE;
+        const share = last || this.playMode === "step" ? 1 : ACTIONS_SHARE;
         for (const [k, action] of actions.entries()) {
           await action.animate({ state: this.state, stage: this.stage, clock: this.stage.clock });
           if (run !== this.run) return;
           this.events.onStepProgress?.(i, (share * (k + 1)) / actions.length);
+        }
+        if (!last && this.playMode === "step") {
+          // Режим могли сменить посреди шага: шкала шага — до конца, дальше — по кнопке
+          this.events.onStepProgress?.(i, 1);
+          this.setStatus("waiting");
+          return;
         }
         if (!last) {
           try {
@@ -95,6 +118,11 @@ export class Timeline {
           }
         }
         if (run !== this.run) return;
+        // Переключили на пошаговый во время паузы между шагами — следующий шаг тоже по кнопке
+        if (!last && this.playMode === "step") {
+          this.setStatus("waiting");
+          return;
+        }
       }
       if (run !== this.run) return;
       await this.stage.cursor.moveTo(this.stage.restPoint(), 900);
@@ -129,7 +157,8 @@ export class Timeline {
   /** Перейти к началу шага n. Если урок играл — продолжает играть с него. */
   seek(n: number): void {
     const target = Math.max(0, Math.min(n, this.steps.length - 1));
-    const wasPlaying = this.currentStatus === "playing" || this.currentStatus === "paused";
+    // В ожидании кнопки урок тоже «идёт»: после перемотки показываем выбранный шаг
+    const wasPlaying = ["playing", "paused", "waiting"].includes(this.currentStatus);
     this.run++;
     const { clock, cursor, keys, overlays } = this.stage;
     clock.cancel();
