@@ -30,7 +30,11 @@ export function parseInput(raw: string | number | null): number | string | null 
   if (raw.startsWith("=")) return raw;
   if (raw.trim() === "") return null;
   const n = /^ *[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)? *$/.test(raw) ? Number(raw) : NaN;
-  return Number.isFinite(n) ? n : (parseDateText(raw) ?? raw);
+  if (Number.isFinite(n)) return n;
+  // «2%» и «2,5%» — число: Excel делит на 100 (формат ячейки «Процентный» уже задан в уроке)
+  const pct = /^ *([+-]?\d+(?:[.,]\d+)?) *% *$/.exec(raw);
+  if (pct?.[1]) return Number(pct[1].replace(",", ".")) / 100;
+  return parseDateText(raw) ?? raw;
 }
 
 /** Набранный текст — дата («04.01.2003», «4 янв 2004»)? Excel тогда сам ставит ячейке формат даты. */
