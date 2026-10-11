@@ -1,0 +1,6 @@
+{% extends "admin/change_list.html" %}
+
+{% block object-tools-items %}
+  <li><a href="{% url 'admin:texts_lesson_list' %}" class="addlink">Исправить тексты урока</a></li>
+  {{ block.super }}
+{% endblock %}

@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "apps.legal",
     "apps.progress",
     "apps.preferences",
+    "apps.texts",
     "lessons",
     "apps.catalog",
 ]
