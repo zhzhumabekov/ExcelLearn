@@ -25,3 +25,5 @@ e2e
 tasks
 docs/legal/*.docx
 backups
+# Ключ и сертификат HTTPS — только для Caddy (том), не в образ
+deploy/certs
