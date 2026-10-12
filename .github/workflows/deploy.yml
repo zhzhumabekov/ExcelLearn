@@ -1,7 +1,7 @@
 name: Deploy
 
 # Обновление сайта после зелёного CI на main. Сервер во внутренней сети и не виден из интернета, поэтому
-# задание выполняет self-hosted runner на самом сервере (метка excellearn) — docs/deploy.md, раздел 6.
+# задание выполняет self-hosted runner на самом сервере (метка excellearn) — docs/deploy.md, шаг 10.
 on:
   workflow_run:
     workflows: [CI]
