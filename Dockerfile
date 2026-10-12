@@ -2,10 +2,6 @@
 
 # ---------- 1. Ассеты: плеер (esbuild) и CSS сайта (Tailwind) ----------
 FROM node:24-slim AS assets
-# Корневые сертификаты ЦС компании (SSL-инспекция в корпоративной сети) — deploy/ca/*.crt, если есть
-COPY deploy/ca/ /tmp/ca/
-RUN cat /tmp/ca/*.crt > /usr/local/share/extra-ca.pem 2>/dev/null; true
-ENV NODE_EXTRA_CA_CERTS=/usr/local/share/extra-ca.pem
 RUN npm install -g pnpm@10
 WORKDIR /app
 
@@ -24,12 +20,7 @@ RUN pnpm --dir player build && pnpm css
 FROM python:3.12-slim AS app
 COPY --from=ghcr.io/astral-sh/uv:0.12 /uv /bin/uv
 
-# Те же сертификаты ЦС компании — в системное хранилище образа; uv берёт его через SSL_CERT_FILE
-COPY deploy/ca/ /usr/local/share/ca-certificates/company/
-RUN update-ca-certificates >/dev/null
-
-ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt \
-    PYTHONUNBUFFERED=1 \
+ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \

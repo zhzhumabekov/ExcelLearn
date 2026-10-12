@@ -73,7 +73,7 @@ sudo ufw enable
 sudo ufw status                      # 22, 80, 443 — ALLOW
 ```
 
-## 3. Прокси и проверка HTTPS компанией (если есть в сети)
+## 3. Прокси (только если выход в интернет через прокси)
 
 Пропустить, если интернет прямой. Адрес — `http://proxy.company.kz:3128` для примера.
 
@@ -96,33 +96,6 @@ Acquire::https::Proxy \"$PROXY\";" | sudo tee /etc/apt/apt.conf.d/95proxy
 ```
 
 Прокси для Docker настраивается после его установки (конец шага 4).
-
-### Проверка HTTPS компанией (SSL-инспекция)
-
-Признак — ошибка `x509: certificate signed by unknown authority` (или `unable to get local issuer certificate`) у `docker pull`, `curl`, `git`. Прокси или брандмауэр компании расшифровывает HTTPS и подписывает сайты своим корневым сертификатом; компьютеры в домене ему доверяют, свежий сервер — нет. Проверка — кто выдал сертификат GitHub:
-
-```bash
-openssl s_client -connect ghcr.io:443 -servername ghcr.io </dev/null 2>/dev/null | openssl x509 -noout -issuer
-# обычно: issuer=… Sectigo / DigiCert …; при инспекции — имя компании или её брандмауэра
-```
-
-Корневой сертификат компании взять у ИТ — файл PEM («Base-64», начинается с `-----BEGIN CERTIFICATE-----`). Если он двоичный (`.cer`/DER): `openssl x509 -inform der -in company.cer -out company-root.crt`.
-
-```bash
-# система: curl, git, агент Actions и Docker при скачивании образов
-sudo cp company-root.crt /usr/local/share/ca-certificates/company-root.crt
-sudo update-ca-certificates          # «1 added»
-sudo systemctl restart docker        # если Docker уже установлен
-curl -sS -o /dev/null -w '%{http_code}\n' https://ghcr.io/v2/   # 401 — соединение доверенное
-```
-
-Сборке образа (npm и uv внутри Docker) сертификат нужен отдельно — после клонирования кода (шаг 5):
-
-```bash
-cp company-root.crt ~/excellearn/deploy/ca/
-```
-
-Сертификаты из [deploy/ca/](../deploy/ca/) Dockerfile добавляет в доверенные на время сборки; в git они не попадают.
 
 ## 4. Docker
 
@@ -396,7 +369,6 @@ sh deploy/update.sh
 | Ошибка 502 | `dc logs web` — обычно ошибка в `.env.production` или в уроке (`lessons_check` в логе) |
 | Сайт открывается, но «Bad Request (400)» | `SITE_DOMAIN` в `.env.production` совпадает с адресом в браузере? |
 | Сборка падает на скачивании пакетов | Исходящий доступ к адресам из шага 0; прокси для Docker (шаг 4) |
-| `x509: certificate signed by unknown authority` | SSL-инспекция: корневой сертификат компании — в систему и в `deploy/ca/` (шаг 3) |
 | `git fetch` / `ssh -T git@github.com` зависает | SSH через 443 (шаг 5) |
 | Деплой висит в «Waiting for a runner» | `sudo ~/actions-runner/svc.sh status`; на GitHub: Settings → Actions → Runners — Idle? |
 | Деплой ждёт «Review deployments» | Включены Required reviewers (шаг 10.4) — нажать Approve во вкладке Actions |
