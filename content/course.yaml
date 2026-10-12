@@ -33,3 +33,6 @@ chapters:
   - id: ch09
     number: 9
     title: Внутренняя ставка доходности
+  - id: ch10
+    number: 10
+    title: Ещё несколько финансовых функций Excel
