@@ -84,7 +84,7 @@ uv run pytest e2e        # в браузере; на Linux: E2E_BROWSER_CHANNEL=
 
 ## Сервер
 
-Развёртывание на VPS (Docker Compose: Django, PostgreSQL, Caddy с HTTPS, ежедневные бэкапы) —
+Развёртывание на сервере во внутренней сети (Docker Compose: Django, PostgreSQL, Caddy с HTTPS, ежедневные бэкапы, автообновление после слияния в main) —
 [docs/deploy.md](docs/deploy.md).
 
 ## Где что лежит

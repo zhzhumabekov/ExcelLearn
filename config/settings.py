@@ -13,7 +13,7 @@ environ.Env.read_env(BASE_DIR / ".env")
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
-# Боевой режим (VPS за Caddy): HTTPS, защищённые cookie, HSTS. Отдельный флаг, а не «not DEBUG»:
+# Боевой режим (сервер за Caddy): HTTPS, защищённые cookie, HSTS. Отдельный флаг, а не «not DEBUG»:
 # тесты тоже работают с DEBUG=False, но по http.
 PRODUCTION = env.bool("PRODUCTION", default=False)
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
