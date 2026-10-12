@@ -1,6 +1,10 @@
-# Caddy: HTTPS (сертификат Let's Encrypt выпускается и продлевается сам), сжатие; все запросы — в Django.
-# SITE_DOMAIN=localhost — локальная проверка с сертификатом Caddy.
+# Caddy: HTTPS, сжатие; все запросы — в Django.
+# Сайт во внутренней сети: Let's Encrypt недоступен, сертификат задаёт CADDY_TLS (.env.production):
+#   internal (по умолчанию) — свой центр сертификации Caddy; его корневой сертификат ставится на компьютеры
+#   /certs/site.crt /certs/site.key — сертификат корпоративного ЦС (файлы в deploy/certs/)
+# SITE_DOMAIN=localhost — локальная проверка.
 {$SITE_DOMAIN:localhost} {
+	tls {$CADDY_TLS:internal}
 	encode zstd gzip
 
 	handle {

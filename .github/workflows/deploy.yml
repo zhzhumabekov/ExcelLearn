@@ -1,0 +1,38 @@
+name: Deploy
+
+# Обновление сайта после зелёного CI на main. Сервер во внутренней сети и не виден из интернета, поэтому
+# задание выполняет self-hosted runner на самом сервере (метка excellearn) — docs/deploy.md, шаг 10.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: deploy
+    # Только проверенный push в main (не PR) или ручной запуск из main
+    if: >-
+      (github.event_name == 'workflow_run'
+        && github.event.workflow_run.conclusion == 'success'
+        && github.event.workflow_run.event == 'push')
+      || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+    runs-on: [self-hosted, excellearn]
+    environment: production
+    timeout-minutes: 30
+    env:
+      # Ровно тот коммит, который прошёл CI (main мог уйти вперёд)
+      SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      DEPLOY_DIR: ${{ vars.DEPLOY_DIR }}
+    steps:
+      - name: update
+        run: |
+          cd "${DEPLOY_DIR:-$HOME/excellearn}"
+          git fetch --quiet origin main
+          git reset --hard "$SHA"
+          sh deploy/update.sh

@@ -19,6 +19,7 @@ db.sqlite3
 # IDE / OS
 .vscode/
 .idea/
+.obsidian/
 Thumbs.db
 .DS_Store
 
@@ -36,3 +37,6 @@ var/
 
 # Бэкапы базы на сервере
 backups/
+
+# Сертификат и ключ HTTPS корпоративного ЦС
+deploy/certs/
