@@ -15,7 +15,7 @@ import {
   selectRow,
   sheetTab,
 } from "./names";
-import { clickRibbon, ribbonTab } from "./ribbon";
+import { clickRibbon, fileMenu, ribbonTab } from "./ribbon";
 import { type Action, type ActionSpec, UnsupportedAction } from "./types";
 
 export { type Action, type ActionContext, type ActionSpec, UnsupportedAction } from "./types";
@@ -34,6 +34,7 @@ export function createAction(spec: ActionSpec): Action {
   if ("wait" in spec) return wait(spec.wait);
   if ("clickRibbon" in spec) return clickRibbon(spec.clickRibbon);
   if ("ribbonTab" in spec) return ribbonTab(spec.ribbonTab);
+  if ("fileMenu" in spec) return fileMenu(spec.fileMenu);
   if ("nameBox" in spec) return nameBox(spec.nameBox);
   if ("nameList" in spec) return nameList(spec.nameList);
   if ("sheetTab" in spec) return sheetTab(spec.sheetTab);

@@ -205,6 +205,12 @@ class Autocomplete(Model):
     autocomplete: str = Field(min_length=1)
 
 
+class FileMenu(Model):
+    """Вкладка «Файл» → пункт меню: «Параметры» открывает окно «Параметры Excel» (глава 11)."""
+
+    fileMenu: Literal["options"]
+
+
 class ContextMenu(Model):
     """Щелчок правой кнопкой по выделению → пункт контекстного меню («Формат ячеек…»)."""
 
@@ -290,6 +296,7 @@ ACTION_MODELS: dict[str, type[Model]] = {
     "hideColumns": HideColumns,
     "autocomplete": Autocomplete,
     "contextMenu": ContextMenu,
+    "fileMenu": FileMenu,
     "dialogType": DialogType,
     "dialogRange": DialogRange,
     "dialogCheck": DialogCheck,
@@ -330,6 +337,7 @@ Action = Annotated[
     | Annotated[HideColumns, Tag("hideColumns")]
     | Annotated[Autocomplete, Tag("autocomplete")]
     | Annotated[ContextMenu, Tag("contextMenu")]
+    | Annotated[FileMenu, Tag("fileMenu")]
     | Annotated[DialogType, Tag("dialogType")]
     | Annotated[DialogRange, Tag("dialogRange")]
     | Annotated[DialogCheck, Tag("dialogCheck")]
@@ -429,6 +437,9 @@ class Solution(Model):
     cells: dict[CellAddr, Cell] = Field(default_factory=dict, description="Формулы ответа (и их форматы)")
     fill: list[SolutionFill] = Field(default_factory=list)
     names: list["NameSpec"] = Field(default_factory=list, description="Имена, которые создаёт ученик (глава 2)")
+    iterative: bool = Field(
+        default=False, description="Решение с циклической ссылкой: в файле решения включены итеративные вычисления"
+    )
 
     @model_validator(mode="after")
     def fill_sources_are_formulas(self) -> "Solution":

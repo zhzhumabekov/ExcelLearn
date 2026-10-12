@@ -4,6 +4,7 @@ import {
   openCreateFromSelection,
   openNameManager,
   openNewName,
+  openOptions,
 } from "../lesson/dialogs";
 import { type LessonState, pasteClipboard, ribbonAutosum, type RibbonTabId } from "../lesson/state";
 import { flashFill, openFindReplace, openTextToColumns } from "../lesson/text-tools";
@@ -113,6 +114,32 @@ export function clickRibbon(command: RibbonCommand): Action {
         stage.flash(cell);
         await clock.wait(FLASH_STAGGER_MS);
       }
+    },
+  };
+}
+
+/**
+ * Вкладка «Файл» → «Параметры»: слева открывается меню «Файл», щелчок по «Параметры» внизу открывает окно
+ * «Параметры Excel» (раздел «Общие»). Дальше — dialogPick «Формулы», dialogCheck, dialogType, dialogButton.
+ */
+export function fileMenu(item: "options"): Action {
+  return {
+    kind: "fileMenu",
+    apply: (state) => {
+      state.menu = null;
+      state.backstage = false;
+      if (item === "options") openOptions(state);
+    },
+    async animate({ state, stage, clock }) {
+      state.menu = null;
+      await clickAt(stage, stage.fileTabPoint(), stage.window.fileTab(), 700);
+      state.backstage = true;
+      stage.render(state);
+      await clock.wait(400);
+      await clickAt(stage, stage.backstagePoint("Параметры"), stage.window.backstageItem("Параметры"), 700);
+      state.backstage = false;
+      if (item === "options") openOptions(state);
+      stage.render(state);
     },
   };
 }

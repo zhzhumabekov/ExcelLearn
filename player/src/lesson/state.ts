@@ -59,6 +59,8 @@ export interface LessonState {
   dialogs: Dialog[];
   /** Контекстное меню (правая кнопка) открыто у этой ячейки. */
   contextMenu: string | null;
+  /** Открыта вкладка «Файл» (меню слева: «Сведения», …, «Параметры»). */
+  backstage: boolean;
 }
 
 export function createState(sheet: SheetModel): LessonState {
@@ -77,6 +79,7 @@ export function createState(sheet: SheetModel): LessonState {
     nameListOpen: false,
     dialogs: [],
     contextMenu: null,
+    backstage: false,
   };
 }
 
@@ -161,12 +164,27 @@ export function setRef(part: EditorPart, range: string): void {
   part.text = rangeName(parseRange(range));
 }
 
+/** Текст окна Excel о циклической ссылке (глава 11). */
+export const CIRCULAR_WARNING =
+  "Обнаружена одна или несколько циклических ссылок, где формула прямо или косвенно ссылается на свою " +
+  "ячейку. Это может привести к неправильным вычислениям. Попробуйте удалить или изменить эти ссылки либо " +
+  "переместить формулы в другие ячейки.";
+
+/** Записать ввод в ячейку; если формула замкнула петлю, а итерации выключены, — предупреждение Excel. */
+function writeInput(state: LessonState, cell: string, text: string): void {
+  state.sheet.setInput(cell, text);
+  const book = bookOf(state);
+  if (book.isCircular(state.sheet.name, cell) && !book.iteration.enabled) {
+    state.dialogs.push({ kind: "alert", text: CIRCULAR_WARNING });
+  }
+}
+
 /** Tab: записать введённое и перейти на ячейку правее. → ячейка, получившая значение (или null). */
 export function commitEditorRight(state: LessonState): string | null {
   const editor = state.editor;
   if (editor) {
     rememberForUndo(state);
-    state.sheet.setInput(editor.cell, editorText(editor));
+    writeInput(state, editor.cell, editorText(editor));
     state.editor = null;
   }
   selectRange(state, offsetCell(state.active, 0, 1));
@@ -186,7 +204,7 @@ export function commitEditor(state: LessonState): void {
   const editor = state.editor;
   if (editor) {
     rememberForUndo(state);
-    state.sheet.setInput(editor.cell, editorText(editor));
+    writeInput(state, editor.cell, editorText(editor));
     state.editor = null;
   }
   selectRange(state, offsetCell(state.active, 1, 0));

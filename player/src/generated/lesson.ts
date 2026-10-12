@@ -138,6 +138,7 @@ export interface Step {
       | HideColumns
       | Autocomplete
       | ContextMenu
+      | FileMenu
       | DialogType
       | DialogRange
       | DialogCheck
@@ -168,6 +169,7 @@ export interface Step {
       | HideColumns
       | Autocomplete
       | ContextMenu
+      | FileMenu
       | DialogType
       | DialogRange
       | DialogCheck
@@ -337,6 +339,12 @@ export interface Autocomplete {
  */
 export interface ContextMenu {
   contextMenu: "formatCells";
+}
+/**
+ * Вкладка «Файл» → пункт меню: «Параметры» открывает окно «Параметры Excel» (глава 11).
+ */
+export interface FileMenu {
+  fileMenu: "options";
 }
 /**
  * Набор текста в поле открытого окна (поле очищается).

@@ -32,5 +32,8 @@
   "ch09/multiple-irr": "6d63d4a140a97f5e",
   "ch10/depreciation": "0bb6b66d3a2ec57f",
   "ch10/loan-schedule": "17fe300109a67130",
-  "ch10/pv": "f9c439667412901d"
+  "ch10/pv": "f9c439667412901d",
+  "ch11/circular-solved": "61b835ecd25d706e",
+  "ch11/circular-warning": "d6128fc73fde4ef7",
+  "ch11/iteration-options": "51cec3179d797b24"
 }

@@ -2,6 +2,7 @@ import { type ActionSpec, createAction } from "../actions";
 import type { Lesson, NameSpec, Sheet } from "../generated/lesson";
 import { type CellValue, ExcelError } from "../sheet/evaluator";
 import { SheetModel } from "../sheet/sheet-model";
+import { DEFAULT_ITERATION } from "../sheet/workbook";
 import { createBook } from "./book";
 import { createState } from "./state";
 
@@ -79,6 +80,9 @@ export function verifySolutionSheet(
   expected: Record<string, string | number>,
   names: NameSpec[] = [],
   sheets: Sheet[] = [],
+  iterative = false,
 ): VerifyResult {
-  return checkExpect(createBook({ sheet, sheets, names }), expected);
+  const first = createBook({ sheet, sheets, names });
+  if (iterative) first.book.setIteration({ ...DEFAULT_ITERATION, enabled: true });
+  return checkExpect(first, expected);
 }

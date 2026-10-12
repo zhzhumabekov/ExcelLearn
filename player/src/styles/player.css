@@ -289,6 +289,15 @@
   color: #666;
 }
 
+.xl-player .xl-sheets .xl-status {
+  margin-left: auto;
+  color: #444;
+}
+
+.xl-player .xl-sheets .xl-status[hidden] {
+  display: none;
+}
+
 .xl-player .xl-sheets .xl-on {
   background: #fff;
   color: var(--xl-green-dark);
@@ -1536,4 +1545,89 @@
 .xl-player .xl-dformat .xl-dtypes {
   min-height: 0;
   max-height: 90px;
+}
+
+/* ---------- Глава 11: «Параметры Excel» и вкладка «Файл» ---------- */
+.xl-player .xl-window {
+  position: relative;
+}
+
+.xl-player .xl-dialog-options {
+  width: 560px;
+}
+
+.xl-player .xl-doptions-page {
+  display: flex;
+  gap: 12px;
+}
+
+.xl-player .xl-dpages {
+  flex: none;
+  width: 190px;
+  max-height: 260px;
+}
+
+.xl-player .xl-dpane {
+  flex: 1;
+  min-width: 0;
+}
+
+.xl-player .xl-dhead {
+  margin: 0 0 6px;
+  font-weight: 600;
+  border-bottom: 1px solid #d6d6d6;
+  padding-bottom: 3px;
+}
+
+.xl-player .xl-dcalc {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.xl-player .xl-diter .xl-dfield {
+  grid-template-columns: max-content 80px;
+  justify-content: start;
+  margin-top: 6px;
+}
+
+.xl-player .xl-diter.xl-off .xl-dfield {
+  opacity: 0.45;
+}
+
+.xl-player .xl-backstage {
+  position: absolute;
+  inset: 28px 0 0 0;
+  display: flex;
+  background: #fff;
+  z-index: 6;
+}
+
+.xl-player .xl-backstage[hidden] {
+  display: none;
+}
+
+.xl-player .xl-backstage-menu {
+  width: 170px;
+  background: var(--xl-green);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0;
+  font-size: 13px;
+}
+
+.xl-player .xl-backstage-menu div {
+  padding: 7px 18px;
+}
+
+.xl-player .xl-backstage-menu .xl-backstage-bottom {
+  margin-top: auto;
+}
+
+.xl-player .xl-backstage-main {
+  flex: 1;
+  padding: 18px 24px;
+  font-size: 20px;
+  color: #333;
 }

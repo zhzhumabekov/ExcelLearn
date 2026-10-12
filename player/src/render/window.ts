@@ -80,6 +80,8 @@ function ribbonButton(id: RibbonButton | null, icon: string, label: string): HTM
   return button;
 }
 
+const BACKSTAGE_ITEMS = ["Главная", "Создать", "Открыть", "Сведения", "Сохранить", "Сохранить как", "Печать", "Общий доступ", "Экспорт", "Закрыть"];
+
 const TABS: [string, RibbonTabId | null][] = [
   ["Файл", null],
   ["Главная", "home"],
@@ -107,6 +109,10 @@ export class WindowView {
   private readonly hideMenu: HTMLElement;
   private readonly findMenu: HTMLElement;
   private readonly contextMenu: HTMLElement;
+  /** Строка состояния: «Циклические ссылки: D8» (глава 11). */
+  private readonly status: HTMLElement;
+  /** Меню вкладки «Файл» (backstage): «Сведения», «Создать», …, «Параметры». */
+  private readonly backstage: HTMLElement;
   private current: GridView;
 
   constructor(
@@ -127,6 +133,7 @@ export class WindowView {
         tab.dataset.tab = id;
         this.tabs.set(id, tab);
       }
+      if (label === "Файл") tab.dataset.file = "";
       tabs.append(tab);
     }
 
@@ -224,8 +231,24 @@ export class WindowView {
       sheets.append(tab);
     }
     sheets.append(el("span", "", "+"));
+    this.status = el("span", "xl-status");
+    this.status.hidden = true;
+    sheets.append(this.status);
 
-    this.el.append(title, tabs, home, formulas, data, formulaBar, this.gridWrap, sheets);
+    this.backstage = el("div", "xl-backstage");
+    this.backstage.hidden = true;
+    const backMenu = el("div", "xl-backstage-menu");
+    for (const item of BACKSTAGE_ITEMS) {
+      const row = el("div", "", item);
+      row.dataset.backstage = item;
+      backMenu.append(row);
+    }
+    const options = el("div", "", "Параметры");
+    options.dataset.backstage = "Параметры";
+    backMenu.append(el("div", "xl-backstage-bottom", "Учётная запись"), options);
+    this.backstage.append(backMenu, el("div", "xl-backstage-main", "Сведения"));
+
+    this.el.append(title, tabs, home, formulas, data, formulaBar, this.gridWrap, sheets, this.backstage);
     this.showTab("home");
     this.showSheet(first.name);
   }
@@ -324,6 +347,29 @@ export class WindowView {
       this.current = grid;
     }
     for (const [key, tab] of this.sheetTabs) tab.classList.toggle("xl-on", key === name);
+  }
+
+  /** Вкладка «Файл» открыта (меню слева, окно Excel за ним не видно). */
+  showBackstage(open: boolean): void {
+    this.backstage.hidden = !open;
+  }
+
+  fileTab(): HTMLElement {
+    const tab = this.el.querySelector<HTMLElement>("[data-file]");
+    if (!tab) throw new Error("Нет вкладки «Файл»");
+    return tab;
+  }
+
+  backstageItem(label: string): HTMLElement {
+    const item = this.backstage.querySelector<HTMLElement>(`[data-backstage="${label}"]`);
+    if (!item) throw new Error(`В меню «Файл» нет «${label}»`);
+    return item;
+  }
+
+  /** Строка состояния справа от ярлыков: текст или null — пусто. */
+  showStatus(text: string | null): void {
+    this.status.hidden = text === null;
+    this.status.textContent = text ?? "";
   }
 
   setLocale(locale: FunctionLocale): void {

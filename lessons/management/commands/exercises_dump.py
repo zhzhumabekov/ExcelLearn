@@ -25,6 +25,7 @@ class Command(BaseCommand):
                 "sheet": solution_sheet(exercise).model_dump(mode="json", exclude_none=True),
                 "sheets": [s.model_dump(mode="json", exclude_none=True) for s in exercise.sheets],
                 "names": [n.model_dump(mode="json", exclude_none=True) for n in exercise.solution.names],
+                "iterative": exercise.solution.iterative,
                 "expect": exercise.expect,
             }
             for chapter, exercises in registry.exercises.items()

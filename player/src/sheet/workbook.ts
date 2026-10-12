@@ -7,7 +7,19 @@ import type { SheetModel, SheetSnapshot } from "./sheet-model";
 export interface WorkbookSnapshot {
   sheets: ReadonlyMap<string, SheetSnapshot>;
   names: readonly NameDef[];
+  iteration: IterationSettings;
 }
+
+/** Файл → Параметры → Формулы → «Включить итеративные вычисления» (глава 11). */
+export interface IterationSettings {
+  enabled: boolean;
+  /** «Предельное число итераций» (по умолчанию 100). */
+  maxIterations: number;
+  /** «Относительная погрешность» (по умолчанию 0,001): итерации останавливаются, когда изменения меньше. */
+  maxChange: number;
+}
+
+export const DEFAULT_ITERATION: IterationSettings = { enabled: false, maxIterations: 100, maxChange: 0.001 };
 
 /** Ошибка определения имени — текст как в окне Excel («Введено недопустимое имя.»). */
 export class NameError extends Error {
@@ -31,7 +43,16 @@ export class Workbook {
   readonly sheets: SheetModel[] = [];
   private nameDefs: NameDef[] = [];
   private computed = new Map<string, CellValue>();
-  private inProgress = new Set<string>();
+  /** Ячейки, которые считаются сейчас (стек): повтор адреса в стеке — циклическая ссылка. */
+  private stack: string[] = [];
+  /** Ячейки петли циклической ссылки (Лист!A1). */
+  private cycle = new Set<string>();
+  /** Без итераций ячейки петли показывают 0, как в Excel. */
+  private zeroed = new Set<string>();
+  /** С итерациями: значения прошлого прохода — их берёт ссылка, замыкающая петлю. */
+  private previous = new Map<string, CellValue>();
+  private lastInput: string | null = null;
+  private iterationSettings: IterationSettings = { ...DEFAULT_ITERATION };
   private readonly evaluate: (formula: string, at: CellPos & { sheet: string }) => CellValue;
   private textLocale: TextLocale = "ru";
   private todaySerial = realToday();
@@ -118,9 +139,74 @@ export class Workbook {
     this.recalc();
   }
 
+  // ---------- Циклические ссылки и итерации ----------
+
+  get iteration(): IterationSettings {
+    return { ...this.iterationSettings };
+  }
+
+  setIteration(settings: IterationSettings): void {
+    this.iterationSettings = { ...settings };
+    this.recalc();
+  }
+
+  /** Ячейки петли циклической ссылки — пусто, если петли нет. */
+  get circularCells(): string[] {
+    return [...this.cycle];
+  }
+
+  /**
+   * Ячейка для строки состояния «Циклические ссылки: D8»: последняя введённая, если она в петле, иначе
+   * первая найденная. null — петли нет или включены итерации (тогда Excel ссылку не показывает).
+   */
+  get circularRef(): string | null {
+    if (this.cycle.size === 0 || this.iterationSettings.enabled) return null;
+    return this.lastInput && this.cycle.has(this.lastInput) ? this.lastInput : ([...this.cycle][0] ?? null);
+  }
+
+  /** Ячейка, в которую только что ввели значение (для строки состояния и предупреждения). */
+  noteInput(sheet: string, addr: string): void {
+    this.lastInput = `${sheet}!${addr}`;
+  }
+
+  isCircular(sheet: string, addr: string): boolean {
+    return this.cycle.has(`${sheet}!${addr}`);
+  }
+
   // ---------- Вычисление ----------
 
+  /**
+   * Пересчёт книги. Первый проход находит петли. Без итераций ячейки петли получают 0 (как Excel после
+   * предупреждения), и книга пересчитывается от них. С итерациями — проходы, пока изменения всех значений не
+   * станут меньше «относительной погрешности», но не больше «предельного числа итераций»: ссылка, замыкающая
+   * петлю, берёт значение прошлого прохода.
+   */
   recalc(): void {
+    this.cycle.clear();
+    this.zeroed.clear();
+    this.previous.clear();
+    this.sweep();
+    if (this.cycle.size === 0) return;
+    if (!this.iterationSettings.enabled) {
+      this.zeroed = new Set(this.cycle);
+      this.sweep();
+      return;
+    }
+    for (let i = 1; i < this.iterationSettings.maxIterations; i++) {
+      const before = new Map(this.computed);
+      this.previous = before;
+      this.sweep();
+      let change = 0;
+      for (const [key, value] of this.computed) {
+        const old = before.get(key);
+        if (typeof value === "number" && typeof old === "number") change = Math.max(change, Math.abs(value - old));
+        else if (value !== old) change = Infinity;
+      }
+      if (change < this.iterationSettings.maxChange) break;
+    }
+  }
+
+  private sweep(): void {
     this.computed.clear();
     for (const sheet of this.sheets) sheet.refreshValues();
   }
@@ -130,8 +216,13 @@ export class Workbook {
     const key = `${sheet}!${addr}`;
     const cached = this.computed.get(key);
     if (cached !== undefined) return cached;
-    if (this.inProgress.has(key)) return 0; // циклическая ссылка: Excel показывает 0 и предупреждение
-    this.inProgress.add(key);
+    if (this.zeroed.has(key)) return 0;
+    const loop = this.stack.indexOf(key);
+    if (loop >= 0) {
+      for (const k of this.stack.slice(loop)) this.cycle.add(k);
+      return this.iterationSettings.enabled ? (this.previous.get(key) ?? 0) : 0;
+    }
+    this.stack.push(key);
     try {
       const at = parseCell(addr);
       const expanded = expandNames(formula, {
@@ -143,7 +234,7 @@ export class Workbook {
       this.computed.set(key, value);
       return value;
     } finally {
-      this.inProgress.delete(key);
+      this.stack.pop();
     }
   }
 
@@ -151,11 +242,13 @@ export class Workbook {
     return {
       sheets: new Map(this.sheets.map((s) => [s.name, s.snapshot()])),
       names: this.nameDefs.map(copyName),
+      iteration: { ...this.iterationSettings },
     };
   }
 
   restore(snapshot: WorkbookSnapshot): void {
     this.nameDefs = snapshot.names.map(copyName);
+    this.iterationSettings = { ...snapshot.iteration };
     for (const sheet of this.sheets) {
       const cells = snapshot.sheets.get(sheet.name);
       if (cells) sheet.restoreCells(cells);

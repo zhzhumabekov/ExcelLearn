@@ -82,8 +82,39 @@ export interface ApplyNamesDialog {
   selected: string[];
 }
 
+/** «Параметры Excel» (Файл → Параметры): раздел «Формулы» → «Параметры вычислений» (глава 11). */
+export interface OptionsDialog {
+  kind: "options";
+  page: string;
+  iterative: boolean;
+  /** Поля — как набраны (в русском Excel погрешность с запятой: «0,001»). */
+  maxIterations: string;
+  maxChange: string;
+  focus: string | null;
+}
+
+export const OPTION_PAGES = [
+  "Общие",
+  "Формулы",
+  "Данные",
+  "Правописание",
+  "Сохранение",
+  "Язык",
+  "Специальные возможности",
+  "Дополнительно",
+  "Настроить ленту",
+  "Панель быстрого доступа",
+  "Надстройки",
+  "Центр управления безопасностью",
+] as const;
+
+export const ITERATIVE_CHECK = "Включить итеративные вычисления";
+export const MAX_ITERATIONS_FIELD = "Предельное число итераций";
+export const MAX_CHANGE_FIELD = "Относительная погрешность";
+
 export type Dialog =
   | AlertDialog
+  | OptionsDialog
   | CreateFromSelectionDialog
   | NameDialog
   | NameManagerDialog
@@ -103,6 +134,7 @@ export const DIALOG_TITLES: Record<Dialog["kind"], string> = {
   findReplace: "Найти и заменить",
   textToColumns: "Мастер распределения текста по столбцам",
   formatCells: "Формат ячеек",
+  options: "Параметры Excel",
 };
 
 // ---------- Имена: ключи строк и что видно с листа ----------
@@ -261,10 +293,51 @@ export function openApplyNames(state: LessonState): void {
   state.dialogs.push({ kind: "applyNames", selected: visibleNames(state).map((d) => d.name) });
 }
 
+// ---------- Параметры Excel ----------
+
+/** Файл → Параметры: окно открывается на разделе «Общие» с текущими настройками книги. */
+export function openOptions(state: LessonState): void {
+  const it = bookOf(state).iteration;
+  state.dialogs.push({
+    kind: "options",
+    page: "Общие",
+    iterative: it.enabled,
+    maxIterations: String(it.maxIterations),
+    maxChange: String(it.maxChange).replace(".", ","),
+    focus: null,
+  });
+}
+
+function onFormulasPage(dialog: OptionsDialog, what: string): void {
+  if (dialog.page !== "Формулы") throw new Error(`«${what}» — в разделе «Формулы», а открыт раздел «${dialog.page}»`);
+}
+
+/** OK в «Параметрах Excel»: настройки итераций — в книгу. → ячейки петли на листе (для вспышки). */
+function saveOptions(state: LessonState, dialog: OptionsDialog): string[] {
+  const maxIterations = Number(dialog.maxIterations.trim());
+  const maxChange = Number(dialog.maxChange.trim().replace(",", "."));
+  if (!Number.isInteger(maxIterations) || maxIterations < 1 || maxIterations > 32767) {
+    throw new Error(`Предельное число итераций — целое от 1 до 32767, а не «${dialog.maxIterations}»`);
+  }
+  if (!Number.isFinite(maxChange) || maxChange < 0) throw new Error(`Неверная погрешность «${dialog.maxChange}»`);
+  const book = bookOf(state);
+  book.setIteration({ enabled: dialog.iterative, maxIterations, maxChange });
+  const prefix = `${state.sheet.name}!`;
+  return book.circularCells.filter((k) => k.startsWith(prefix)).map((k) => k.slice(prefix.length));
+}
+
 // ---------- Поля, флажки, списки ----------
 
 export function dialogFieldText(state: LessonState, field: string, text: string): void {
   const top = topDialog(state);
+  if (top.kind === "options") {
+    onFormulasPage(top, field);
+    if (field === MAX_ITERATIONS_FIELD) top.maxIterations = text;
+    else if (field === MAX_CHANGE_FIELD) top.maxChange = text;
+    else throw new Error(`В «Параметрах Excel» нет поля «${field}»`);
+    top.focus = field;
+    return;
+  }
   if (top.kind === "findReplace") {
     if (field !== "Найти" && field !== "Заменить на") throw new Error(`В окне «Найти и заменить» нет поля «${field}»`);
     top.fields[field] = text;
@@ -295,6 +368,12 @@ export function dialogFieldRange(state: LessonState, field: string, range: strin
 
 export function dialogToggle(state: LessonState, label: string): void {
   const top = topDialog(state);
+  if (top.kind === "options") {
+    onFormulasPage(top, label);
+    if (label !== ITERATIVE_CHECK) throw new Error(`В «Параметрах Excel» нет флажка «${label}»`);
+    top.iterative = !top.iterative;
+    return;
+  }
   if (top.kind === "textToColumns") {
     if (top.step === 1 && SPLIT_MODES.includes(label as SplitMode)) top.mode = label as SplitMode;
     else if (top.step === 2 && DELIMITERS.includes(label as Delimiter)) {
@@ -324,6 +403,7 @@ export function dialogChooseOption(state: LessonState, field: string, option: st
 export function dialogItems(state: LessonState, dialog: Dialog): string[] {
   if (dialog.kind === "nameManager") return bookOf(state).names.map(nameKey);
   if (dialog.kind === "pasteName" || dialog.kind === "applyNames") return visibleNames(state).map((d) => d.name);
+  if (dialog.kind === "options") return [...OPTION_PAGES];
   if (dialog.kind === "formatCells") {
     return dialog.category === "Дата" ? [...FORMAT_CATEGORIES, ...Object.keys(DATE_TYPES)] : [...FORMAT_CATEGORIES];
   }
@@ -338,6 +418,10 @@ export function dialogPickItem(state: LessonState, item: string, add: "ctrl" | "
   if (!found) throw new Error(`В списке окна нет «${item}»`);
   if (dialog.kind === "pasteName") {
     dialog.selected = found;
+    return;
+  }
+  if (dialog.kind === "options") {
+    dialog.page = found;
     return;
   }
   if (dialog.kind === "formatCells") {
@@ -473,6 +557,12 @@ export function pressDialogButton(state: LessonState, label: string): string[] {
     return [];
   }
   switch (dialog.kind) {
+    case "options": {
+      if (label !== "OK") break;
+      const flashed = saveOptions(state, dialog);
+      closeTop(state);
+      return flashed;
+    }
     case "alert":
       if (label !== "OK") break;
       closeTop(state);

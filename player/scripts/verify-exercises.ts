@@ -10,6 +10,7 @@ interface DumpedExercise {
   sheet: Sheet;
   sheets: Sheet[];
   names: NameSpec[];
+  iterative?: boolean;
   expect: Record<string, string | number>;
 }
 
@@ -17,7 +18,13 @@ const exercises = JSON.parse(readFileSync(0, "utf8")) as DumpedExercise[];
 
 let failed = 0;
 for (const exercise of exercises) {
-  const { checked, problems } = verifySolutionSheet(exercise.sheet, exercise.expect, exercise.names, exercise.sheets);
+  const { checked, problems } = verifySolutionSheet(
+    exercise.sheet,
+    exercise.expect,
+    exercise.names,
+    exercise.sheets,
+    exercise.iterative,
+  );
   if (problems.length === 0) {
     console.log(`✓ ${exercise.name}: значений сверено — ${checked}`);
   } else {
