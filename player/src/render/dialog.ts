@@ -6,6 +6,10 @@ import {
   CREATE_CHECKS,
   type Dialog,
   DIALOG_TITLES,
+  ITERATIVE_CHECK,
+  MAX_CHANGE_FIELD,
+  MAX_ITERATIONS_FIELD,
+  OPTION_PAGES,
   dialogButtons,
   dialogItems,
   nameKey,
@@ -175,6 +179,21 @@ export class DialogView {
         }
         return `${head}<p>Формат данных столбца:</p>${check("общий", true, true)}
           ${inputField("Поместить в", dialog.destination, isTop && dialog.focus === "Поместить в")}${splitPreview(state, dialog)}`;
+      }
+      case "options": {
+        const pages = OPTION_PAGES.map(
+          (page) => `<div data-item="${attr(page)}"${dialog.page === page ? ' class="xl-on"' : ""}>${escapeHtml(page)}</div>`,
+        ).join("");
+        const number = (text: string) => (locale === "ru" ? text : text.replace(",", "."));
+        const content =
+          dialog.page === "Формулы"
+            ? `<p class="xl-dhead">Параметры вычислений</p>
+              <div class="xl-dcalc"><div>Вычисления в книге:${check("автоматически", true, true)}${check("вручную", false, true)}</div>
+              <div class="xl-diter${dialog.iterative ? "" : " xl-off"}">${check(ITERATIVE_CHECK, dialog.iterative)}
+              ${inputField(MAX_ITERATIONS_FIELD, number(dialog.maxIterations), isTop && dialog.focus === MAX_ITERATIONS_FIELD)}
+              ${inputField(MAX_CHANGE_FIELD, number(dialog.maxChange), isTop && dialog.focus === MAX_CHANGE_FIELD)}</div></div>`
+            : `<p class="xl-dhead">${escapeHtml(dialog.page)}</p><p class="xl-dcaption">Основные параметры работы с Excel.</p>`;
+        return `<div class="xl-doptions-page"><div class="xl-dlist xl-dpages">${pages}</div><div class="xl-dpane">${content}</div></div>`;
       }
       case "formatCells": {
         const cell = state.sheet.get(dialog.cell);

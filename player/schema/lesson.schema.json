@@ -374,6 +374,21 @@
       "title": "DragSelect",
       "type": "object"
     },
+    "FileMenu": {
+      "additionalProperties": false,
+      "description": "Вкладка «Файл» → пункт меню: «Параметры» открывает окно «Параметры Excel» (глава 11).",
+      "properties": {
+        "fileMenu": {
+          "const": "options",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fileMenu"
+      ],
+      "title": "FileMenu",
+      "type": "object"
+    },
     "Fill": {
       "additionalProperties": false,
       "properties": {
@@ -783,6 +798,9 @@
               },
               {
                 "$ref": "#/$defs/ContextMenu"
+              },
+              {
+                "$ref": "#/$defs/FileMenu"
               },
               {
                 "$ref": "#/$defs/DialogType"

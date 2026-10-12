@@ -125,6 +125,7 @@ export class SheetModel {
     const current = this.get(addr);
     const fmt = current.fmt === "general" && isDateText(raw) ? "date" : current.fmt;
     this.cells.set(addr, { ...current, input: parseInput(raw), fmt });
+    this.book.noteInput(this.name, addr);
     this.recalc();
   }
 

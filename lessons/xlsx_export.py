@@ -218,5 +218,10 @@ def exercise_xlsx(exercise: Exercise, kind: Literal["task", "solution"]) -> byte
         fill_worksheet(wb.create_sheet(), extra)
     if kind == "solution":
         add_names(wb, exercise.solution.names, sheet.name)
+        if exercise.solution.iterative:
+            # Файл → Параметры → Формулы → «Включить итеративные вычисления» (как в книге: 100 итераций, 0,001)
+            wb.calculation.iterate = True
+            wb.calculation.iterateCount = 100
+            wb.calculation.iterateDelta = 0.001
     _add_info_sheet(wb, exercise, kind)
     return _save(wb)

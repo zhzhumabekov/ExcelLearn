@@ -157,3 +157,19 @@ def test_info_text_starting_with_formula_stays_text(client):
     info = openpyxl.load_workbook(BytesIO(response.content))["Условие"]
     cells = [c for row in info.iter_rows() for c in row if isinstance(c.value, str) and c.value.startswith("=")]
     assert cells and all(c.data_type == "s" for c in cells)
+
+
+@pytest.mark.parametrize(("kind", "iterate"), [("solution", True), ("task", False)])
+def test_circular_solution_file_has_iterative_calculation(kind, iterate):
+    """Глава 11: в решении — циклическая ссылка, файл решения открывается с включёнными итерациями."""
+    from lessons.xlsx_export import exercise_xlsx
+
+    exercise = get_registry().exercise("ch11", "year-balance")
+    assert exercise.solution.iterative
+
+    wb = openpyxl.load_workbook(BytesIO(exercise_xlsx(exercise, kind)))
+
+    assert bool(wb.calculation.iterate) is iterate
+    if iterate:
+        assert wb.calculation.iterateCount == 100
+        assert wb.calculation.iterateDelta == 0.001

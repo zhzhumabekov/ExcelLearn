@@ -36,3 +36,6 @@ chapters:
   - id: ch10
     number: 10
     title: Ещё несколько финансовых функций Excel
+  - id: ch11
+    number: 11
+    title: Циклические ссылки

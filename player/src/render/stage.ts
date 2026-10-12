@@ -62,6 +62,7 @@ export class Stage {
     window.showTab(state.ribbonTab);
     window.showMenu(state.menu);
     window.showContextMenu(state.contextMenu);
+    window.showBackstage(state.backstage);
     window.grid.setHidden(state.hiddenColumns[state.sheet.name] ?? []);
     window.showNameList(state.nameListOpen ? visibleNames(state).map((d) => d.name) : null);
     window.grid.renderAll();
@@ -86,6 +87,7 @@ export class Stage {
           : escapeHtml(formulaBarText(cell, locale));
     }
     window.grid.highlightHeaders(editing ? editing.cell : state.selection);
+    window.showStatus(circularStatus(state, locale));
     this.dialogs.render(state, locale);
   }
 
@@ -159,6 +161,14 @@ export class Stage {
   }
 
   /** Элемент верхнего окна: [data-field="Имя"], [data-check=…], [data-item=…], [data-button="OK"]. */
+  fileTabPoint(): Point {
+    return this.point(this.window.fileTab());
+  }
+
+  backstagePoint(label: string): Point {
+    return this.point(this.window.backstageItem(label));
+  }
+
   dialogPoint(selector: string): Point {
     return this.point(this.dialogs.target(selector));
   }
@@ -172,4 +182,13 @@ export class Stage {
     const { width, height } = this.el.getBoundingClientRect();
     return { x: width * 0.88, y: height * 0.82 };
   }
+}
+
+/** «Циклические ссылки: D8» — как в строке состояния Excel; ячейка другого листа — с его именем. */
+function circularStatus(state: LessonState, locale: FunctionLocale): string | null {
+  const ref = state.sheet.book.circularRef;
+  if (!ref) return null;
+  const [sheet, addr] = ref.split("!");
+  const where = sheet === state.sheet.name ? addr : ref;
+  return `${locale === "ru" ? "Циклические ссылки" : "Circular References"}: ${where}`;
 }
