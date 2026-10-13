@@ -63,6 +63,10 @@ export class GridView {
   private headers = new Map<string, HTMLTableCellElement>();
   private readonly colEls: HTMLTableColElement[] = [];
   private hidden = new Set<string>();
+  /** Строки листа (tr) — прокрутка прячет ушедшие за верх окна. */
+  private readonly rowEls: HTMLTableRowElement[] = [];
+  /** Закреплённые области: левая верхняя ячейка прокручиваемой части (глава 12). */
+  private frozen: { row: number; col: number } | null = null;
 
   constructor(
     private readonly sheet: SheetModel,
@@ -104,6 +108,8 @@ export class GridView {
       `xl-${display.align}`,
       state.style ? `xl-${state.style}` : "",
       this.hidden.has(colToLetters(col)) ? "xl-colhidden" : "",
+      this.frozen && row === this.frozen.row - 1 ? "xl-frz-b" : "",
+      this.frozen && col === this.frozen.col - 1 ? "xl-frz-r" : "",
       display.align === "left" && neighbor !== null ? "xl-clip" : "",
     ]
       .filter(Boolean)
@@ -140,6 +146,20 @@ export class GridView {
   }
 
   /** Скрытые столбцы (Главная → Формат → Скрыть столбцы): ширина 0, содержимое не видно. */
+  /** Прокрутка и закрепление: видны закреплённые строки и visible строк после прокрученных. */
+  setView(frozen: { row: number; col: number } | null, scrolled: number, visible: number | null): void {
+    const top = frozen ? frozen.row : 1;
+    const changed = JSON.stringify(frozen) !== JSON.stringify(this.frozen);
+    this.frozen = frozen;
+    for (const [i, tr] of this.rowEls.entries()) {
+      const row = i + 1;
+      const scrolledAway = row >= top && row < top + scrolled;
+      const below = visible !== null && row >= top + scrolled + Math.max(1, visible - (top - 1));
+      tr.hidden = scrolledAway || below;
+    }
+    if (changed) this.renderAll();
+  }
+
   setHidden(letters: readonly string[]): void {
     const hidden = new Set(letters);
     if ([...hidden].join() === [...this.hidden].join()) return;
@@ -191,6 +211,7 @@ export class GridView {
     body.append(head);
     for (let row = 1; row <= this.rows; row++) {
       const tr = document.createElement("tr");
+      this.rowEls.push(tr);
       tr.append(this.makeHeader(String(row), "xl-rowh"));
       for (let col = 1; col <= this.cols; col++) {
         const addr = cellName({ col, row });

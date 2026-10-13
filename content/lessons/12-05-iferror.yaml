@@ -1,0 +1,128 @@
+# Глава 12 (ЕСЛИ и логические функции). Собрано генератором; ответы expect посчитаны независимо.
+id: iferror
+chapter: ch12
+order: 5
+title: 'ЕСЛИОШИБКА и АГРЕГАТ: ошибки не ломают среднее'
+source: Errortrap.xlsx (рис. 12.8)
+sheet:
+  file: Премия_список.xlsx
+  name: Оклады
+  columns:
+    A: 120
+    B: 130
+    C: 30
+    D: 140
+    E: 100
+    F: 130
+  rows: 10
+  cells:
+    A1:
+      v: Сотрудник
+      style: head
+    B1:
+      v: Оклад, тыс. ₸
+      style: head
+    D1:
+      v: Список премии
+      style: head
+    E1:
+      v: ВПР
+      style: head
+    F1:
+      v: ЕСЛИОШИБКА
+      style: head
+    D8:
+      v: Среднее
+      style: label
+    D9:
+      v: АГРЕГАТ
+      style: label
+    A2: Айгерим
+    B2: 520
+    A3: Данияр
+    B3: 480
+    A4: Ольга
+    B4: 610
+    A5: Ержан
+    B5: 450
+    A6: Мадина
+    B6: 550
+    D2: Айгерим
+    D3: Ержан
+    D4: Тимур
+    D5: Асель
+    D6: Ольга
+    E8:
+      fmt: number
+    F8:
+      fmt: number
+    E9:
+      fmt: number
+expect:
+  E2: 520
+  F2: 520
+  E3: 450
+  F3: 450
+  E4: '#N/A'
+  F4: ' '
+  E5: '#N/A'
+  F5: ' '
+  E6: 610
+  F6: 610
+  E8: '#N/A'
+  F8: 526.6667
+  E9: 526.6667
+steps:
+- title: Ситуация
+  text: Бухгалтер подставляет оклады в список на премию через {fn:VLOOKUP}. В списке есть Тимур и Асель — они ещё не в штате,
+    и {fn:VLOOKUP} для них не найдёт оклад. Посмотрим, что станет со средним.
+  actions:
+  - wait: 3000
+- title: '{fn:VLOOKUP} и #Н/Д'
+  text: 'В <code>E2</code>: <code>{f:=VLOOKUP(D2,$A$2:$B$6,2,FALSE)}</code>, протяните до <code>E6</code>. Для Тимура и
+    Асель — <code>#Н/Д</code>: «значение недоступно». А <code>{f:=AVERAGE(E2:E6)}</code> в <code>E8</code> тоже даёт <code>#Н/Д</code>:
+    одна ошибка в диапазоне портит весь итог.'
+  actions:
+  - click: E2
+  - type: =VLOOKUP(D2,$A$2:$B$6,2,FALSE)
+  - keys:
+    - Enter
+  - click: E2
+  - fill: E2:E6
+  - click: E8
+  - type: =AVERAGE(E2:E6)
+  - keys:
+    - Enter
+- title: '{fn:IFERROR}: замена ошибки'
+  text: '<code>{f:=IFERROR(VLOOKUP(D2,$A$2:$B$6,2,FALSE)," ")}</code> в <code>F2</code>: первый аргумент — формула, второй
+    — что показать, если она дала ошибку (здесь пробел). Протяните до <code>F6</code>. Теперь <code>{f:=AVERAGE(F2:F6)}</code>
+    — <b>526,67</b>: {fn:AVERAGE} пропускает текст и считает среднее трёх окладов.'
+  actions:
+  - click: F2
+  - type: =IFERROR(VLOOKUP(D2,$A$2:$B$6,2,FALSE)," ")
+  - keys:
+    - Enter
+  - click: F2
+  - fill: F2:F6
+  - click: F8
+  - type: =AVERAGE(F2:F6)
+  - keys:
+    - Enter
+- title: '{fn:AGGREGATE}: без лишнего столбца'
+  text: 'Можно не заменять ошибки, а пропустить их: <code>{f:=AGGREGATE(1,6,E2:E6)}</code>. Первый аргумент 1 — {fn:AVERAGE}
+    (9 — {fn:SUM}, 4 — {fn:MAX}), второй 6 — «пропускать ошибки». Ответ тот же: <b>526,67</b>.'
+  actions:
+  - click: E9
+  - type: =AGGREGATE(1,6,E2:E6)
+  - keys:
+    - Enter
+- title: 'Частая ошибка: спрятать все ошибки'
+  text: 'Оборачивать в {fn:IFERROR} всё подряд «чтобы было красиво». Ошибка — это сигнал: опечатка в имени, не тот диапазон.
+    Прячьте только ожидаемые ошибки, как «нет в штате», а вместо пустоты лучше писать понятное «нет в штате».'
+  actions:
+  - wait: 3000
+- title: Что запомнить
+  text: <code>{f:=IFERROR(формула,замена)}</code> — показать замену, если формула дала ошибку. <code>{f:=AGGREGATE(1,6,диапазон)}</code>
+    — среднее без ошибок. <b>На работе пригодится</b> при сверке списков, где не все найдены.
+  actions:
+  - click: F8

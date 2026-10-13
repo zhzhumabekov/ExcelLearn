@@ -53,6 +53,12 @@ class Sheet(Model):
     name: str = "Лист1"
     columns: dict[ColumnLetter, int] = Field(default_factory=dict, description="Ширина колонок в пикселях")
     rows: int | None = Field(default=None, ge=1, le=200, description="Сколько строк показывать")
+    visibleRows: int | None = Field(
+        default=None,
+        ge=3,
+        le=40,
+        description="Окно просмотра: сколько строк видно сразу (лист длиннее — его прокручивают действием scroll)",
+    )
     cells: dict[CellAddr, Cell] = Field(default_factory=dict)
 
 
@@ -148,7 +154,7 @@ class ClickRibbon(Model):
 class RibbonTab(Model):
     """Переключить вкладку ленты."""
 
-    ribbonTab: Literal["home", "formulas", "data"]
+    ribbonTab: Literal["home", "formulas", "data", "view"]
 
 
 class NameBox(Model):
@@ -203,6 +209,24 @@ class Autocomplete(Model):
     """Двойной щелчок по имени (функции или диапазона) в списке автозавершения формулы."""
 
     autocomplete: str = Field(min_length=1)
+
+
+class FreezePanes(Model):
+    """Вид → Окно → «Закрепить области ▾» → пункт меню (глава 12). panes — по активной ячейке."""
+
+    freezePanes: Literal["panes", "topRow", "firstColumn", "unfreeze"]
+
+
+class FillDown(Model):
+    """Двойной щелчок по маркеру заполнения: копировать формулу вниз до конца данных соседнего столбца."""
+
+    fillDown: CellAddr
+
+
+class Scroll(Model):
+    """Прокрутка листа колёсиком мыши: на сколько строк вниз (минус — вверх)."""
+
+    scroll: int = Field(ge=-200, le=200)
 
 
 class FileMenu(Model):
@@ -297,6 +321,9 @@ ACTION_MODELS: dict[str, type[Model]] = {
     "autocomplete": Autocomplete,
     "contextMenu": ContextMenu,
     "fileMenu": FileMenu,
+    "freezePanes": FreezePanes,
+    "scroll": Scroll,
+    "fillDown": FillDown,
     "dialogType": DialogType,
     "dialogRange": DialogRange,
     "dialogCheck": DialogCheck,
@@ -338,6 +365,9 @@ Action = Annotated[
     | Annotated[Autocomplete, Tag("autocomplete")]
     | Annotated[ContextMenu, Tag("contextMenu")]
     | Annotated[FileMenu, Tag("fileMenu")]
+    | Annotated[FreezePanes, Tag("freezePanes")]
+    | Annotated[Scroll, Tag("scroll")]
+    | Annotated[FillDown, Tag("fillDown")]
     | Annotated[DialogType, Tag("dialogType")]
     | Annotated[DialogRange, Tag("dialogRange")]
     | Annotated[DialogCheck, Tag("dialogCheck")]

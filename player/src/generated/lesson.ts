@@ -63,6 +63,10 @@ export interface Sheet {
    * Сколько строк показывать
    */
   rows?: number | null;
+  /**
+   * Окно просмотра: сколько строк видно сразу (лист длиннее — его прокручивают действием scroll)
+   */
+  visibleRows?: number | null;
   cells?: {
     /**
      * This interface was referenced by `undefined`'s JSON-Schema definition
@@ -139,6 +143,9 @@ export interface Step {
       | Autocomplete
       | ContextMenu
       | FileMenu
+      | FreezePanes
+      | Scroll
+      | FillDown
       | DialogType
       | DialogRange
       | DialogCheck
@@ -170,6 +177,9 @@ export interface Step {
       | Autocomplete
       | ContextMenu
       | FileMenu
+      | FreezePanes
+      | Scroll
+      | FillDown
       | DialogType
       | DialogRange
       | DialogCheck
@@ -278,7 +288,7 @@ export interface ClickRibbon {
  * Переключить вкладку ленты.
  */
 export interface RibbonTab {
-  ribbonTab: "home" | "formulas" | "data";
+  ribbonTab: "home" | "formulas" | "data" | "view";
 }
 /**
  * Щелчок в поле «Имя», набор имени и Enter: имя выделенному диапазону (или переход к существующему).
@@ -345,6 +355,24 @@ export interface ContextMenu {
  */
 export interface FileMenu {
   fileMenu: "options";
+}
+/**
+ * Вид → Окно → «Закрепить области ▾» → пункт меню (глава 12). panes — по активной ячейке.
+ */
+export interface FreezePanes {
+  freezePanes: "panes" | "topRow" | "firstColumn" | "unfreeze";
+}
+/**
+ * Прокрутка листа колёсиком мыши: на сколько строк вниз (минус — вверх).
+ */
+export interface Scroll {
+  scroll: number;
+}
+/**
+ * Двойной щелчок по маркеру заполнения: копировать формулу вниз до конца данных соседнего столбца.
+ */
+export interface FillDown {
+  fillDown: string;
 }
 /**
  * Набор текста в поле открытого окна (поле очищается).

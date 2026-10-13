@@ -3,6 +3,7 @@ import FormulaParser, { type CellRef, type FunctionArg, type RangeRef } from "fa
 import { cellName, MAX_COL, MAX_ROW } from "./address";
 import { dateFunctions } from "./dates";
 import { FINANCE_FUNCTIONS } from "./finance";
+import { LOGIC_FUNCTIONS } from "./logic";
 import { installFormulajs, PARSER_ERRORS } from "./formulajs-bridge";
 import { LOOKUP_FUNCTIONS } from "./lookup";
 import { type TextLocale, textFunctions } from "./text-functions";
@@ -111,6 +112,8 @@ function createParser(source: CellSource): FormulaParser {
   Object.assign(parser.functions, textFunctions(() => source.locale?.() ?? "ru"));
   // ЧПС и ЧИСТНЗ — свои (finance.ts): пустые ячейки — как в Excel
   Object.assign(parser.functions, FINANCE_FUNCTIONS);
+  // ВЫБОР и АГРЕГАТ — свои (logic.ts): ВЫБОР отдаёт диапазон в СУММ, АГРЕГАТ пропускает ошибки
+  Object.assign(parser.functions, LOGIC_FUNCTIONS);
   // Даты — свои (dates.ts): 29.02.1900, строка выходных РАБДЕНЬ.МЕЖД, «04.01.2003» в ДАТАЗНАЧ
   Object.assign(
     parser.functions,

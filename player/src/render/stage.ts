@@ -64,6 +64,11 @@ export class Stage {
     window.showContextMenu(state.contextMenu);
     window.showBackstage(state.backstage);
     window.grid.setHidden(state.hiddenColumns[state.sheet.name] ?? []);
+    window.grid.setView(
+      state.frozen[state.sheet.name] ?? null,
+      state.scrolled[state.sheet.name] ?? 0,
+      state.sheet.visibleRows,
+    );
     window.showNameList(state.nameListOpen ? visibleNames(state).map((d) => d.name) : null);
     window.grid.renderAll();
 
@@ -161,6 +166,11 @@ export class Stage {
   }
 
   /** Элемент верхнего окна: [data-field="Имя"], [data-check=…], [data-item=…], [data-button="OK"]. */
+  /** Середина сетки — куда наводить курсор, чтобы прокрутить лист колёсиком. */
+  gridPoint(): Point {
+    return this.point(this.window.gridWrap);
+  }
+
   fileTabPoint(): Point {
     return this.point(this.window.fileTab());
   }

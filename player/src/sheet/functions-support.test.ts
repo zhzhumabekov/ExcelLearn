@@ -213,3 +213,84 @@ describe("гл. 10: ПС, БС, ПЛТ, ОСПЛТ, ПРПЛТ, ОБЩПЛАТ, 
     expect(value("=RATE(120,-1000,80000,-10000,0)")).toBeCloseTo(0.00818, 5);
   });
 });
+
+// Глава 12: ЕСЛИ, И, ИЛИ, ЕСЛИОШИБКА, АГРЕГАТ, СТРОКА, ОСТАТ, ЕСЛИМН, ВЫБОР, ПЕРЕКЛЮЧ и ошибки Excel.
+describe("гл. 12: логические функции и ошибки", () => {
+  const sheet = new SheetModel({
+    cells: {
+      A1: 1200,
+      // ВЫБОР по диапазонам (рис. 12.15): кварталы в столбцах M:P
+      M6: 10,
+      M7: 20,
+      M8: 30,
+      N6: 5,
+      N7: 5,
+      N8: 5,
+      O6: 30,
+      O7: 40,
+      O8: 50,
+      P6: 1,
+      P7: 1,
+      P8: 1,
+      // АГРЕГАТ (рис. 12.8): зарплаты с ошибками #Н/Д
+      E11: 80,
+      E12: 70,
+      E15: 74,
+      C3: 0,
+      B3: 5,
+      B6: 3,
+      C6: "jack",
+    },
+  });
+  const value = (formula: string) => {
+    sheet.setInput("Z1", formula);
+    return sheet.value("Z1");
+  };
+
+  it.each([
+    ["=IF(A1<=500,3*A1,IF(A1<=1200,2.7*A1,IF(A1<=2000,2.3*A1,2*A1)))", 3240],
+    ['=IF(OR(7=2,7=3,7=12),"проигрыш",IF(OR(7=7,7=11),"выигрыш","продолжать"))', "выигрыш"],
+    ['=IF(AND(1=1,5>3),"Да","Нет")', "Да"],
+    ['=IFERROR(1/0," ")', " "],
+    ["=IFERROR(5,0)", 5],
+    ['=IFS(A1<=500,3,A1<=1200,2.7,A1<=2000,2.3,TRUE,2)', 2.7],
+    ["=CHOOSE(3,-1,1,1,1,1,1,1,0,-1,-1)", 1],
+    ["=SUM(CHOOSE(3,M6:M8,N6:N8,O6:O8,P6:P8))", 120],
+    ['=SWITCH("L","XL","Очень большой","L","Большой","Неправильный код")', "Большой"],
+    ['=SWITCH("Q","XL","Очень большой","L","Большой","Неправильный код")', "Неправильный код"],
+    ["=ROW(A6)", 6],
+    ["=MOD(9,4)", 1],
+    ["=MOD(6,3)", 0],
+    ["=AGGREGATE(1,6,E11:E15)", 74.66667],
+  ])("%s → %j", (formula, expected) => {
+    const v = value(formula);
+    if (typeof expected === "number") expect(v).toBeCloseTo(expected, 4);
+    else expect(v).toBe(expected);
+  });
+
+  it("ЕСЛИОШИБКА с ВПР и АГРЕГАТ пропускают #Н/Д", () => {
+    sheet.setInput("E13", '=VLOOKUP("JR",M6:N8,2,FALSE)');
+    sheet.setInput("E14", '=VLOOKUP("Josh",M6:N8,2,FALSE)');
+    expect(String(value("=AVERAGE(E11:E15)"))).toMatch(/#N\/A/);
+    expect(value("=AGGREGATE(1,6,E11:E15)")).toBeCloseTo(74.66667, 4);
+  });
+
+  it.each([
+    ["=C3/B3", 0],
+    ["=B3/C3", "#DIV/0!"],
+    ["=B6+C6", "#VALUE!"],
+    ["=SUM(sales)", "#NAME?"],
+    ["=SQRT(-1)", "#NUM!"],
+  ])("ошибка: %s → %s", (formula, code) => {
+    const v = value(formula);
+    if (typeof code === "number") expect(v).toBe(code);
+    else expect(String(v)).toContain(code);
+  });
+
+  it("СТРОКА() без аргумента — строка самой формулы", () => {
+    sheet.setInput("Z7", "=ROW()");
+    expect(sheet.value("Z7")).toBe(7);
+    sheet.setInput("Z6", '=IF(MOD(ROW(),4)=2,"год","")');
+    expect(sheet.value("Z6")).toBe("год");
+  });
+});

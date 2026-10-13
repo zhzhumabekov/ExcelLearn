@@ -1631,3 +1631,16 @@
   font-size: 20px;
   color: #333;
 }
+
+/* ---------- Глава 12: закреплённые области и прокрутка ---------- */
+.xl-player .xl-grid tr[hidden] {
+  display: none;
+}
+
+.xl-player .xl-grid .xl-frz-b {
+  border-bottom: 2px solid #5f6368;
+}
+
+.xl-player .xl-grid .xl-frz-r {
+  border-right: 2px solid #5f6368;
+}
