@@ -16,7 +16,8 @@ export type RibbonButton =
   | "format"
   | "find"
   | "textToColumns"
-  | "flashFill";
+  | "flashFill"
+  | "freezePanes";
 
 /** Пункты меню «Присвоить имя ▾» и «Формат ▾» (с подменю «Скрыть или отобразить»). */
 export type MenuItem =
@@ -28,9 +29,13 @@ export type MenuItem =
   | "unhideRows"
   | "unhideColumns"
   | "findItem"
-  | "replace";
+  | "replace"
+  | "freezePanes"
+  | "freezeTopRow"
+  | "freezeFirstColumn"
+  | "unfreezePanes";
 
-export type MenuState = "defineName" | "format" | "format-hide" | "find" | null;
+export type MenuState = "defineName" | "format" | "format-hide" | "find" | "freeze" | null;
 
 /** Пункты контекстного меню ячейки (правая кнопка мыши); id — те, по которым щёлкает урок. */
 const CONTEXT_ITEMS: [string | null, string][] = [
@@ -88,7 +93,7 @@ const TABS: [string, RibbonTabId | null][] = [
   ["Вставка", null],
   ["Формулы", "formulas"],
   ["Данные", "data"],
-  ["Вид", null],
+  ["Вид", "view"],
 ];
 
 /** Окно Excel: заголовок, вкладки и лента, поле «Имя», строка формул, сетка листа и ярлыки листов. */
@@ -108,6 +113,7 @@ export class WindowView {
   private readonly formatMenu: HTMLElement;
   private readonly hideMenu: HTMLElement;
   private readonly findMenu: HTMLElement;
+  private readonly freezeMenu: HTMLElement;
   private readonly contextMenu: HTMLElement;
   /** Строка состояния: «Циклические ссылки: D8» (глава 11). */
   private readonly status: HTMLElement;
@@ -197,6 +203,26 @@ export class WindowView {
     this.ribbons.set("formulas", formulas);
     this.ribbons.set("data", data);
 
+    // Вид → Окно → «Закрепить области ▾» (глава 12)
+    const freeze = el("span", "xl-split");
+    const freezeButton = ribbonButton("freezePanes", "❄", "Закрепить области ▾");
+    freezeButton.classList.add("xl-rbig");
+    freeze.append(freezeButton);
+    this.freezeMenu = menu([
+      ["freezePanes", "Закрепить области"],
+      ["freezeTopRow", "Закрепить верхнюю строку"],
+      ["freezeFirstColumn", "Закрепить первый столбец"],
+      ["unfreezePanes", "Снять закрепление областей"],
+    ]);
+    freeze.append(this.freezeMenu);
+    const view = el("div", "xl-ribbon");
+    view.append(
+      ribbonGroup("Режимы просмотра книги", ribbonButton(null, "▤", "Обычный"), ribbonButton(null, "▥", "Разметка страницы")),
+      ribbonGroup("Масштаб", ribbonButton(null, "🔍", "Масштаб"), ribbonButton(null, "1:1", "100%")),
+      ribbonGroup("Окно", freeze),
+    );
+    this.ribbons.set("view", view);
+
     const formulaBar = el("div", "xl-fbar");
     // Поле «Имя» — отдельное поле со стрелкой списка, как в Excel, а не просто подпись
     this.nameField = el("div", "xl-namebox");
@@ -248,7 +274,7 @@ export class WindowView {
     backMenu.append(el("div", "xl-backstage-bottom", "Учётная запись"), options);
     this.backstage.append(backMenu, el("div", "xl-backstage-main", "Сведения"));
 
-    this.el.append(title, tabs, home, formulas, data, formulaBar, this.gridWrap, sheets, this.backstage);
+    this.el.append(title, tabs, home, formulas, data, view, formulaBar, this.gridWrap, sheets, this.backstage);
     this.showTab("home");
     this.showSheet(first.name);
   }
@@ -304,6 +330,7 @@ export class WindowView {
     this.formatMenu.hidden = open !== "format" && open !== "format-hide";
     this.hideMenu.hidden = open !== "format-hide";
     this.findMenu.hidden = open !== "find";
+    this.freezeMenu.hidden = open !== "freeze";
   }
 
   contextItem(id: string): HTMLElement {

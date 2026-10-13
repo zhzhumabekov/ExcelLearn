@@ -1,5 +1,5 @@
-import { fillRange, selectRange } from "../lesson/state";
-import { cellName, parseRange, type RangePos } from "../sheet/address";
+import { fillRange, type LessonState, selectRange } from "../lesson/state";
+import { cellName, parseCell, parseRange, type RangePos } from "../sheet/address";
 import type { Action } from "./types";
 
 /** Ячейка на пути от start к end при прогрессе t (0…1) — для протягивания мышью. */
@@ -67,6 +67,48 @@ export function fill(range: string): Action {
       stage.render(state);
       for (const cell of filled) {
         stage.flash(cell);
+        await clock.wait(FILL_STAGGER_MS);
+      }
+      cursor.setShape("arrow");
+    },
+  };
+}
+
+/**
+ * Двойной щелчок по маркеру заполнения: формула копируется вниз до последней строки, где заполнен соседний
+ * столбец слева (если он пуст — справа), как в Excel. → диапазон заполнения или сама ячейка, если некуда.
+ */
+export function fillDownRange(state: LessonState, cell: string): string {
+  const { row, col } = parseCell(cell);
+  const filled = (c: number, r: number) => c >= 1 && state.sheet.get(cellName({ col: c, row: r })).input !== null;
+  const side = filled(col - 1, row + 1) ? col - 1 : filled(col + 1, row + 1) ? col + 1 : null;
+  if (side === null) return cell;
+  let last = row;
+  while (filled(side, last + 1)) last++;
+  return `${cell}:${cellName({ col, row: last })}`;
+}
+
+export function fillDown(cell: string): Action {
+  return {
+    kind: "fillDown",
+    apply: (state) => {
+      const range = fillDownRange(state, cell);
+      if (range !== cell) fillRange(state, range);
+    },
+    async animate({ state, stage, clock }) {
+      const { cursor } = stage;
+      selectRange(state, cell);
+      stage.render(state);
+      await cursor.moveTo(stage.cellPoint(cell, "handle"), 500);
+      cursor.setShape("plus");
+      await clock.wait(400);
+      await cursor.click();
+      await cursor.click();
+      const range = fillDownRange(state, cell);
+      const filled = range === cell ? [] : fillRange(state, range);
+      stage.render(state);
+      for (const c of filled.slice(0, 12)) {
+        stage.flash(c);
         await clock.wait(FILL_STAGGER_MS);
       }
       cursor.setShape("arrow");

@@ -51,6 +51,8 @@ export class Workbook {
   private zeroed = new Set<string>();
   /** С итерациями: значения прошлого прохода — их берёт ссылка, замыкающая петлю. */
   private previous = new Map<string, CellValue>();
+  private batchDepth = 0;
+  private batchDirty = false;
   private lastInput: string | null = null;
   private iterationSettings: IterationSettings = { ...DEFAULT_ITERATION };
   private readonly evaluate: (formula: string, at: CellPos & { sheet: string }) => CellValue;
@@ -182,6 +184,10 @@ export class Workbook {
    * петлю, берёт значение прошлого прохода.
    */
   recalc(): void {
+    if (this.batchDepth > 0) {
+      this.batchDirty = true;
+      return;
+    }
     this.cycle.clear();
     this.zeroed.clear();
     this.previous.clear();
@@ -203,6 +209,20 @@ export class Workbook {
         else if (value !== old) change = Infinity;
       }
       if (change < this.iterationSettings.maxChange) break;
+    }
+  }
+
+  /** Несколько правок — один пересчёт в конце (заполнение диапазона маркером: иначе пересчёт на каждую ячейку). */
+  batch<T>(fn: () => T): T {
+    this.batchDepth++;
+    try {
+      return fn();
+    } finally {
+      this.batchDepth--;
+      if (this.batchDepth === 0 && this.batchDirty) {
+        this.batchDirty = false;
+        this.recalc();
+      }
     }
   }
 

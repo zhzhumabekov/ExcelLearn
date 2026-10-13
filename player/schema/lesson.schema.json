@@ -403,6 +403,41 @@
       "title": "Fill",
       "type": "object"
     },
+    "FillDown": {
+      "additionalProperties": false,
+      "description": "Двойной щелчок по маркеру заполнения: копировать формулу вниз до конца данных соседнего столбца.",
+      "properties": {
+        "fillDown": {
+          "pattern": "^[A-Z]{1,3}[1-9][0-9]*$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fillDown"
+      ],
+      "title": "FillDown",
+      "type": "object"
+    },
+    "FreezePanes": {
+      "additionalProperties": false,
+      "description": "Вид → Окно → «Закрепить области ▾» → пункт меню (глава 12). panes — по активной ячейке.",
+      "properties": {
+        "freezePanes": {
+          "enum": [
+            "panes",
+            "topRow",
+            "firstColumn",
+            "unfreeze"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "freezePanes"
+      ],
+      "title": "FreezePanes",
+      "type": "object"
+    },
     "HideColumns": {
       "additionalProperties": false,
       "description": "Протянуть по заголовкам столбцов и скрыть их: Главная → Формат → Скрыть или отобразить → Скрыть столбцы.",
@@ -550,7 +585,8 @@
           "enum": [
             "home",
             "formulas",
-            "data"
+            "data",
+            "view"
           ],
           "type": "string"
         }
@@ -559,6 +595,22 @@
         "ribbonTab"
       ],
       "title": "RibbonTab",
+      "type": "object"
+    },
+    "Scroll": {
+      "additionalProperties": false,
+      "description": "Прокрутка листа колёсиком мыши: на сколько строк вниз (минус — вверх).",
+      "properties": {
+        "scroll": {
+          "maximum": 200,
+          "minimum": -200,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "scroll"
+      ],
+      "title": "Scroll",
       "type": "object"
     },
     "Select": {
@@ -662,6 +714,20 @@
           ],
           "default": null,
           "description": "Сколько строк показывать"
+        },
+        "visibleRows": {
+          "anyOf": [
+            {
+              "maximum": 40,
+              "minimum": 3,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Окно просмотра: сколько строк видно сразу (лист длиннее — его прокручивают действием scroll)"
         },
         "cells": {
           "patternProperties": {
@@ -801,6 +867,15 @@
               },
               {
                 "$ref": "#/$defs/FileMenu"
+              },
+              {
+                "$ref": "#/$defs/FreezePanes"
+              },
+              {
+                "$ref": "#/$defs/Scroll"
+              },
+              {
+                "$ref": "#/$defs/FillDown"
               },
               {
                 "$ref": "#/$defs/DialogType"

@@ -2,7 +2,7 @@ import { click, select, showRefs, wait } from "./basic";
 import { contextMenu } from "./context";
 import { clickRef, dragRef, type } from "./editing";
 import { keys } from "./keys";
-import { dragSelect, fill } from "./mouse";
+import { dragSelect, fill, fillDown } from "./mouse";
 import { dialogButton, dialogCheck, dialogChoose, dialogPick, dialogRange, dialogType } from "./dialogs";
 import {
   addSelect,
@@ -16,6 +16,7 @@ import {
   sheetTab,
 } from "./names";
 import { clickRibbon, fileMenu, ribbonTab } from "./ribbon";
+import { freezePanes, scroll } from "./view";
 import { type Action, type ActionSpec, UnsupportedAction } from "./types";
 
 export { type Action, type ActionContext, type ActionSpec, UnsupportedAction } from "./types";
@@ -35,6 +36,9 @@ export function createAction(spec: ActionSpec): Action {
   if ("clickRibbon" in spec) return clickRibbon(spec.clickRibbon);
   if ("ribbonTab" in spec) return ribbonTab(spec.ribbonTab);
   if ("fileMenu" in spec) return fileMenu(spec.fileMenu);
+  if ("freezePanes" in spec) return freezePanes(spec.freezePanes);
+  if ("scroll" in spec) return scroll(spec.scroll);
+  if ("fillDown" in spec) return fillDown(spec.fillDown);
   if ("nameBox" in spec) return nameBox(spec.nameBox);
   if ("nameList" in spec) return nameList(spec.nameList);
   if ("sheetTab" in spec) return sheetTab(spec.sheetTab);

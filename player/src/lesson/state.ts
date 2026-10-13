@@ -30,7 +30,7 @@ export interface EditorState {
  * Состояние урока, которое меняют действия. Всё, что видит ученик, рисуется из него, поэтому
  * перемотка (apply всех действий подряд) даёт ту же картинку, что и анимация.
  */
-export type RibbonTabId = "home" | "formulas" | "data";
+export type RibbonTabId = "home" | "formulas" | "data" | "view";
 
 export interface LessonState {
   /** Активный лист (ярлык которого выбран). Книга — sheet.book. */
@@ -50,9 +50,13 @@ export interface LessonState {
   ribbonTab: RibbonTabId;
   /** Открытое меню кнопки ленты: «Присвоить имя ▾», «Формат ▾» (и подменю «Скрыть или отобразить»),
    *  «Найти и выделить ▾». */
-  menu: "defineName" | "format" | "format-hide" | "find" | null;
+  menu: "defineName" | "format" | "format-hide" | "find" | "freeze" | null;
   /** Скрытые столбцы по листам (буквы). */
   hiddenColumns: Record<string, string[]>;
+  /** Закреплённые области по листам: левая верхняя ячейка прокручиваемой части (C9 — строки 1–8 и столбцы A:B). */
+  frozen: Record<string, { row: number; col: number } | null>;
+  /** Сколько строк прокручено (ушло за верх окна под закреплённой частью) — по листам. */
+  scrolled: Record<string, number>;
   /** Раскрыт список поля «Имя». */
   nameListOpen: boolean;
   /** Открытые окна: последнее — сверху (из «Диспетчера имён» открывается «Создание имени»). */
@@ -76,6 +80,8 @@ export function createState(sheet: SheetModel): LessonState {
     ribbonTab: "home",
     menu: null,
     hiddenColumns: {},
+    frozen: {},
+    scrolled: {},
     nameListOpen: false,
     dialogs: [],
     contextMenu: null,
@@ -243,14 +249,16 @@ export function pasteClipboard(state: LessonState, keepClipboard: boolean): stri
 
   rememberForUndo(state);
   const cells = cellsInRange(target);
-  for (const addr of cells) {
-    const to = parseCell(addr);
-    const from = {
-      row: source.start.row + ((to.row - target.start.row) % h),
-      col: source.start.col + ((to.col - target.start.col) % w),
-    };
-    copyCell(state, from, to);
-  }
+  state.sheet.book.batch(() => {
+    for (const addr of cells) {
+      const to = parseCell(addr);
+      const from = {
+        row: source.start.row + ((to.row - target.start.row) % h),
+        col: source.start.col + ((to.col - target.start.col) % w),
+      };
+      copyCell(state, from, to);
+    }
+  });
   state.selection = rangeName(target);
   if (!keepClipboard) state.clipboard = null;
   return cells;
@@ -261,7 +269,9 @@ export function fillRange(state: LessonState, range: string): string[] {
   const { start } = parseRange(range);
   const cells = cellsInRange(range).filter((addr) => addr !== cellName(start));
   rememberForUndo(state);
-  for (const addr of cells) copyCell(state, start, parseCell(addr));
+  state.sheet.book.batch(() => {
+    for (const addr of cells) copyCell(state, start, parseCell(addr));
+  });
   selectRange(state, range);
   return cells;
 }

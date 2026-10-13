@@ -63,6 +63,8 @@ export class SheetModel {
   readonly file: string | null;
   readonly columns: Readonly<Record<string, number>>;
   readonly rows: number | null;
+  /** Окно просмотра: сколько строк видно сразу (лист прокручивают); null — видны все. */
+  readonly visibleRows: number | null;
   readonly book: Workbook;
   private cells = new Map<string, CellState>();
 
@@ -72,6 +74,7 @@ export class SheetModel {
     this.file = sheet.file ?? null;
     this.columns = sheet.columns ?? {};
     this.rows = sheet.rows ?? null;
+    this.visibleRows = sheet.visibleRows ?? null;
     for (const [addr, cell] of Object.entries(sheet.cells ?? {})) {
       const spec: CellSpec = typeof cell === "object" ? cell : { v: cell };
       this.cells.set(addr, {
