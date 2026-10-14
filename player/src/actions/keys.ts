@@ -14,6 +14,7 @@ import {
 import { openPasteName } from "../lesson/dialogs";
 import { flashFill, openFormatCells } from "../lesson/text-tools";
 import { formatDate } from "../locale/format";
+import { formatTime } from "../sheet/times";
 import type { RibbonButton } from "../render/window";
 import type { Key } from "./key-types";
 import { type Action, type ActionSpec, UnsupportedAction } from "./types";
@@ -86,6 +87,13 @@ const HANDLERS: Record<string, KeyHandler> = {
   "Ctrl+;": {
     apply(state) {
       typeChars(state, formatDate(state.sheet.book.today, "ru"));
+      return undefined;
+    },
+  },
+  // Ctrl+Shift+; — текущее время текстом в ячейке (статичное, в отличие от ТДАТА()): «7:10»
+  "Ctrl+Shift+;": {
+    apply(state) {
+      typeChars(state, formatTime(state.sheet.book.time, "ru", false));
       return undefined;
     },
   },

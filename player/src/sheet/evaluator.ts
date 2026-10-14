@@ -7,6 +7,7 @@ import { LOGIC_FUNCTIONS } from "./logic";
 import { installFormulajs, PARSER_ERRORS } from "./formulajs-bridge";
 import { LOOKUP_FUNCTIONS } from "./lookup";
 import { type TextLocale, textFunctions } from "./text-functions";
+import { timeFunctions } from "./times";
 
 /** Ошибка Excel (#DIV/0!, #REF!, #NAME? …) — отдельный тип, чтобы не путать с текстом. */
 export class ExcelError {
@@ -30,6 +31,8 @@ export interface CellSource {
   locale?(): TextLocale;
   /** «Сегодня» для СЕГОДНЯ() — серийный номер даты. По умолчанию — настоящая дата. */
   today?(): number;
+  /** «Сейчас» для ТДАТА() — серийный номер с долей суток. По умолчанию — настоящие дата и время. */
+  now?(): number;
 }
 
 // Функции, которым нужна ссылка, а не значение аргумента. В fast-formula-parser нет публичной настройки
@@ -59,6 +62,12 @@ function fromParserResult(result: unknown): CellValue {
 }
 
 /** Настоящая сегодняшняя дата — серийный номер Excel. */
+/** Настоящие дата и время: серийный номер с долей суток. */
+export function realNow(): number {
+  const now = new Date();
+  return realToday() + (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) / 86_400;
+}
+
 export function realToday(): number {
   const now = new Date();
   return Math.round((Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) - Date.UTC(1899, 11, 30)) / 86_400_000);
@@ -119,6 +128,14 @@ function createParser(source: CellSource): FormulaParser {
     parser.functions,
     dateFunctions(
       () => source.today?.() ?? realToday(),
+      () => source.locale?.() ?? "ru",
+    ),
+  );
+  // Время — своё (times.ts): ВРЕМЯ, ВРЕМЗНАЧ, ЧАС, МИНУТЫ, СЕКУНДЫ, ТДАТА без часового пояса браузера
+  Object.assign(
+    parser.functions,
+    timeFunctions(
+      () => source.now?.() ?? realNow(),
       () => source.locale?.() ?? "ru",
     ),
   );

@@ -65,7 +65,7 @@
         },
         "fmt": {
           "default": "general",
-          "description": "date, dateLong: v — дата «2025-05-01» (в листе — серийный номер Excel); dateLong — длинный формат «4 января 2003 г.»",
+          "description": "date, dateLong: v — дата «2025-05-01» (в листе — серийный номер Excel); dateLong — длинный формат «4 января 2003 г.»; time «8:30», timeSec «15:10:30», hours «38:48:00» ([ч]:мм:сс), datetime «01.01.2026 5:35» — v числом (доля суток, серийный номер с долей)",
           "enum": [
             "general",
             "number",
@@ -73,7 +73,11 @@
             "kzt",
             "percent",
             "date",
-            "dateLong"
+            "dateLong",
+            "time",
+            "timeSec",
+            "hours",
+            "datetime"
           ],
           "type": "string"
         },
@@ -416,6 +420,21 @@
         "fillDown"
       ],
       "title": "FillDown",
+      "type": "object"
+    },
+    "FillSeries": {
+      "additionalProperties": false,
+      "description": "Автозаполнение рядом: первые две ячейки диапазона уже заполнены — шаг ряда (8:00, 8:20 → … 17:00).",
+      "properties": {
+        "fillSeries": {
+          "pattern": "^[A-Z]{1,3}[1-9][0-9]*(:[A-Z]{1,3}[1-9][0-9]*)?$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fillSeries"
+      ],
+      "title": "FillSeries",
       "type": "object"
     },
     "FreezePanes": {
@@ -818,6 +837,9 @@
                 "$ref": "#/$defs/DragSelect"
               },
               {
+                "$ref": "#/$defs/FillSeries"
+              },
+              {
                 "$ref": "#/$defs/Fill"
               },
               {
@@ -1001,6 +1023,19 @@
       ],
       "default": null,
       "description": "«Сегодня» урока для СЕГОДНЯ() и Ctrl+; («2026-10-12»): анимация, перемотка и ответы совпадают"
+    },
+    "now": {
+      "anyOf": [
+        {
+          "pattern": "^\\d{1,2}:\\d{2}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "«Сейчас» урока для ТДАТА() и Ctrl+Shift+; («14:12»), вместе с today"
     },
     "expect": {
       "description": "Значения из исходника для сверки",

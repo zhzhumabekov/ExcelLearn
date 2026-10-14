@@ -48,6 +48,8 @@ def figure_lesson(chapter: str, figure: Figure) -> Lesson:
             "sheet": figure.sheet.model_dump(exclude_none=True),
             "sheets": [s.model_dump(exclude_none=True) for s in figure.sheets],
             "names": [n.model_dump(exclude_none=True) for n in figure.names],
+            "today": figure.today,
+            "now": figure.now,
             "expect": figure.expect,
             "steps": [
                 {
@@ -64,6 +66,8 @@ def figure_hash(figure: Figure) -> str:
     dump = figure.model_dump(mode="json", exclude={"caption"})
     if dump.get("today") is None:
         dump.pop("today", None)  # поле добавлено в главе 7: без него хеш прежних кадров не меняется
+    if dump.get("now") is None:
+        dump.pop("now", None)  # поле главы 13
     data = json.dumps(dump, ensure_ascii=False, sort_keys=True)
     return hashlib.sha256(data.encode()).hexdigest()[:16]
 

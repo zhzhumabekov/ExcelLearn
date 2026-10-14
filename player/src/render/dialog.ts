@@ -18,7 +18,7 @@ import {
 import { bookOf, type LessonState } from "../lesson/state";
 import {
   chosenFormat,
-  DATE_TYPES,
+  formatTypes,
   DELIMITERS,
   FORMAT_CATEGORIES,
   formatCode,
@@ -204,7 +204,7 @@ export class DialogView {
         const list = FORMAT_CATEGORIES.map(
           (c) => `<div data-item="${attr(c)}"${dialog.category === c ? ' class="xl-on"' : ""}>${escapeHtml(c)}</div>`,
         ).join("");
-        const types = Object.entries(DATE_TYPES)
+        const types = Object.entries(formatTypes(dialog.category) ?? {})
           .map(
             ([key, t]) =>
               `<div data-item="${attr(key)}"${dialog.dateType === key ? ' class="xl-on"' : ""}>${escapeHtml(locale === "ru" ? key : t.en)}</div>`,
@@ -213,7 +213,7 @@ export class DialogView {
         const custom =
           dialog.category === "(все форматы)"
             ? `<label class="xl-dfield"><span>Тип:</span><span class="xl-dinput" data-field="Тип">${escapeHtml(shown)}</span></label>`
-            : dialog.category === "Дата"
+            : formatTypes(dialog.category)
               ? `<p>Тип:</p><div class="xl-dlist xl-dtypes">${types}</div>`
               : "";
         return `<div class="xl-dtabs"><span class="xl-on">Число</span><span>Выравнивание</span><span>Шрифт</span><span>Граница</span><span>Заливка</span></div>

@@ -1,4 +1,4 @@
-import { fillRange, type LessonState, selectRange } from "../lesson/state";
+import { fillRange, fillSeriesRange, type LessonState, selectRange } from "../lesson/state";
 import { cellName, parseCell, parseRange, type RangePos } from "../sheet/address";
 import type { Action } from "./types";
 
@@ -64,6 +64,47 @@ export function fill(range: string): Action {
       cursor.release();
       overlays.showFill(null);
       const filled = fillRange(state, range);
+      stage.render(state);
+      for (const cell of filled) {
+        stage.flash(cell);
+        await clock.wait(FILL_STAGGER_MS);
+      }
+      cursor.setShape("arrow");
+    },
+  };
+}
+
+/** Автозаполнение рядом: выделяем две первые ячейки и тянем маркер второй до конца диапазона. */
+export function fillSeries(range: string): Action {
+  const pos = parseRange(range);
+  const first = cellName(pos.start);
+  const down = pos.end.row > pos.start.row ? 1 : 0;
+  const second = cellName({ row: pos.start.row + down, col: pos.start.col + 1 - down });
+  return {
+    kind: "fillSeries",
+    apply: (state) => void fillSeriesRange(state, range),
+    async animate({ state, stage, clock }) {
+      const { cursor, overlays } = stage;
+      cursor.setShape("arrow");
+      await cursor.moveTo(stage.cellPoint(first), 600);
+      await cursor.press();
+      selectRange(state, first);
+      stage.render(state);
+      await cursor.moveTo(stage.cellPoint(second), 400);
+      cursor.release();
+      selectRange(state, `${first}:${second}`);
+      stage.render(state);
+      await cursor.moveTo(stage.cellPoint(second, "handle"), 500);
+      cursor.setShape("plus");
+      await clock.wait(400);
+      await cursor.press();
+      const rest = parseRange(`${second}:${cellName(pos.end)}`);
+      await cursor.moveTo(stage.cellPoint(cellName(pos.end), "handle"), dragMs(rest), (t) => {
+        overlays.showFill(`${first}:${along(rest, t)}`);
+      });
+      cursor.release();
+      overlays.showFill(null);
+      const filled = fillSeriesRange(state, range);
       stage.render(state);
       for (const cell of filled) {
         stage.flash(cell);

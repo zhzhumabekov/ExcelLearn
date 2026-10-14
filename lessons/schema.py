@@ -37,10 +37,13 @@ class Model(BaseModel):
 class CellSpec(Model):
     v: Scalar | None = None
     f: str | None = Field(default=None, pattern=r"^=", description="Формула, уже записанная в ячейке шаблона")
-    fmt: Literal["general", "number", "usd", "kzt", "percent", "date", "dateLong"] = Field(
+    fmt: Literal[
+        "general", "number", "usd", "kzt", "percent", "date", "dateLong", "time", "timeSec", "hours", "datetime"
+    ] = Field(
         default="general",
         description="date, dateLong: v — дата «2025-05-01» (в листе — серийный номер Excel); "
-        "dateLong — длинный формат «4 января 2003 г.»",
+        "dateLong — длинный формат «4 января 2003 г.»; time «8:30», timeSec «15:10:30», hours «38:48:00» "
+        "([ч]:мм:сс), datetime «01.01.2026 5:35» — v числом (доля суток, серийный номер с долей)",
     )
     style: Literal["head", "label", "total"] | None = None
 
@@ -101,6 +104,20 @@ class DragRef(Model):
 
 class DragSelect(Model):
     dragSelect: RangeAddr
+
+
+class FillSeries(Model):
+    """Автозаполнение рядом: первые две ячейки диапазона уже заполнены — шаг ряда (8:00, 8:20 → … 17:00)."""
+
+    fillSeries: RangeAddr
+
+    @field_validator("fillSeries")
+    @classmethod
+    def must_be_one_dimensional(cls, value: str) -> str:
+        start, end = split_range(value)
+        if _column(start) != _column(end) and _row(start) != _row(end):
+            raise ValueError("маркер заполнения тянется только по строке или по столбцу")
+        return value
 
 
 class Fill(Model):
@@ -305,6 +322,7 @@ ACTION_MODELS: dict[str, type[Model]] = {
     "dragRef": DragRef,
     "dragSelect": DragSelect,
     "fill": Fill,
+    "fillSeries": FillSeries,
     "keys": Keys,
     "showRefs": ShowRefs,
     "wait": Wait,
@@ -348,6 +366,7 @@ Action = Annotated[
     | Annotated[ClickRef, Tag("clickRef")]
     | Annotated[DragRef, Tag("dragRef")]
     | Annotated[DragSelect, Tag("dragSelect")]
+    | Annotated[FillSeries, Tag("fillSeries")]
     | Annotated[Fill, Tag("fill")]
     | Annotated[Keys, Tag("keys")]
     | Annotated[ShowRefs, Tag("showRefs")]
@@ -439,6 +458,11 @@ class Lesson(Model):
         pattern=r"^\d{4}-\d{2}-\d{2}$",
         description="«Сегодня» урока для СЕГОДНЯ() и Ctrl+; («2026-10-12»): анимация, перемотка и ответы совпадают",
     )
+    now: str | None = Field(
+        default=None,
+        pattern=r"^\d{1,2}:\d{2}$",
+        description="«Сейчас» урока для ТДАТА() и Ctrl+Shift+; («14:12»), вместе с today",
+    )
     expect: dict[ExpectAddr, Scalar] = Field(default_factory=dict, description="Значения из исходника для сверки")
     steps: list[Step] = Field(min_length=1)
 
@@ -520,6 +544,7 @@ class Figure(Model):
     sheets: list[Sheet] = Field(default_factory=list)
     names: list[NameSpec] = Field(default_factory=list)
     today: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", description="«Сегодня» кадра для СЕГОДНЯ()")
+    now: str | None = Field(default=None, pattern=r"^\d{1,2}:\d{2}$", description="«Сейчас» кадра для ТДАТА()")
     actions: list[Action] = Field(default_factory=list, description="Что сделать на листе до снимка")
     expect: dict[ExpectAddr, Scalar] = Field(default_factory=dict, description="Значения на кадре для сверки")
 

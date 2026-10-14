@@ -2,6 +2,7 @@ import type { CellSpec, Sheet } from "../generated/lesson";
 
 import { parseCell } from "./address";
 import { isoToSerial, parseDateText } from "./dates";
+import { parseDateTimeText, parseTimeText, typedTimeFormat } from "./times";
 import type { CellValue } from "./evaluator";
 import { Workbook } from "./workbook";
 
@@ -34,12 +35,18 @@ export function parseInput(raw: string | number | null): number | string | null 
   // «2%» и «2,5%» — число: Excel делит на 100 (формат ячейки «Процентный» уже задан в уроке)
   const pct = /^ *([+-]?\d+(?:[.,]\d+)?) *% *$/.exec(raw);
   if (pct?.[1]) return Number(pct[1].replace(",", ".")) / 100;
-  return parseDateText(raw) ?? raw;
+  return parseDateTimeText(raw) ?? parseTimeText(raw)?.value ?? parseDateText(raw) ?? raw;
 }
 
 /** Набранный текст — дата («04.01.2003», «4 янв 2004»)? Excel тогда сам ставит ячейке формат даты. */
 export function isDateText(raw: string | number | null): boolean {
   return typeof raw === "string" && !raw.startsWith("=") && parseDateText(raw) !== null;
+}
+
+/** Формат, который Excel ставит ячейке «Общий» при вводе: дата, время, дата со временем; null — не меняет. */
+export function typedFormat(raw: string | number | null): Fmt | null {
+  if (typeof raw !== "string" || raw.startsWith("=")) return null;
+  return typedTimeFormat(raw) ?? (parseDateText(raw) !== null ? "date" : null);
 }
 
 /** Дата «2025-05-01» → серийный номер Excel (45778); числа и прочее — как есть. */
@@ -126,7 +133,7 @@ export class SheetModel {
   /** Ввод в ячейку (как набор текста + Enter). Формат и стиль ячейки сохраняются. */
   setInput(addr: string, raw: string | number | null): void {
     const current = this.get(addr);
-    const fmt = current.fmt === "general" && isDateText(raw) ? "date" : current.fmt;
+    const fmt = current.fmt === "general" ? (typedFormat(raw) ?? current.fmt) : current.fmt;
     this.cells.set(addr, { ...current, input: parseInput(raw), fmt });
     this.book.noteInput(this.name, addr);
     this.recalc();

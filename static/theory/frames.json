@@ -38,5 +38,8 @@
   "ch11/iteration-options": "2251cc25e9ef5ca3",
   "ch12/freeze-panes": "f6734a5e5a441927",
   "ch12/iferror": "49f4a1bcd146f33c",
-  "ch12/nested-if": "b747595075511872"
+  "ch12/nested-if": "b747595075511872",
+  "ch13/series": "00ad1b21f21c4695",
+  "ch13/sum-hours": "6730f4d832794ab8",
+  "ch13/time-fraction": "25759fb4821fef0b"
 }

@@ -1,5 +1,5 @@
 import { type CellPos, parseCell } from "./address";
-import { type CellSource, type CellValue, createEvaluator, realToday } from "./evaluator";
+import { type CellSource, type CellValue, createEvaluator, realNow, realToday } from "./evaluator";
 import type { TextLocale } from "./text-functions";
 import { expandNames, type NameDef, nameProblem, sameName } from "./names";
 import type { SheetModel, SheetSnapshot } from "./sheet-model";
@@ -58,6 +58,8 @@ export class Workbook {
   private readonly evaluate: (formula: string, at: CellPos & { sheet: string }) => CellValue;
   private textLocale: TextLocale = "ru";
   private todaySerial = realToday();
+  /** Время «сейчас» — доля суток для ТДАТА() и Ctrl+Shift+;. */
+  private timeOfDay = realNow() - realToday();
 
   constructor() {
     const source: CellSource = {
@@ -66,6 +68,7 @@ export class Workbook {
       extent: (sheet) => this.sheetOrNull(sheet)?.extent() ?? { rows: 1, cols: 1 },
       locale: () => this.textLocale,
       today: () => this.todaySerial,
+      now: () => this.todaySerial + this.timeOfDay,
     };
     this.evaluate = createEvaluator(source);
   }
@@ -84,6 +87,17 @@ export class Workbook {
   /** «Сегодня» книги — для СЕГОДНЯ() и Ctrl+;. У урока оно постоянное: анимация и перемотка совпадают. */
   get today(): number {
     return this.todaySerial;
+  }
+
+  /** «Сейчас» книги — доля суток (у урока постоянная, как «сегодня»). */
+  get time(): number {
+    return this.timeOfDay;
+  }
+
+  setTime(fraction: number): void {
+    if (fraction === this.timeOfDay) return;
+    this.timeOfDay = fraction;
+    this.recalc();
   }
 
   setToday(serial: number): void {

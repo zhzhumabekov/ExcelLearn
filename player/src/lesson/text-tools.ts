@@ -303,11 +303,24 @@ export const DATE_TYPES: Record<string, { fmt: Fmt; en: string }> = {
   "*14 марта 2012 г.": { fmt: "dateLong", en: "*Wednesday, March 14, 2012" },
 };
 
+/** Типы категории «Время» (как в списке Excel): 13:30, 13:30:55, 37:30:55 — [ч]:мм:сс, дата со временем. */
+export const TIME_TYPES: Record<string, { fmt: Fmt; en: string }> = {
+  "13:30": { fmt: "time", en: "1:30 PM" },
+  "13:30:55": { fmt: "timeSec", en: "1:30:55 PM" },
+  "37:30:55": { fmt: "hours", en: "37:30:55" },
+  "14.03.12 13:30": { fmt: "datetime", en: "3/14/12 13:30" },
+};
+
+/** Список «Тип» категории окна (у «Даты» и «Времени»), иначе null. */
+export function formatTypes(category: string): Record<string, { fmt: Fmt; en: string }> | null {
+  return category === "Дата" ? DATE_TYPES : category === "Время" ? TIME_TYPES : null;
+}
+
 export interface FormatCellsDialog {
   kind: "formatCells";
   cell: string;
   category: string;
-  /** Выбранный тип в категории «Дата» (строка списка «Тип»). */
+  /** Выбранный тип в категории «Дата» или «Время» (строка списка «Тип»). */
   dateType?: string;
 }
 
@@ -319,6 +332,10 @@ const CATEGORY_OF: Record<Fmt, (typeof FORMAT_CATEGORIES)[number]> = {
   percent: "Процентный",
   date: "Дата",
   dateLong: "Дата",
+  time: "Время",
+  timeSec: "Время",
+  hours: "Время",
+  datetime: "Время",
 };
 
 /** Формат, который даст OK в окне: категория (и тип даты). null — категория формат не меняет. */
@@ -332,6 +349,8 @@ export function chosenFormat(dialog: FormatCellsDialog): Fmt | null {
       return "percent";
     case "Дата":
       return DATE_TYPES[dialog.dateType ?? ""]?.fmt ?? "date";
+    case "Время":
+      return TIME_TYPES[dialog.dateType ?? ""]?.fmt ?? "time";
     default:
       return null;
   }
@@ -360,6 +379,14 @@ export function formatCode(fmt: Fmt, locale: "ru" | "en"): string {
       return locale === "ru" ? "dd.mm.yyyy" : "m/d/yyyy";
     case "dateLong":
       return locale === "ru" ? '[$-F800]d mmmm yyyy "г."' : "[$-F800]dddd, mmmm d, yyyy";
+    case "time":
+      return locale === "ru" ? "h:mm" : "h:mm AM/PM";
+    case "timeSec":
+      return locale === "ru" ? "h:mm:ss" : "h:mm:ss AM/PM";
+    case "hours":
+      return "[h]:mm:ss";
+    case "datetime":
+      return locale === "ru" ? "dd.mm.yyyy h:mm" : "m/d/yyyy h:mm";
     default:
       return "General";
   }
@@ -367,6 +394,6 @@ export function formatCode(fmt: Fmt, locale: "ru" | "en"): string {
 
 export function openFormatCells(state: LessonState): void {
   const fmt = state.sheet.get(state.active).fmt;
-  const dateType = Object.entries(DATE_TYPES).find(([, t]) => t.fmt === fmt)?.[0];
+  const dateType = Object.entries({ ...DATE_TYPES, ...TIME_TYPES }).find(([, t]) => t.fmt === fmt)?.[0];
   state.dialogs.push({ kind: "formatCells", cell: state.active, category: CATEGORY_OF[fmt], ...(dateType ? { dateType } : {}) });
 }
