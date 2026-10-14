@@ -29,6 +29,10 @@ export interface Lesson {
    */
   today?: string | null;
   /**
+   * «Сейчас» урока для ТДАТА() и Ctrl+Shift+; («14:12»), вместе с today
+   */
+  now?: string | null;
+  /**
    * Значения из исходника для сверки
    */
   expect?: {
@@ -82,9 +86,10 @@ export interface CellSpec {
    */
   f?: string | null;
   /**
-   * date, dateLong: v — дата «2025-05-01» (в листе — серийный номер Excel); dateLong — длинный формат «4 января 2003 г.»
+   * date, dateLong: v — дата «2025-05-01» (в листе — серийный номер Excel); dateLong — длинный формат «4 января 2003 г.»; time «8:30», timeSec «15:10:30», hours «38:48:00» ([ч]:мм:сс), datetime «01.01.2026 5:35» — v числом (доля суток, серийный номер с долей)
    */
-  fmt?: "general" | "number" | "usd" | "kzt" | "percent" | "date" | "dateLong";
+  fmt?:
+    "general" | "number" | "usd" | "kzt" | "percent" | "date" | "dateLong" | "time" | "timeSec" | "hours" | "datetime";
   style?: ("head" | "label" | "total") | null;
 }
 /**
@@ -126,6 +131,7 @@ export interface Step {
       | ClickRef
       | DragRef
       | DragSelect
+      | FillSeries
       | Fill
       | Keys
       | ShowRefs
@@ -160,6 +166,7 @@ export interface Step {
       | ClickRef
       | DragRef
       | DragSelect
+      | FillSeries
       | Fill
       | Keys
       | ShowRefs
@@ -206,6 +213,12 @@ export interface DragRef {
 }
 export interface DragSelect {
   dragSelect: string;
+}
+/**
+ * Автозаполнение рядом: первые две ячейки диапазона уже заполнены — шаг ряда (8:00, 8:20 → … 17:00).
+ */
+export interface FillSeries {
+  fillSeries: string;
 }
 export interface Fill {
   fill: string;

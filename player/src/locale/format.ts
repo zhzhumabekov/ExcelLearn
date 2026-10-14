@@ -4,6 +4,7 @@
 import type { Fmt } from "../sheet/sheet-model";
 import { localizeDateText, parseDateText, serialToYmd } from "../sheet/dates";
 import { type CellValue, ExcelError } from "../sheet/evaluator";
+import { formatHours, formatTime, localizeDateTimeText, parseDateTimeText, splitTime } from "../sheet/times";
 import dictionary from "./functions-ru.json";
 
 export type FunctionLocale = "ru" | "en";
@@ -66,6 +67,7 @@ function isDateValueArg(tokens: readonly string[], i: number): boolean {
  */
 export function localizeFormula(formula: string, locale: FunctionLocale): string {
   if (!formula.startsWith("=") && parseDateText(formula) !== null) return localizeDateText(formula, locale);
+  if (!formula.startsWith("=") && parseDateTimeText(formula) !== null) return localizeDateTimeText(formula, locale);
   if (locale === "en") {
     const tokens = formula.match(TOKEN_RE) ?? [];
     return tokens
@@ -159,6 +161,13 @@ function fitNumber(value: number, display: DisplayValue, fmt: Fmt, locale: Funct
   return { text: hashes, align: display.align };
 }
 
+function formatTimeValue(value: number, fmt: "time" | "timeSec" | "hours" | "datetime", locale: FunctionLocale): string {
+  if (fmt === "hours") return formatHours(value);
+  if (fmt !== "datetime") return formatTime(value, locale, fmt === "timeSec");
+  const { day, seconds } = splitTime(value);
+  return `${formatDate(day, locale)} ${Math.floor(seconds / 3600)}:${String(Math.floor((seconds % 3600) / 60)).padStart(2, "0")}`;
+}
+
 /** Помещается ли текст в ячейку (решает отрисовка — она знает шрифт и ширину колонки). */
 export type Fits = (display: DisplayValue) => boolean;
 
@@ -188,6 +197,13 @@ function formatPlain(value: CellValue, fmt: Fmt, locale: FunctionLocale): Displa
       // Отрицательной даты не бывает: Excel заполняет ячейку решётками при любой ширине
       if (value < 0) return { text: "#".repeat(12), align: "right" };
       return { text: fmt === "date" ? formatDate(value, locale) : formatLongDate(value, locale), align: "right" };
+    case "time":
+    case "timeSec":
+    case "hours":
+    case "datetime":
+      // Отрицательного времени нет: Excel заполняет ячейку решётками, как у отрицательной даты
+      if (value < 0) return { text: "#".repeat(12), align: "right" };
+      return { text: formatTimeValue(value, fmt, locale), align: "right" };
     case "number":
       return { text: NUMBER_FORMATS[locale].format(value), align: "right" };
     case "percent": {

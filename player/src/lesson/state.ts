@@ -10,7 +10,7 @@ import {
   rangeName,
   shiftFormula,
 } from "../sheet/address";
-import { isFormula, type SheetModel } from "../sheet/sheet-model";
+import { type CellState, isFormula, type SheetModel } from "../sheet/sheet-model";
 import type { Workbook, WorkbookSnapshot } from "../sheet/workbook";
 import type { Dialog } from "./dialogs";
 
@@ -112,7 +112,9 @@ export function editorText(editor: EditorState): string {
 
 /** Ссылки набранной формулы по порядку появления (и вставленные мышью, и набранные) — для цветных рамок. */
 export function editorRefs(editor: EditorState): string[] {
-  return formulaRefs(editorText(editor));
+  // Ссылки бывают только в формуле: набранное время «8:30» — не строки 8:30
+  const text = editorText(editor);
+  return text.startsWith("=") ? formulaRefs(text) : [];
 }
 
 // ---------- Операции над состоянием: из них собираются apply() и animate() действий ----------
@@ -274,6 +276,58 @@ export function fillRange(state: LessonState, range: string): string[] {
   });
   selectRange(state, range);
   return cells;
+}
+
+// Списки автозаполнения Excel: «Понедельник, Вторник…» и месяцы идут по кругу
+const AUTOFILL_LISTS = [
+  ["понедельник", "вторник", "среда", "четверг", "пятница", "суббота", "воскресенье"],
+  ["пн", "вт", "ср", "чт", "пт", "сб", "вс"],
+  ["январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"],
+  ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
+];
+
+/** Значение k-го члена ряда по двум первым ячейкам (k = 0, 1, 2…); null — ряд не продолжить. */
+function seriesValue(first: CellState["input"], second: CellState["input"], k: number): string | number | null {
+  if (typeof first === "number" && typeof second === "number") {
+    // Хвосты двоичных дробей убираем: 8:00 + 27 × 20 мин должно дать ровно 17:00 (целые секунды суток)
+    const value = first + (second - first) * k;
+    const seconds = value * 86_400;
+    return Math.abs(seconds - Math.round(seconds)) < 1e-6 ? Math.round(seconds) / 86_400 : Number(value.toPrecision(15));
+  }
+  if (typeof first === "string" && typeof second === "string" && !first.startsWith("=")) {
+    for (const list of AUTOFILL_LISTS) {
+      const a = list.indexOf(first.toLowerCase());
+      const b = list.indexOf(second.toLowerCase());
+      if (a < 0 || b < 0) continue;
+      const word = list[(((a + (b - a) * k) % list.length) + list.length) % list.length] as string;
+      // Регистр — как у первой ячейки: «Понедельник» → «Вторник»
+      return first[0] === first[0]?.toUpperCase() ? word[0]?.toUpperCase() + word.slice(1) : word;
+    }
+  }
+  return null;
+}
+
+/**
+ * Автозаполнение рядом: выделены две первые ячейки диапазона, маркер тянут до конца. Числа, даты и время
+ * продолжаются с тем же шагом, дни недели и месяцы — по кругу; иначе две ячейки повторяются. Формат — от первых.
+ */
+export function fillSeriesRange(state: LessonState, range: string): string[] {
+  const cells = cellsInRange(range);
+  const [a, b] = cells.map((addr) => state.sheet.get(addr));
+  if (!a || !b) throw new Error(`Автозаполнение: в ${range} меньше двух ячеек`);
+  rememberForUndo(state);
+  const filled = cells.slice(2);
+  state.sheet.book.batch(() => {
+    filled.forEach((addr, i) => {
+      const k = i + 2;
+      const source = k % 2 === 0 ? a : b;
+      const value = seriesValue(a.input, b.input, k);
+      if (value === null) copyCell(state, parseCell(cells[k % 2] as string), parseCell(addr));
+      else state.sheet.setCell(addr, { input: value, fmt: source.fmt, style: source.style });
+    });
+  });
+  selectRange(state, range);
+  return filled;
 }
 
 /**

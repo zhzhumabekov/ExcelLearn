@@ -2,7 +2,7 @@ import { click, select, showRefs, wait } from "./basic";
 import { contextMenu } from "./context";
 import { clickRef, dragRef, type } from "./editing";
 import { keys } from "./keys";
-import { dragSelect, fill, fillDown } from "./mouse";
+import { dragSelect, fill, fillDown, fillSeries } from "./mouse";
 import { dialogButton, dialogCheck, dialogChoose, dialogPick, dialogRange, dialogType } from "./dialogs";
 import {
   addSelect,
@@ -30,6 +30,7 @@ export function createAction(spec: ActionSpec): Action {
   if ("dragRef" in spec) return dragRef(spec.dragRef);
   if ("dragSelect" in spec) return dragSelect(spec.dragSelect);
   if ("fill" in spec) return fill(spec.fill);
+  if ("fillSeries" in spec) return fillSeries(spec.fillSeries);
   if ("keys" in spec) return keys(spec.keys, spec);
   if ("showRefs" in spec) return showRefs(spec.showRefs);
   if ("wait" in spec) return wait(spec.wait);

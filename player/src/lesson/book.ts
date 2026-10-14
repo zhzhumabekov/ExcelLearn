@@ -2,6 +2,7 @@ import type { Lesson } from "../generated/lesson";
 import type { NameArea } from "../sheet/names";
 import { isoToSerial } from "../sheet/dates";
 import { SheetModel } from "../sheet/sheet-model";
+import { parseTimeText } from "../sheet/times";
 import { Workbook } from "../sheet/workbook";
 
 // Часть ссылки: (лист!)диапазон. Лист — в апострофах или без них.
@@ -24,11 +25,15 @@ export function parseRefersTo(text: string, defaultSheet: string): NameArea[] {
 }
 
 /** Книга урока: первый лист, остальные листы и имена, определённые к началу. Возвращает первый лист. */
-export function createBook(lesson: Pick<Lesson, "sheet" | "sheets" | "names"> & { today?: string | null }): SheetModel {
+export function createBook(
+  lesson: Pick<Lesson, "sheet" | "sheets" | "names"> & { today?: string | null; now?: string | null },
+): SheetModel {
   const book = new Workbook();
   // «Сегодня» урока — до первого пересчёта листов, чтобы СЕГОДНЯ() в шаблоне сразу дала нужную дату
   const today = lesson.today ? isoToSerial(lesson.today) : null;
   if (today !== null) book.setToday(today);
+  const now = lesson.now ? parseTimeText(lesson.now) : null;
+  if (now) book.setTime(now.value);
   const first = new SheetModel(lesson.sheet, book);
   for (const sheet of lesson.sheets ?? []) new SheetModel(sheet, book);
   for (const spec of lesson.names ?? []) {

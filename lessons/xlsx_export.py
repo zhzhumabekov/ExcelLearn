@@ -27,6 +27,10 @@ NUMBER_FORMATS = {
     "date": "dd.mm.yyyy",
     # Системный длинный формат даты: русский Excel покажет «4 января 2003 г.», английский — «Saturday, January 4, 2003»
     "dateLong": "[$-F800]dddd, mmmm dd, yyyy",
+    "time": "h:mm",
+    "timeSec": "h:mm:ss",
+    "hours": "[h]:mm:ss",
+    "datetime": "dd.mm.yyyy h:mm",
 }
 HEAD_FILL = PatternFill("solid", fgColor="E8F3EC")  # --xl-green-soft плеера
 TOTAL_BORDER = Border(top=Side(style="double", color="999999"))

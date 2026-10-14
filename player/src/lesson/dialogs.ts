@@ -26,7 +26,7 @@ import {
 } from "./state";
 import {
   applyFormatCells,
-  DATE_TYPES,
+  formatTypes,
   DELIMITERS,
   type Delimiter,
   FORMAT_CATEGORIES,
@@ -405,7 +405,7 @@ export function dialogItems(state: LessonState, dialog: Dialog): string[] {
   if (dialog.kind === "pasteName" || dialog.kind === "applyNames") return visibleNames(state).map((d) => d.name);
   if (dialog.kind === "options") return [...OPTION_PAGES];
   if (dialog.kind === "formatCells") {
-    return dialog.category === "Дата" ? [...FORMAT_CATEGORIES, ...Object.keys(DATE_TYPES)] : [...FORMAT_CATEGORIES];
+    return [...FORMAT_CATEGORIES, ...Object.keys(formatTypes(dialog.category) ?? {})];
   }
   return [];
 }
@@ -425,11 +425,13 @@ export function dialogPickItem(state: LessonState, item: string, add: "ctrl" | "
     return;
   }
   if (dialog.kind === "formatCells") {
-    if (found in DATE_TYPES) dialog.dateType = found;
+    const types = formatTypes(dialog.category);
+    if (types && found in types) dialog.dateType = found;
     else {
       dialog.category = found;
-      // Как в Excel: при выборе категории «Дата» выделен первый тип списка
-      if (found === "Дата") dialog.dateType ??= Object.keys(DATE_TYPES)[0];
+      // Как в Excel: при выборе категории «Дата» или «Время» выделен первый тип списка
+      const next = formatTypes(found);
+      if (next && !(dialog.dateType && dialog.dateType in next)) dialog.dateType = Object.keys(next)[0];
     }
     return;
   }
